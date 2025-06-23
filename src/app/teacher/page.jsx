@@ -1,15 +1,28 @@
+
 'use client'
 import Image from "next/image";
-import styles from "./page.module.css";
 import { io } from "socket.io-client";
 import { useEffect, useRef, useState } from "react";
+import QuestionsInput from "@/components/QuestionsInput";
 
-export default function Home() {
+export default function Teacher() {
   const socketRef = useRef();
 
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([])
+  const [questions, setQuestions] = useState([
+    {
+      question: "Who is akshath",
+      options: ["a", "b", "c", "d"]
+    }
+  ]);
 
+  const sendQuestions=()=>{
+    socketRef.current.emit('send-questions',{
+      roomId:"quiz-123",
+      questions
+    })
+  }
   useEffect(() => {
     const socket = io();
     socketRef.current = socket;
@@ -19,21 +32,11 @@ export default function Home() {
     })
 
 
-    // socket.emit('send-message', {
-    //   roomid: 'quiz-123',
-    //   message: 'Hello quiz team'
-    // })
 
     socket.on('receive-message', (data) => {
       console.log("📥 New message", data);
       setMessages((prev) => [...prev, data.message]);
     });
-
-    // const createRoom = () => {
-    //   console.log("CREATING THE ROOM BROOOOOOOOOO")
-    //   socket.emit('join-room', 'quiz-123');
-
-    // }
 
     return () => {
       socket.disconnect()
@@ -67,7 +70,35 @@ export default function Home() {
 
   return (
     <div className="text-red-700">
-    Welcome to our app bro  
+      <p > Hey Teacher , Welcome ! </p>
+      <br />
+      <button onClick={() => { createRoom() }} >
+        Create
+      </button>
+
+      <p>Type you message here to send to the group</p>
+
+      <input value={message} type="text" onChange={(e) => { setMessage(e.target.value) }} />
+
+
+      <button onClick={() => { sendMessage() }} >
+        Send message
+      </button>
+
+      <div>
+        <h3>Messages:</h3>
+        <ul>
+          {messages.map((msg, idx) => (
+            <li key={idx}>{msg}</li>
+          ))}
+        </ul>
+      </div>
+
+      <QuestionsInput />
+
+      <button onClick={()=>{sendQuestions()}} className="border border-green-600 bg-green-500 text-white m-10 p-3">
+        Send qustions
+      </button>
     </div>
   );
 }
