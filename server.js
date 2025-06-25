@@ -1,56 +1,82 @@
-// initialising custom server using express to support socket.io
+// server.js
 const express = require('express');
 const next = require('next');
 const http = require('http');
 const { Server } = require('socket.io');
 const port = process.env.PORT || 3000;
 const dev = process.env.NODE_ENV !== 'production';
-const app = next({ dev });
+
+// Initialize Next.js app with custom configuration to avoid routing issues
+const app = next({ 
+  dev,
+  conf: {
+    // Disable file-system routing that might be causing the issue
+    useFileSystemPublicRoutes: true,
+  }
+});
+
 const handle = app.getRequestHandler();
+const handleRoomSocket = require('./socketHandlers/room');
+const handleQuestionSocket = require('./socketHandlers/questions');
+const handleChatSocket = require('./socketHandlers/chat');
+const testRoutes = require('./src/routes/testRoutes.js');
 
-app.prepare().then(() => {
-  const expressApp = express();
-  const server = http.createServer(expressApp);
-  const io = new Server(server);
+console.log('Starting Next.js app preparation...');
 
-  io.on('connection', (socket) => {
-    console.log("new client connected ", socket.id);
-
-    socket.on('join-room', (roomid) => {
-      socket.join(roomid);
-      console.log(`🟢 ${socket.id} joined room ${roomid}`)
-    })
-
-    socket.on('send-message', ({ roomId, message }) => {
-      console.log(`💬 Message to room ${roomId}: ${message}`);
-      io.to(roomId).emit('receive-message', {
-        message,
-        sender: socket.id,
+app.prepare()
+  .then(() => {
+    console.log('Next.js app prepared successfully');
+    
+    const expressApp = express();
+    
+    // Parse JSON request bodies
+    expressApp.use(express.json());
+    
+    // Create HTTP server
+    const server = http.createServer(expressApp);
+    const io = new Server(server, {
+      cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+      }
+    });
+    
+    // Socket.io connection handling
+    io.on('connection', (socket) => {
+      console.log("new client connected ", socket.id);
+      
+      // Modularized socket handlers
+      handleRoomSocket(io, socket);
+      handleQuestionSocket(io, socket);
+      handleChatSocket(io, socket);
+      
+      socket.on('disconnect', () => {
+        console.log('Client disconnected:', socket.id);
       });
     });
-
-
-    // RECIEVING QUESTIONS AND SENDING IT TO THE ROOM ID
-    socket.on('send-questions',({roomId ,questions})=>{
-      console.log("Recieved questions in server");
-      console.log("mcq: ", questions)
-
-      io.to(roomId).emit("recieve-questions",questions);
-    })
-
     
-
-    socket.on('disconnect', () => {
-      console.log('Client disconnected:', socket.id);
+    // Health check endpoint (put this first)
+    expressApp.get('/health', (req, res) => {
+      res.json({ status: 'OK', timestamp: new Date().toISOString() });
     });
+    
+    // Mount API routes from external file
+    expressApp.use('/api', testRoutes);
+    
+    // Let Next.js handle everything else - this was working before
+    expressApp.use((req, res) => {
+      return handle(req, res);
+    });
+    
+    server.listen(port, (err) => {
+      if (err) throw err;
+      console.log(`> Ready on http://localhost:${port}`);
+      console.log(`> Health check: http://localhost:${port}/health`);
+    });
+  })
+  .catch((ex) => {
+    console.error('Error during Next.js app preparation:', ex);
+    console.error('This error suggests an issue with your Next.js pages or API routes');
+    console.error('Check your pages/ and pages/api/ directories for malformed routes');
+    process.exit(1);
   });
-
-  expressApp.use((req, res) => {
-    return handle(req, res);
-  });
-
-  server.listen(port, (err) => {
-    if (err) throw err;
-    console.log(`> Ready on http://localhost:${port}`);
-  });
-});
