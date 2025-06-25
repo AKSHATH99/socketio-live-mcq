@@ -12,17 +12,78 @@ export default function Teacher() {
   const [messages, setMessages] = useState([])
   const [questions, setQuestions] = useState([
     {
-      question: "Who is akshath",
-      options: ["a", "b", "c", "d"]
+      question: "",
+      options: ["", "", "", ""]
     }
   ]);
 
-  const sendQuestions=()=>{
-    socketRef.current.emit('send-questions',{
-      roomId:"quiz-123",
+  const [testMeta, setTestMeta] = useState({
+    title: "",
+    description: ""
+  });
+  const [fetchedTest, setFetchedTest] = useState(null);
+
+
+
+
+  const createTest = async () => {
+    try {
+      const res = await fetch("http://localhost:3000/api/test", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(testMeta) // ✅ directly use the object
+      });
+
+      const data = await res.json();
+      console.log("✅ Test Created:", data);
+
+      await fetchTests();
+
+      setTestMeta({
+        title: "",
+        description: ""
+      });
+
+    } catch (error) {
+      console.error("❌ Error creating test:", error);
+    }
+  };
+
+  const fetchTests = async () => {
+    try {
+      const res = await fetch("http://localhost:3000/api/fetchTest", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(testMeta) // ✅ directly use the object
+      });
+
+      const data = await res.json();
+      console.log("✅ Fetched data:", data);
+
+      setFetchedTest(data);
+
+    } catch (error) {
+      console.error("❌ Error creating test:", error);
+    }
+  };
+
+
+
+
+
+
+  // ----------------------SOCKET IO------------------------------------------------------
+  const sendQuestions = () => {
+    socketRef.current.emit('send-questions', {
+      roomId: "quiz-123",
       questions
     })
   }
+
   useEffect(() => {
     const socket = io();
     socketRef.current = socket;
@@ -94,9 +155,43 @@ export default function Teacher() {
         </ul>
       </div>
 
-      <QuestionsInput />
+      <div>
+        Create new test
+        <input
+          type="text"
+          placeholder="Test Title"
+          value={testMeta.title}
+          onChange={(e) => setTestMeta({ ...testMeta, title: e.target.value })}
+        />
+        <input
+          type="text"
+          placeholder="Test Description"
+          value={testMeta.description}
+          onChange={(e) => setTestMeta({ ...testMeta, description: e.target.value })}
+        />
 
-      <button onClick={()=>{sendQuestions()}} className="border border-green-600 bg-green-500 text-white m-10 p-3">
+        <div className="mt-10 p-3 border border-gray-400">
+          <h2 className="text-black font-bold">Fetched Test Data:</h2>
+          {fetchedTest ? (
+            <pre className="text-black">{JSON.stringify(fetchedTest, null, 2)}</pre>
+          ) : (
+            <p className="text-black">No test fetched yet.</p>
+          )}
+        </div>
+
+
+        <button className="border border-black" onClick={() => { createTest() }}>
+          Create test
+        </button>
+
+      </div>
+
+
+
+      <QuestionsInput questions={questions} setQuestions={setQuestions} />
+
+
+      <button onClick={() => { sendQuestions() }} className="border border-green-600 bg-green-500 text-white m-10 p-3">
         Send qustions
       </button>
     </div>

@@ -6,9 +6,16 @@ export default function Student() {
     const [roomId, setRoomId] = useState("");
     const socketRef = useRef();
     const [messages, setMessages] = useState([]);
-    const [questions , setQuestions] = useState([]);
+    const [questions, setQuestions] = useState([]);
+    const [currentRoomID, setCurrentRoomID] = useState("")
 
     useEffect(() => {
+        const alreadyjoined = localStorage.getItem("roomid");
+
+        if (alreadyjoined) {
+            setCurrentRoomID(alreadyjoined);
+            return;
+        }
         const socket = io();
         socketRef.current = socket;
 
@@ -19,13 +26,13 @@ export default function Student() {
         socket.on('receive-message', (data) => {
             console.log("📥 New message", data);
             setMessages((prev) => [...prev, data.message]);
-        
+
         });
 
-        socket.on("recieve-questions",(questions)=>{
-          console.log("Recieved questions in student end")  
-          setQuestions(questions);
-          console.log("at student",questions)
+        socket.on("recieve-questions", (questions) => {
+            console.log("Recieved questions in student end")
+            setQuestions(questions);
+            console.log("at student", questions)
         })
 
         return () => {
@@ -38,6 +45,8 @@ export default function Student() {
         console.log("Student joining the room ", roomId)
         const joined = await socketRef.current.emit('join-room', roomId);
         if (joined) {
+            localStorage.setItem("roomid", roomId);
+            setCurrentRoomID(roomId);
             console.log("Joined hahaha")
         }
     }
@@ -54,6 +63,10 @@ export default function Student() {
                 Hi srudent , welsome to platfrom
             </p>
 
+            <p className="text-green-600 font-bold text-xl ">
+                Curently in the room : {currentRoomID}
+
+            </p>
             <p>
                 Join room . Type the room code here !
             </p>
@@ -70,7 +83,7 @@ export default function Student() {
                         <li key={idx}>{msg}</li>
                     ))}
                 </ul>
-            </div> 
+            </div>
         </div>
 
 
