@@ -61,7 +61,7 @@ app.prepare()
     });
     
     // Mount API routes from external file
-    expressApp.use('/api', testRoutes);
+    expressApp.use('/api', testRoutes(io));
     
     // Let Next.js handle everything else - this was working before
     expressApp.use((req, res) => {
