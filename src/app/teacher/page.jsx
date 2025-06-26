@@ -73,6 +73,26 @@ export default function Teacher() {
 
 
 
+  const startTest = async (testId) => {
+  try {
+    const res = await fetch("http://localhost:3000/api/live-test", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        testid: testId,
+        roomId: "quiz-123" // or whatever variable you're using
+      })
+    });
+
+    const data = await res.json();
+    console.log("🚀 Test Started:", data);
+  } catch (err) {
+    console.error("❌ Failed to start test:", err);
+  }
+};
+
 
 
 
@@ -170,14 +190,31 @@ export default function Teacher() {
           onChange={(e) => setTestMeta({ ...testMeta, description: e.target.value })}
         />
 
-        <div className="mt-10 p-3 border border-gray-400">
-          <h2 className="text-black font-bold">Fetched Test Data:</h2>
-          {fetchedTest ? (
-            <pre className="text-black">{JSON.stringify(fetchedTest, null, 2)}</pre>
-          ) : (
-            <p className="text-black">No test fetched yet.</p>
-          )}
+        <div className="mt-10 p-4 border border-gray-500 rounded">
+  <h2 className="text-black font-bold text-lg mb-4">Fetched Test Data:</h2>
+
+  {fetchedTest && fetchedTest.length > 0 ? (
+    <div className="space-y-4">
+      {fetchedTest.map((test) => (
+        <div key={test.id} className="p-4 border border-gray-300 rounded text-black">
+          <h3 className="font-semibold text-lg">{test.title}</h3>
+          <p className="text-sm text-gray-700">{test.description}</p>
+          <p className="text-xs text-gray-500 mt-1">Created At: {new Date(test.createdAt).toLocaleString()}</p>
+
+          <button
+            className="mt-2 bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
+            onClick={() => startTest(test.id)}
+          >
+            ▶ Start Test
+          </button>
         </div>
+      ))}
+    </div>
+  ) : (
+    <p className="text-gray-700">No test fetched yet.</p>
+  )}
+</div>
+
 
 
         <button className="border border-black" onClick={() => { createTest() }}>

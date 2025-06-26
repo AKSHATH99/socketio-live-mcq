@@ -1,12 +1,14 @@
 'use client'
 import { useState, useEffect, useRef } from "react";
 import { io } from "socket.io-client";
+import LiveQuestion from "@/controllers/DisplayQuestionBox";
 
 export default function Student() {
     const [roomId, setRoomId] = useState("");
     const socketRef = useRef();
     const [messages, setMessages] = useState([]);
-    const [questions, setQuestions] = useState([]);
+const [question, setQuestion] = useState(null);
+
     const [currentRoomID, setCurrentRoomID] = useState("")
 
     useEffect(() => {
@@ -31,7 +33,7 @@ export default function Student() {
 
         socket.on("recieve-questions", (questions) => {
             console.log("Recieved questions in student end")
-            setQuestions(questions);
+            setQuestion(questions);
             console.log("at student", questions)
         })
 
@@ -45,7 +47,7 @@ export default function Student() {
         console.log("Student joining the room ", roomId)
         const joined = await socketRef.current.emit('join-room', roomId);
         if (joined) {
-            localStorage.setItem("roomid", roomId);
+            // localStorage.setItem("roomid", roomId);
             setCurrentRoomID(roomId);
             console.log("Joined hahaha")
         }
@@ -53,8 +55,8 @@ export default function Student() {
 
 
     useEffect(() => {
-        console.log(roomId)
-    }, [roomId])
+        console.log("new question questions  ",question)
+    }, [question])
 
 
     return (
@@ -83,6 +85,13 @@ export default function Student() {
                         <li key={idx}>{msg}</li>
                     ))}
                 </ul>
+            </div>
+
+            <div className="text-red-700">
+
+                <p className="text-xl">Your questions goes here</p>
+                {question && <LiveQuestion question={question} />}
+
             </div>
         </div>
 
