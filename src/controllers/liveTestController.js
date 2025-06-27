@@ -1,6 +1,7 @@
 
 // src/controllers/testController.js
 const { prisma } = require('../lib/prisma');
+const { redis } = require('../lib/redis');
 
 function liveTestController(io) {
     return {
@@ -18,13 +19,18 @@ function liveTestController(io) {
                         testId: testid
                     },
                     orderBy: {
-                        createdAt: 'asc' 
+                        createdAt: 'asc'
                     }
                 });
 
-                if (!questions) {
+                if (!questions || questions.length ==0) {
                     return res.status(400).json({ error: "Couldnt fetch questions" })
                 }
+
+
+                await redis.set(`test:${testid}`, JSON.stringify(questions), {
+                    ex: 60 * 60, // ⏱️ expires in 1 hour
+                });
 
                 console.log(questions);
 
@@ -55,4 +61,4 @@ function liveTestController(io) {
     }
 }
 
-module.exports= liveTestController
+module.exports = liveTestController

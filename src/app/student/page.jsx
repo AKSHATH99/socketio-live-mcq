@@ -32,9 +32,17 @@ const [question, setQuestion] = useState(null);
         });
 
         socket.on("recieve-questions", (questions) => {
-            console.log("Recieved questions in student end")
-            setQuestion(questions);
-            console.log("at student", questions)
+            console.log("📬 Received questions in student end:", questions);
+            
+            const receivedQuestions = Array.isArray(questions) ? questions : [questions];
+            
+            if (receivedQuestions.length > 0) {
+                const firstQuestion = receivedQuestions[0];
+                setQuestion(firstQuestion);
+                console.log("📝 Set question with testId:", firstQuestion.testId);
+            } else {
+                console.warn("⚠️ No questions received");
+            }
         })
 
         return () => {
@@ -90,7 +98,7 @@ const [question, setQuestion] = useState(null);
             <div className="text-red-700">
 
                 <p className="text-xl">Your questions goes here</p>
-                {question && <LiveQuestion question={question} />}
+                {question && <LiveQuestion question={question} socket={socketRef.current} />}
 
             </div>
         </div>

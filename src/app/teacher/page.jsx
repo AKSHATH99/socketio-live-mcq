@@ -98,10 +98,24 @@ export default function Teacher() {
 
   // ----------------------SOCKET IO------------------------------------------------------
   const sendQuestions = () => {
+    if (!fetchedTest || fetchedTest.length === 0) {
+      console.error('No test selected');
+      return;
+    }
+    const currentTestId = fetchedTest[0].id;
+    
+    // Add testId to each question before sending
+    const questionsWithTestId = questions.map(q => ({
+      ...q,
+      testId: currentTestId
+    }));
+    
     socketRef.current.emit('send-questions', {
       roomId: "quiz-123",
-      questions
-    })
+      questions: questionsWithTestId
+    });
+    
+    console.log('Sent questions with testId:', currentTestId);
   }
 
   useEffect(() => {
