@@ -30,3 +30,14 @@ model Question {
   timer     Int      @default(10)
   createdAt DateTime @default(now())
 }
+
+model TestResult {
+  id           String   @id @default(uuid())
+  studentId    String
+  testId       String
+  questionId   String
+  selectedAnswer String
+  isCorrect    Boolean
+  timestamp    DateTime @default(now())
+}
+
