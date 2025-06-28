@@ -4,7 +4,7 @@ const { prisma } = require('../lib/prisma');
 module.exports.addTestResult = async (req, res) => {
   try {
     const { studentId, testId, questionId, selectedAnswer, isCorrect } = req.body;
-    console.log( studentId, testId, questionId, selectedAnswer, isCorrect)
+    console.log(studentId, testId, questionId, selectedAnswer, isCorrect)
     if (!studentId || !testId || !questionId || !selectedAnswer) {
       return res.status(400).json({ error: "Missing required fields" });
     }
@@ -41,3 +41,38 @@ module.exports.getTestResults = async (req, res) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+
+module.exports.getLeaderBoard = async (req, res) => {
+  try {
+    // console.log("hi")
+    const {testid} = req.body; 
+
+    const results = await prisma.testResult.findMany({
+      where: { testId: testid },
+    });
+    console.log(results);
+
+    const scores = {};
+
+    for (const result of results) {
+      if (!scores[result.studentId]) scores[result.studentId] = 0;
+      if (result.isCorrect) scores[result.studentId]++;
+    }
+
+    const leaderboard = Object.entries(scores)
+      .map(([studentId, score]) => ({ studentId, score }))
+      .sort((a, b) => b.score - a.score);
+
+    console.log(leaderboard);
+    return res.status(201).json(leaderboard);
+
+
+  } catch (error) {
+
+    console.error("Error fetching test results:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+}
+
+

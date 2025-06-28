@@ -22,7 +22,7 @@ export default function Teacher() {
     description: ""
   });
   const [fetchedTest, setFetchedTest] = useState(null);
-
+  const [leaderboard, setLeaderboard] = useState([]);
 
 
 
@@ -74,24 +74,51 @@ export default function Teacher() {
 
 
   const startTest = async (testId) => {
-  try {
-    const res = await fetch("http://localhost:3000/api/live-test", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        testid: testId,
-        roomId: "quiz-123" // or whatever variable you're using
-      })
-    });
+    try {
+      const res = await fetch("http://localhost:3000/api/live-test", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          testid: testId,
+          roomId: "quiz-123" // or whatever variable you're using
+        })
+      });
 
-    const data = await res.json();
-    console.log("🚀 Test Started:", data);
-  } catch (err) {
-    console.error("❌ Failed to start test:", err);
-  }
-};
+      const data = await res.json();
+      console.log("🚀 Test Started:", data);
+    } catch (err) {
+      console.error("❌ Failed to start test:", err);
+    }
+  };
+
+
+  const fetchLeaderboard = async () => {
+    try {
+      const res = await fetch("http://localhost:3000/api/get-leaderboard", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({testid: "0046b553-a37f-4145-9105-65ddfcb90ae6"}) // ✅ directly use the object
+      });
+      const data = await res.json();
+      setLeaderboard(data);
+    } catch (error) {
+      console.error("Error fetching leaderboard", error);
+    }
+  };
+
+  useEffect(() => {
+    setInterval(function () {
+      
+    }, 5000);
+  })
+
+  useEffect(()=>{
+    console.log(leaderboard)
+  },[leaderboard])
 
 
 
@@ -103,18 +130,18 @@ export default function Teacher() {
       return;
     }
     const currentTestId = fetchedTest[0].id;
-    
+
     // Add testId to each question before sending
     const questionsWithTestId = questions.map(q => ({
       ...q,
       testId: currentTestId
     }));
-    
+
     socketRef.current.emit('send-questions', {
       roomId: "quiz-123",
       questions: questionsWithTestId
     });
-    
+
     console.log('Sent questions with testId:', currentTestId);
   }
 
@@ -205,29 +232,29 @@ export default function Teacher() {
         />
 
         <div className="mt-10 p-4 border border-gray-500 rounded">
-  <h2 className="text-black font-bold text-lg mb-4">Fetched Test Data:</h2>
+          <h2 className="text-black font-bold text-lg mb-4">Fetched Test Data:</h2>
 
-  {fetchedTest && fetchedTest.length > 0 ? (
-    <div className="space-y-4">
-      {fetchedTest.map((test) => (
-        <div key={test.id} className="p-4 border border-gray-300 rounded text-black">
-          <h3 className="font-semibold text-lg">{test.title}</h3>
-          <p className="text-sm text-gray-700">{test.description}</p>
-          <p className="text-xs text-gray-500 mt-1">Created At: {new Date(test.createdAt).toLocaleString()}</p>
+          {fetchedTest && fetchedTest.length > 0 ? (
+            <div className="space-y-4">
+              {fetchedTest.map((test) => (
+                <div key={test.id} className="p-4 border border-gray-300 rounded text-black">
+                  <h3 className="font-semibold text-lg">{test.title}</h3>
+                  <p className="text-sm text-gray-700">{test.description}</p>
+                  <p className="text-xs text-gray-500 mt-1">Created At: {new Date(test.createdAt).toLocaleString()}</p>
 
-          <button
-            className="mt-2 bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
-            onClick={() => startTest(test.id)}
-          >
-            ▶ Start Test
-          </button>
+                  <button
+                    className="mt-2 bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
+                    onClick={() => startTest(test.id)}
+                  >
+                    ▶ Start Test
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-700">No test fetched yet.</p>
+          )}
         </div>
-      ))}
-    </div>
-  ) : (
-    <p className="text-gray-700">No test fetched yet.</p>
-  )}
-</div>
 
 
 
@@ -245,6 +272,33 @@ export default function Teacher() {
       <button onClick={() => { sendQuestions() }} className="border border-green-600 bg-green-500 text-white m-10 p-3">
         Send qustions
       </button>
+
+      <p className="text-xl text-blue-200">LEADERBOARD</p>
+      <button className="border border-black rouded-lg mt-10" onClick={()=>{fetchLeaderboard()}}> Refresh Leaderboard</button>
+      <div className="p-4">
+        <h1 className="text-xl font-bold mb-4">Leaderboard</h1>
+      { leaderboard.length > 0 ?
+              // <p>heyyy</p>
+      <table className="min-w-full border border-gray-300">
+          <thead>
+            <tr className="bg-gray-100 border-b">
+              <th className="text-left p-2 border-r">#</th>
+              <th className="text-left p-2 border-r">Student ID</th>
+              <th className="text-left p-2">Score</th>
+            </tr>
+          </thead>
+          <tbody>
+            {leaderboard.map((entry, index) => (
+              <tr key={entry.studentId} className="border-b">
+                <td className="p-2 border-r">{index + 1}</td>
+                <td className="p-2 border-r">{entry.studentId}</td>
+                <td className="p-2">{entry.score}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+       :"my" }
+      </div>
     </div>
   );
 }

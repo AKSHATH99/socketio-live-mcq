@@ -2,7 +2,7 @@
 const express = require('express');
 const { createTest, fetchTests } = require('../controllers/testController.js');
 const { addQuestionToTest, getQuestionsByTestId } = require('../controllers/questionController');
-const {addTestResult, getTestResults} = require('../controllers/testResultController.js');
+const {addTestResult, getTestResults, getLeaderBoard} = require('../controllers/testResultController.js');
 module.exports = function(io) {
   const router = express.Router();
   const { sendQuestions } = require('../controllers/liveTestController.js')(io);
@@ -14,5 +14,6 @@ module.exports = function(io) {
   router.post('/live-test', sendQuestions);
   router.post('/add-result',addTestResult)
   router.post('/get-results',getTestResults)
+  router.post('/get-leaderboard',getLeaderBoard)
   return router;
 };
