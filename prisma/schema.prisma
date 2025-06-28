@@ -13,17 +13,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 model Test {
-  id         String     @id @default(uuid())
-  title      String
+  id          String     @id @default(uuid())
+  title       String
   description String?
-  createdAt  DateTime   @default(now())
-  questions  Question[] // 1-to-many relationship
+  createdAt   DateTime   @default(now())
+  questions   Question[] // 1-to-many relationship
+  teacherId   String?
+  teacher     Teacher?   @relation(fields: [teacherId], references: [id])
 }
 
 model Question {
   id        String   @id @default(uuid())
   testId    String
-  test      Test     @relation(fields: [testId], references: [id])
+  test      Test     @relation(fields: [testId], references: [id]) 
   question  String
   options   String[]
   answer    String
@@ -41,3 +43,11 @@ model TestResult {
   timestamp    DateTime @default(now())
 }
 
+model Teacher {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  tests     Test[]   // 1-to-many relationship with Test
+  createdAt DateTime @default(now())
+}
