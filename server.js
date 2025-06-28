@@ -3,6 +3,8 @@ const express = require('express');
 const next = require('next');
 const http = require('http');
 const { Server } = require('socket.io');
+const cookieParser = require('cookie-parser');
+const cors = require('cors');
 const port = process.env.PORT || 3000;
 const dev = process.env.NODE_ENV !== 'production';
 
@@ -29,8 +31,13 @@ app.prepare()
 
     const expressApp = express();
 
-    // Parse JSON request bodies
+    // Middleware
     expressApp.use(express.json());
+    expressApp.use(cookieParser());
+    expressApp.use(cors({
+        origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+        credentials: true
+    }));
 
     // Create HTTP server
     const server = http.createServer(expressApp);
