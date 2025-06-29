@@ -20,6 +20,7 @@ model Test {
   questions   Question[] // 1-to-many relationship
   teacherId   String?
   teacher     Teacher?   @relation(fields: [teacherId], references: [id])
+   results     TestResult[]
 }
 
 model Question {
@@ -34,14 +35,17 @@ model Question {
 }
 
 model TestResult {
-  id           String   @id @default(uuid())
-  studentId    String
-  testId       String
-  questionId   String
+  id             String   @id @default(uuid())
+  studentId      String
+  student        Student  @relation(fields: [studentId], references: [id])
+  testId         String
+  test           Test     @relation(fields: [testId], references: [id])
+  questionId     String
   selectedAnswer String
-  isCorrect    Boolean
-  timestamp    DateTime @default(now())
+  isCorrect      Boolean
+  timestamp      DateTime @default(now())
 }
+
 
 model Teacher {
   id        String   @id @default(uuid())
@@ -51,3 +55,13 @@ model Teacher {
   tests     Test[]   // 1-to-many relationship with Test
   createdAt DateTime @default(now())
 }
+
+model Student {
+  id         String        @id @default(uuid())
+  name       String
+  email      String        @unique
+  password   String
+  createdAt  DateTime      @default(now())
+  results    TestResult[]  // 1-to-many answers submitted
+}
+
