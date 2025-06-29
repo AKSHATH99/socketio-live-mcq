@@ -7,7 +7,12 @@ export default function Student() {
     const [roomId, setRoomId] = useState("");
     const socketRef = useRef();
     const [messages, setMessages] = useState([]);
-const [question, setQuestion] = useState(null);
+    const [question, setQuestion] = useState(null);
+    const [pendingAnswer, setPendingAnswer] = useState(null);
+    const [questions, setQuestions] = useState([]);
+    const [currentIndex, setCurrentIndex] = useState(0);
+
+
 
     const [currentRoomID, setCurrentRoomID] = useState("")
 
@@ -33,13 +38,12 @@ const [question, setQuestion] = useState(null);
 
         socket.on("recieve-questions", (questions) => {
             console.log("📬 Received questions in student end:", questions);
-            
+
             const receivedQuestions = Array.isArray(questions) ? questions : [questions];
-            
+
             if (receivedQuestions.length > 0) {
-                const firstQuestion = receivedQuestions[0];
-                setQuestion(firstQuestion);
-                console.log("📝 Set question with testId:", firstQuestion.testId);
+                setQuestions(receivedQuestions);
+                setCurrentIndex(0);
             } else {
                 console.warn("⚠️ No questions received");
             }
@@ -63,8 +67,15 @@ const [question, setQuestion] = useState(null);
 
 
     useEffect(() => {
-        console.log("new question questions  ",question)
+        console.log("new question questions  ", question)
     }, [question])
+
+    function handleAnswer(data) {
+        console.log("✅ Parent received answer", data);
+        // the parent survives re-renders so no unmount problem
+        socketRef.current.emit("answer-validate", data);
+    }
+
 
 
     return (
@@ -96,9 +107,22 @@ const [question, setQuestion] = useState(null);
             </div>
 
             <div className="text-red-700">
-
                 <p className="text-xl">Your questions goes here</p>
-                {question && <LiveQuestion question={question} socket={socketRef.current} />}
+                {questions.length > 0 && questions[currentIndex] && (
+                    <LiveQuestion
+                        question={questions[currentIndex]}
+                        onAnswer={(data) => {
+                            console.log("✅ Parent received answer", data);
+                            socketRef.current.emit("answer-validate", data);
+                            // advance to next question
+                            if (currentIndex + 1 < questions.length) {
+                                setCurrentIndex(currentIndex + 1);
+                            } else {
+                                console.log("✅ All questions completed");
+                            }
+                        }}
+                    />
+                )}
 
             </div>
         </div>

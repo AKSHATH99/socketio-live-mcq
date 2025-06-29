@@ -2,7 +2,7 @@
 const express = require('express');
 const { createTest, fetchTests } = require('../controllers/testController.js');
 const { addQuestionToTest, getQuestionsByTestId } = require('../controllers/questionController');
-const {addTestResult, getTestResults, getLeaderBoard} = require('../controllers/testResultController.js');
+const {addTestResult, getTestResults, getLeaderBoard , getLiveLeaderBoard} = require('../controllers/testResultController.js');
 const {TeacherSignup , TeacherLogin} = require('../controllers/TeacherControllers.js');
 const {StudentSignup , StudentLogin} = require('../controllers/StudentController.js');
 const {sendOTP, verifyOTP} = require('../controllers/authVerify/OtpControllers.js')
@@ -22,7 +22,7 @@ module.exports = function(io) {
   router.post('/student/signup', StudentSignup);
   router.post('/student/login', StudentLogin); 
   // Protected Routes
-  router.use(protect); // All routes after this will be protected
+  // router.use(protect); // All routes after this will be protected
   
   // Test Routes
   router.post('/test', createTest);
@@ -33,6 +33,7 @@ module.exports = function(io) {
   router.post('/add-result', addTestResult);
   router.post('/get-results', getTestResults);
   router.post('/get-leaderboard', getLeaderBoard);
+  router.post('/get-live-leaderboard', getLiveLeaderBoard)
 
   router.use(protectStudent); // All routes after this will be for student to pass through middleware
   

@@ -1,21 +1,49 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 
-export default function LiveQuestion({ question, socket }) {
+export default function LiveQuestion({ question, onAnswer }) {
   const [timer, setTimer] = useState(question?.timer || 10);
   const [selected, setSelected] = useState(null);
   const [disabled, setDisabled] = useState(false);
+  const [lastSubmittedAnswer, setLastSubmittedAnswer] = useState(null);
+
+  const submitAnswer = (selectedIdx) => {
+    if (disabled) return;
+    
+    setSelected(selectedIdx);
+    
+    const selectedAnswer = question.options[selectedIdx];
+    // Only submit if the answer has changed
+    if (lastSubmittedAnswer !== selectedIdx) {
+      onAnswer({
+        questionId: question.id,
+        selectedAnswer,
+        testId: question.testId,
+        studentId: "31e96375-fd44-42e1-a675-48c6a45d65a2"
+      });
+      setLastSubmittedAnswer(selectedIdx);
+    }
+  };
 
   useEffect(() => {
     setTimer(question?.timer || 10);
     setSelected(null);
     setDisabled(false);
-    console.log(question.id)
+    setLastSubmittedAnswer(null);
 
     const interval = setInterval(() => {
       setTimer((prev) => {
         if (prev <= 1) {
           clearInterval(interval);
           setDisabled(true);
+// Submit final answer when timer runs out
+          if (selected !== null && lastSubmittedAnswer === selected) {
+            onAnswer({
+              questionId: question.id,
+              selectedAnswer: null,
+              testId: question.testId,
+              studentId: "31e96375-fd44-42e1-a675-48c6a45d65a2"
+            });
+          }
           return 0;
         }
         return prev - 1;
@@ -24,43 +52,6 @@ export default function LiveQuestion({ question, socket }) {
 
     return () => clearInterval(interval);
   }, [question]);
-
-
-  useEffect(() => {
-    if (disabled && selected !== null) {
-      const selectedAnswer = question.options[selected];
-
-      console.log("🚀 Selected answer:", selectedAnswer);
-
-      function generateRandomThreeDigitNumber() {
-        // Generate a random number between 0 and 899 (inclusive)
-        const randomNumber = Math.floor(Math.random() * 900);
-
-        // Add 100 to shift the range to 100-999
-        const threeDigitNumber = randomNumber + 100;
-
-
-        return "student"+threeDigitNumber;
-      }
-
-      const RandomStudenId = generateRandomThreeDigitNumber();
-
-        // Emit to server with testId
-        socket.emit("answer-validate", {
-          questionId: question.id,
-          selectedAnswer,
-          testId: question.testId ,// Include the testId from the question
-          studentId: RandomStudenId
-
-        });
-
-      console.log("📤 Sent answer for question:", question.id, "with testId:", question.testId);
-    }
-  }, [disabled]);
-
-  useEffect(() => {
-    console.log(selected)
-  }, [selected])
 
   if (!question) return <div>No question received yet</div>;
 
@@ -74,9 +65,9 @@ export default function LiveQuestion({ question, socket }) {
           <button
             key={idx}
             className={`p-2 border ${selected === idx ? "bg-blue-500 text-white" : "bg-white"
-              } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+              } ${disabled ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-100"}`}
             disabled={disabled}
-            onClick={() => setSelected(idx)}
+            onClick={() => submitAnswer(idx)}
           >
             {opt}
           </button>

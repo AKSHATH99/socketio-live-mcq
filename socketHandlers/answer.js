@@ -35,8 +35,14 @@ module.exports = function handleAnswerValidation(io, socket) {
             }
 
             console.log("question found ", question.answer)
+            console.log("my anwer", selectedAnswer);
 
             const isCorrect = question.answer === selectedAnswer ? true : false;
+
+            if(isCorrect){
+                await redis.zincrby(`leaderboard:${testId}`,  1 , studentId);
+
+            }
 
             fetch("http://localhost:3000/api/add-result", {
                 method: "POST",

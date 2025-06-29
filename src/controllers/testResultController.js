@@ -1,5 +1,12 @@
 // src/controllers/testResultController.js
 const { prisma } = require('../lib/prisma');
+const { Redis } = require('@upstash/redis');
+
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN,
+});
+
 
 module.exports.addTestResult = async (req, res) => {
   try {
@@ -46,7 +53,7 @@ module.exports.getTestResults = async (req, res) => {
 module.exports.getLeaderBoard = async (req, res) => {
   try {
     // console.log("hi")
-    const {testid} = req.body; 
+    const { testid } = req.body;
 
     const results = await prisma.testResult.findMany({
       where: { testId: testid },
@@ -75,4 +82,27 @@ module.exports.getLeaderBoard = async (req, res) => {
   }
 }
 
+module.exports.getLiveLeaderBoard = async (req, res) => {
 
+  const { testId } = req.body;
+
+  if (!testId) {
+    return res.status(400).json({ message: "TestID not recieved" })
+  }
+
+  try {
+    const leaderboard = await redis.zrevrange(`leaderboard:${testId}`, 0, 9, "WITHSCORES");
+
+    const formatted = [];
+    for (let i = 0; i < leaderboard.length; i += 2) {
+      formatted.push({
+        studentId: leaderboard[i],
+        score: parseInt(leaderboard[i + 1]),
+      });
+    }
+    res.status(200).json({ leaderboard: formatted });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Could not fetch leaderboard" });
+  }
+}; 
