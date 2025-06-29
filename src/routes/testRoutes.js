@@ -5,12 +5,17 @@ const { addQuestionToTest, getQuestionsByTestId } = require('../controllers/ques
 const {addTestResult, getTestResults, getLeaderBoard} = require('../controllers/testResultController.js');
 const {TeacherSignup , TeacherLogin} = require('../controllers/TeacherControllers.js');
 const {StudentSignup , StudentLogin} = require('../controllers/StudentController.js');
+const {sendOTP, verifyOTP} = require('../controllers/authVerify/OtpControllers.js')
+
+
 const { protect } = require('../middleware/authMiddleware');
 const { protectStudent } = require('../middleware/authStudentMiddleware');
 module.exports = function(io) {
   const router = express.Router();
   const { sendQuestions } = require('../controllers/liveTestController.js')(io);
 
+  router.post('/send-otp', sendOTP);
+  router.post('/verify-otp', verifyOTP);
   // Public Routes
   router.post('/teacher/signup', TeacherSignup);
   router.post('/teacher/login', TeacherLogin);
