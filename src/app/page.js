@@ -1,73 +1,23 @@
 'use client'
 import Image from "next/image";
 import styles from "./page.module.css";
-import { io } from "socket.io-client";
-import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
-  const socketRef = useRef();
-
-  const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState([])
-
-  useEffect(() => {
-    const socket = io();
-    socketRef.current = socket;
-
-    socket.on('connect', () => {
-      console.log('connected from frontend', socket.id)
-    })
-
-
-    // socket.emit('send-message', {
-    //   roomid: 'quiz-123',
-    //   message: 'Hello quiz team'
-    // })
-
-    socket.on('receive-message', (data) => {
-      console.log("📥 New message", data);
-      setMessages((prev) => [...prev, data.message]);
-    });
-
-    // const createRoom = () => {
-    //   console.log("CREATING THE ROOM BROOOOOOOOOO")
-    //   socket.emit('join-room', 'quiz-123');
-
-    // }
-
-    return () => {
-      socket.disconnect()
-    }
-  }, []);
-
-  const createRoom = () => {
-    console.log("CREATING THE ROOM BROOOOOOOOOO");
-    socketRef.current.emit('join-room', 'quiz-123');
-    socketRef.current.emit('send-message', {
-      roomId: 'quiz-123',
-      message: 'Hello quiz team'
-    });
-  };
-
-  const sendMessage = () => {
-    console.log("Sedinign message")
-    socketRef.current.emit('send-message', {
-      roomId: "quiz-123",
-      message: message
-    })
-
-  }
-
-  useEffect(() => {
-    console.log("hiii")
-    console.log(messages)
-  }, [messages])
-
-
+    const router = useRouter();
 
   return (
     <div className="text-red-700">
-    Welcome to our app bro  
+    Welcome to our app bro 
+
+    <p>
+      Who tf are you ??
+      </p> 
+
+      <div>
+        <button className="border border-black px-2 py-1 m-10" onClick={()=>{router.push("/auth/verify?type=student")}} >Student</button>
+        <button className="border border-black px-2 py-1" onClick={()=>{router.push("/auth/verify?type=teacher")}} >Teacher</button>
+      </div>
     </div>
   );
 }
