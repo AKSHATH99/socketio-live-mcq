@@ -29,13 +29,23 @@ export default function Signin() {
                 })
             })
             const data = await res.json()
-            console.log(data)
+            console.log(data);
             if (data.error) {
                 toast.error(data.error)
             } else {
-                toast.success("Signed in successfully")
+                toast.success("Signed in successfully");
+                const teacherId = data.teacher?.id;
+                if (!teacherId) {
+                    console.error('No teacher ID found in response');
+                    return;
+                }
+                localStorage.setItem('teacherId', teacherId);
+                // Store the token in localStorage or context as needed
+                if (data.token) {
+                    localStorage.setItem('token', data.token);
+                }
                 setTimeout(() => {
-                    router.push("/teacher")
+                    router.push(`/teacher/${teacherId}`)
                 }, 2000);
             }
         } catch (error) {

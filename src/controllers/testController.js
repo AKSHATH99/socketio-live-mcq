@@ -4,7 +4,7 @@ const { prisma } = require('../lib/prisma');
 module.exports.createTest = async (req, res) => {
   try {
     console.log("hooo")
-    const { title, description } = req.body;
+    const { title, description , teacherId } = req.body;
 
     if (!title) {
       return res.status(400).json({ error: 'Title is required' });
@@ -14,6 +14,7 @@ module.exports.createTest = async (req, res) => {
       data: {
         title,
         description,
+        teacherId
       },
     });
 
@@ -36,6 +37,27 @@ module.exports.fetchTests = async (req, res) => {
     return res.status(201).json(tests)
   } catch (error) {
 
+    console.error('Error creating test:', err);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
+
+module.exports.fetchTestByTeacherID = async (req, res) => {
+  try {
+    const { id } = req.body;
+
+    if (!id) {
+      return res.status(400).json({ error: 'id is required' });
+    }
+
+    const tests = await prisma.test.findMany({
+      where: {
+        teacherId: id
+      }
+    });
+
+    return res.status(201).json(tests)
+  } catch (error) {
     console.error('Error creating test:', err);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
