@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { io } from "socket.io-client";
 import { useEffect, useRef, useState } from "react";
-import QuestionsInput from "@/components/QuestionsInput";
+// import QuestionsInput from "@/components/QuestionsInput";
 import CreateRoomModal from "@/components/TeacherInterface/CreateRoomModal";
 import CreateTestModal from "@/components/TeacherInterface/CreateTestModal";
 import { useRouter } from "next/navigation";
@@ -358,7 +358,7 @@ export default function Teacher({ params }) {
 
 
 
-      <QuestionsInput questions={questions} setQuestions={setQuestions} />
+      {/* <QuestionsInput questions={questions} setQuestions={setQuestions} /> */}
 
 
       <button onClick={() => { sendQuestions() }} className="border border-green-600 bg-green-500 text-white m-10 p-3">
