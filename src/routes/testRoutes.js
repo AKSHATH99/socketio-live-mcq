@@ -1,6 +1,6 @@
 // src/routes/testRoutes.js
 const express = require('express');
-const { createTest, fetchTests , fetchTestByTeacherID} = require('../controllers/testController.js');
+const { createTest, fetchTests , fetchTestByTeacherID ,fetchTestDetails} = require('../controllers/testController.js');
 const { addQuestionToTest, getQuestionsByTestId } = require('../controllers/questionController');
 const {addTestResult, getTestResults, getLeaderBoard , getLiveLeaderBoard} = require('../controllers/testResultController.js');
 const {TeacherSignup , TeacherLogin} = require('../controllers/TeacherControllers.js');
@@ -35,7 +35,7 @@ module.exports = function(io) {
   router.post('/get-leaderboard', getLeaderBoard);
   router.post('/get-live-leaderboard', getLiveLeaderBoard)
   router.post('/get-teacher-tests',fetchTestByTeacherID)
-
+  router.post('/get-test',fetchTestDetails)
   router.use(protectStudent); // All routes after this will be for student to pass through middleware
   
 

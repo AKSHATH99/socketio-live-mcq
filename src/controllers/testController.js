@@ -37,7 +37,7 @@ module.exports.fetchTests = async (req, res) => {
     return res.status(201).json(tests)
   } catch (error) {
 
-    console.error('Error creating test:', err);
+    console.error('Error fetching tests:', error);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
@@ -59,6 +59,27 @@ module.exports.fetchTestByTeacherID = async (req, res) => {
     return res.status(201).json(tests)
   } catch (error) {
     console.error('Error creating test:', err);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
+
+module.exports.fetchTestDetails = async (req, res) => {
+  try {
+    const { id } = req.body;
+
+    if (!id) {
+      return res.status(400).json({ error: 'id is required' });
+    }
+
+    const test = await prisma.test.findUnique({
+      where: {
+        id
+      }
+    });
+
+    return res.status(201).json(test)
+  } catch (error) {
+    console.error('Error fetching test details:', error);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
