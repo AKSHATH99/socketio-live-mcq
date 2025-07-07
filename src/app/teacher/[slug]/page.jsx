@@ -212,6 +212,7 @@ export default function Teacher({ params }) {
       roomId: roomId,
       message: 'Hello quiz team'
     });
+    localStorage.setItem('roomId', roomId);
   };
 
   const sendMessage = () => {

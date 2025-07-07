@@ -15,7 +15,8 @@ export default function Test({ params }) {
     const [openQuestionModal, setOpenQuestionModal] = useState(false);
     const [showQuestionsPreview, setShowQuestionsPreview] = useState(false);
     const [activeTab, setActiveTab] = useState("questions");
-
+    const [isTestLive , setIsTestLive] = useState(false);
+    const [roomId , setRoomId] = useState("");
     const fetchTestDetails = async () => {
         try {
             const res = await fetch(`/api/get-test`, {
@@ -52,7 +53,28 @@ export default function Test({ params }) {
         }
     };
 
+  const startTest = async (testId) => {
+    try {
+      const res = await fetch("http://localhost:3000/api/live-test", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          testid: testId,
+          roomId: roomId // or whatever variable you're using
+        })
+      });
+
+      const data = await res.json();
+      console.log("🚀 Test Started:", data);
+      setIsTestLive(true);
+    } catch (err) {
+      console.error("❌ Failed to start test:", err);
+    }
+  };
     useEffect(() => {
+        setRoomId(localStorage.getItem('roomId'));
         fetchQuestions();
         fetchTestDetails();
     }, [testId]);
@@ -161,6 +183,7 @@ export default function Test({ params }) {
                                             ? 'bg-slate-200 text-slate-400 cursor-not-allowed' 
                                             : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white hover:shadow-xl hover:scale-105 shadow-lg'
                                     }`}
+                                    onClick={() => startTest(testId)}
                                 >
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1a3 3 0 000-6h-1m10 6h1a3 3 0 000-6h-1m-7 10a3 3 0 006 0" />
@@ -266,9 +289,9 @@ export default function Test({ params }) {
                             </div>
                         )}
                         
-                        {activeTab === "Live Test" && <LiveTest />}
-                        {activeTab === "Test Results" && <TestResult />}
-                        {activeTab === "Leaderboard" && <LeaderBoard />}
+                        {activeTab === "Live Test" && <LiveTest testid={testId} isTestLive={isTestLive} startTest={startTest} />}
+                        {activeTab === "Test Results" && <TestResult testId={testId} />}
+                        {activeTab === "Leaderboard" && <LeaderBoard testId={testId} />}
                     </div>
                 </div>
             </div>

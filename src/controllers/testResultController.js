@@ -83,15 +83,18 @@ module.exports.getLeaderBoard = async (req, res) => {
 }
 
 module.exports.getLiveLeaderBoard = async (req, res) => {
-
   const { testId } = req.body;
 
   if (!testId) {
-    return res.status(400).json({ message: "TestID not recieved" })
+    return res.status(400).json({ message: "TestID not received" });
   }
 
   try {
-    const leaderboard = await redis.zrevrange(`leaderboard:${testId}`, 0, 9, "WITHSCORES");
+    const leaderboard = await redis.zrange(`leaderboard:${testId}`, {
+      rev: true,               // equivalent to zrevrange
+      withScores: true,        // equivalent to WITHSCORES
+      limit: { offset: 0, count: 10 }
+    });
 
     const formatted = [];
     for (let i = 0; i < leaderboard.length; i += 2) {
@@ -100,9 +103,75 @@ module.exports.getLiveLeaderBoard = async (req, res) => {
         score: parseInt(leaderboard[i + 1]),
       });
     }
+
     res.status(200).json({ leaderboard: formatted });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Could not fetch leaderboard" });
   }
-}; 
+};
+
+module.exports.getTestResultsDetailed = async (req, res) => {
+  const { testId } = req.body;
+
+  if (!testId) {
+    return res.status(400).json({ error: "TestID is required" });
+  }
+
+  try {
+    // get all results for this test
+    const results = await prisma.testResult.findMany({
+      where: { testId },
+      include: {
+        student: { select: { id: true, name: true, email: true } },
+      },
+      orderBy: { timestamp: "asc" },
+    });
+
+    // get all questions for this test
+    const questions = await prisma.question.findMany({
+      where: { testId },
+      select: { id: true, question: true, answer: true, options: true },
+    });
+
+    const questionMap = {};
+    for (const q of questions) {
+      questionMap[q.id] = q;
+    }
+
+    // group results by student
+    const grouped = {};
+
+    for (const result of results) {
+      const questionData = questionMap[result.questionId];
+
+      if (!grouped[result.studentId]) {
+        grouped[result.studentId] = {
+          student: result.student,
+          totalCorrect: 0,
+          answers: []
+        };
+      }
+      grouped[result.studentId].answers.push({
+        question: questionData?.question ?? "Unknown",
+        correctAnswer: questionData?.answer ?? "Unknown",
+        options: questionData?.options ?? [],
+        selectedAnswer: result.selectedAnswer,
+        isCorrect: result.isCorrect
+      });
+      if (result.isCorrect) {
+        grouped[result.studentId].totalCorrect++;
+      }
+    }
+
+    const final = Object.values(grouped);
+
+    res.status(200).json({ students: final });
+  } catch (error) {
+    console.error("Error in getTestResultsDetailed", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+
+
