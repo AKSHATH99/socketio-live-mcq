@@ -107,3 +107,34 @@ module.exports.StudentLogin = async (req, res) => {
         });
     }
 }   
+
+
+module.exports.studentDetailsById = async (req, res) => {
+    try {
+        const { id } = req.body;
+        if (!id) {
+            return res.status(400).json({message:"All fields are required"});
+        }
+
+        const student = await prisma.student.findUnique({
+            where: {
+                id
+            }
+        });
+        if (!student) {
+            return res.status(400).json({message:"Invalid id"});
+        }
+
+        const { password: _, ...studentWithoutPassword } = student;
+        return res.status(200).json({
+            message: "Student details fetched successfully",
+            student: studentWithoutPassword
+        });
+    } catch (error) {
+        console.error('Error fetching student details:', error);
+        return res.status(500).json({
+            message: "Internal Server Error",
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+}

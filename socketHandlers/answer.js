@@ -6,7 +6,7 @@ const redis = new Redis({
 });
 
 module.exports = function handleAnswerValidation(io, socket) {
-    socket.on('answer-validate', async ({ studentId, questionId, selectedAnswer, testId = "" }) => {
+    socket.on('answer-validate', async ({ studentId, questionId, selectedAnswer, testId = "" , studentName }) => {
         try {
             console.log("answer validate")
             console.log(questionId)
@@ -53,6 +53,7 @@ module.exports = function handleAnswerValidation(io, socket) {
                     questionId,
                     selectedAnswer,
                     isCorrect,
+                    studentName
                 }),
             }).then(() => {
                 console.log("✅ Result stored in DB");

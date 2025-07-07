@@ -10,8 +10,8 @@ const redis = new Redis({
 
 module.exports.addTestResult = async (req, res) => {
   try {
-    const { studentId, testId, questionId, selectedAnswer, isCorrect } = req.body;
-    console.log(studentId, testId, questionId, selectedAnswer, isCorrect)
+    const { studentId, testId, questionId, selectedAnswer, isCorrect, studentName } = req.body;
+    console.log(studentId, testId, questionId, selectedAnswer, isCorrect, studentName)
     if (!studentId || !testId || !questionId || !selectedAnswer) {
       return res.status(400).json({ error: "Missing required fields" });
     }
@@ -23,6 +23,7 @@ module.exports.addTestResult = async (req, res) => {
         questionId,
         selectedAnswer,
         isCorrect,
+        studentName
       },
     });
 
@@ -52,31 +53,44 @@ module.exports.getTestResults = async (req, res) => {
 
 module.exports.getLeaderBoard = async (req, res) => {
   try {
-    // console.log("hi")
     const { testid } = req.body;
 
+    // First, get all test results for this test
     const results = await prisma.testResult.findMany({
       where: { testId: testid },
+      include: {
+        student: {
+          select: {
+            name: true
+          }
+        }
+      }
     });
-    console.log(results);
 
     const scores = {};
 
+    // Process results to calculate scores
     for (const result of results) {
-      if (!scores[result.studentId]) scores[result.studentId] = 0;
-      if (result.isCorrect) scores[result.studentId]++;
+      const studentId = result.studentId;
+      if (!scores[studentId]) {
+        scores[studentId] = {
+          studentId,
+          studentName: result.student?.name || 'Unknown',
+          score: 0
+        };
+      }
+      if (result.isCorrect) {
+        scores[studentId].score++;
+      }
     }
 
-    const leaderboard = Object.entries(scores)
-      .map(([studentId, score]) => ({ studentId, score }))
-      .sort((a, b) => b.score - a.score);
+    // Convert to array and sort by score (descending)
+    const leaderboard = Object.values(scores).sort((a, b) => b.score - a.score);
 
-    console.log(leaderboard);
-    return res.status(201).json(leaderboard);
-
+    console.log("Leaderboard data:", leaderboard);
+    return res.status(200).json(leaderboard);
 
   } catch (error) {
-
     console.error("Error fetching test results:", error);
     return res.status(500).json({ error: "Internal Server Error" });
   }
@@ -157,7 +171,8 @@ module.exports.getTestResultsDetailed = async (req, res) => {
         correctAnswer: questionData?.answer ?? "Unknown",
         options: questionData?.options ?? [],
         selectedAnswer: result.selectedAnswer,
-        isCorrect: result.isCorrect
+        isCorrect: result.isCorrect,
+        studentName: result.studentName
       });
       if (result.isCorrect) {
         grouped[result.studentId].totalCorrect++;

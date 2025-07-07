@@ -38,6 +38,7 @@ model TestResult {
   id             String   @id @default(uuid())
   studentId      String
   student        Student  @relation(fields: [studentId], references: [id])
+  studentName    String
   testId         String
   test           Test     @relation(fields: [testId], references: [id])
   questionId     String

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-export default function LiveQuestion({ question, onAnswer }) {
+export default function LiveQuestion({ question, onAnswer, studentId , studentName }) {
   const [timer, setTimer] = useState(question?.timer || 10);
   const [selected, setSelected] = useState(null);
   const [disabled, setDisabled] = useState(false);
@@ -18,11 +18,16 @@ export default function LiveQuestion({ question, onAnswer }) {
         questionId: question.id,
         selectedAnswer,
         testId: question.testId,
-        studentId: "31e96375-fd44-42e1-a675-48c6a45d65a2"
+        studentId: studentId,
+        studentName: studentName
       });
       setLastSubmittedAnswer(selectedIdx);
     }
   };
+  useEffect(()=>{
+    console.log("studentid in question box",studentId)
+    console.log("studentname in question box",studentName)
+  },[])
 
   useEffect(() => {
     setTimer(question?.timer || 10);
@@ -41,7 +46,8 @@ export default function LiveQuestion({ question, onAnswer }) {
               questionId: question.id,
               selectedAnswer: null,
               testId: question.testId,
-              studentId: "31e96375-fd44-42e1-a675-48c6a45d65a2"
+              studentId: studentId,
+              studentName: studentName
             });
           }
           return 0;
