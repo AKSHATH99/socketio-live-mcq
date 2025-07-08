@@ -17,6 +17,9 @@ export default function Test({ params }) {
     const [activeTab, setActiveTab] = useState("questions");
     const [isTestLive , setIsTestLive] = useState(false);
     const [roomId , setRoomId] = useState("");
+    const [testEnded, setTestEnded] = useState(false);
+
+
     const fetchTestDetails = async () => {
         try {
             const res = await fetch(`/api/get-test`, {
@@ -78,6 +81,12 @@ export default function Test({ params }) {
         fetchQuestions();
         fetchTestDetails();
     }, [testId]);
+
+    useEffect(()=>{
+        if(testEnded){
+            setActiveTab("Test Results"); 
+        }
+    },[testEnded])
 
     if (loading) {
         return (
@@ -289,7 +298,7 @@ export default function Test({ params }) {
                             </div>
                         )}
                         
-                        {activeTab === "Live Test" && <LiveTest testid={testId} isTestLive={isTestLive} startTest={startTest} />}
+                        {activeTab === "Live Test" && <LiveTest testEnded={testEnded} setTestEnded={setTestEnded} testid={testId} setIsTestLive={setIsTestLive} isTestLive={isTestLive} startTest={startTest} />}
                         {activeTab === "Test Results" && <TestResult testId={testId} />}
                         {activeTab === "Leaderboard" && <LeaderBoard testId={testId} />}
                     </div>

@@ -51,6 +51,10 @@ function liveTestController(io) {
 
                     accumulatedTime += timerInMs;
                 });
+                
+                setTimeout(() => {
+                io.to(roomId).emit('test-ended', roomId , testid)
+                }, accumulatedTime);
 
                 return res.status(201).json("");
             } catch (err) {

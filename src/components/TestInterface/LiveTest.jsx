@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import { Loader2, Clock, Trophy, Users } from "lucide-react";
 
-const LiveTest = ({ testid, isTestLive, startTest }) => {
+const LiveTest = ({ testid, isTestLive, startTest , setIsTestLive , testEnded , setTestEnded }) => {
     const socketRef = useRef();
     const [roomId, setRoomId] = useState("");
     const [questions, setQuestions] = useState([]);
@@ -50,6 +50,13 @@ const LiveTest = ({ testid, isTestLive, startTest }) => {
                     });
                 }, 1000);
             }
+        });
+
+        socket.on("test-ended", (roomId, testId) => {
+            console.log("Test ended for room:", roomId);
+            console.log("Test ID:", testId);
+            // setIsTestLive(false);
+            setTestEnded(true);
         });
 
         setRoomId(currentRoom);
@@ -236,7 +243,7 @@ const LiveTest = ({ testid, isTestLive, startTest }) => {
                 </div>
 
                 {/* Overlay Start Test Button */}
-                {!isTestLive && (
+                {!isTestLive && !testEnded && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-lg">
                         <div className="text-center">
                             <button
@@ -246,6 +253,19 @@ const LiveTest = ({ testid, isTestLive, startTest }) => {
                                 Start Test
                             </button>
                             <p className="text-white mt-3 text-sm">Click to begin the live test session</p>
+                        </div>
+                    </div>
+                )}
+                {testEnded && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-70 rounded-lg">
+                        <div className="text-center p-6 bg-white rounded-xl shadow-xl max-w-md w-full mx-4">
+                            <Trophy className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
+                            <h3 className="text-2xl font-bold text-gray-800 mb-2">Test Completed!</h3>
+                            <p className="text-gray-600 mb-6">You've successfully completed the test. Redirecting to results...</p>
+                            <div className="flex justify-center items-center space-x-2">
+                                <Loader2 className="h-5 w-5 text-blue-600 animate-spin" />
+                                <span className="text-sm text-gray-500">Preparing your results</span>
+                            </div>
                         </div>
                     </div>
                 )}

@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { io } from "socket.io-client";
 import LiveQuestion from "@/controllers/DisplayQuestionBox";
 import JoinRoomModal from "@/components/StudentInterface/JoinRoom";
-
+import Dashboard from "@/components/StudentInterface/Dashboard";
 export default function Student({params}) {
 
     const studentId = params.slug;
@@ -19,6 +19,7 @@ export default function Student({params}) {
     const [isJoining, setIsJoining] = useState(false);
     const [showJoinModal, setShowJoinModal] = useState(false);
     const [studentName, setStudentName] = useState("");
+    const [TestEnded , setTestEnded] = useState(false);
 
     useEffect(()=>{
         console.log(studentData)
@@ -83,6 +84,12 @@ export default function Student({params}) {
             }
         })
 
+        socket.on("test-ended", (roomId, testId) => {
+            console.log("Test ended for room:", roomId);
+            console.log("Test ID:", testId);
+            // setIsTestLive(false);
+            setTestEnded(true);
+        });
         return () => {
             socket.disconnect()
         }
@@ -115,6 +122,8 @@ export default function Student({params}) {
         socketRef.current.emit("answer-validate", data);
     }
 
+
+
     if (isLoading) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
@@ -128,6 +137,8 @@ export default function Student({params}) {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+
+
             {/* Header with Room Status */}
             <div className="bg-white shadow-sm border-b border-gray-200">
                 <div className="container mx-auto px-4 py-4">
@@ -165,12 +176,56 @@ export default function Student({params}) {
 
             {/* Main Content - Questions Take Center Stage */}
             <div className="container mx-auto px-4 py-8">
-                
-              
 
                 {/* Main Question Area - Takes up most of the screen */}
                 <div className="min-h-[70vh]">
-                    {questions.length > 0 && questions[currentIndex] ? (
+                    {TestEnded ? (
+                        // Test Ended UI
+                        <div className="bg-white rounded-lg shadow-lg h-full flex items-center justify-center">
+                            <div className="text-center py-12">
+                                <div className="text-8xl mb-6">🎉</div>
+                                <h3 className="text-3xl font-bold text-gray-800 mb-4">
+                                    Test Session Completed!
+                                </h3>
+                                <p className="text-gray-600 text-lg mb-6 max-w-lg mx-auto">
+                                    Great job, {studentData?.name}! The instructor has ended the test session. 
+                                    Your responses have been successfully submitted and recorded.
+                                </p>
+                                
+                                <div className="bg-green-50 border border-green-200 rounded-lg p-6 max-w-md mx-auto mb-6">
+                                    <div className="text-green-800 font-semibold text-lg mb-3">📊 Session Summary</div>
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between text-green-700">
+                                            <span>Questions Answered:</span>
+                                            <span className="font-medium">{currentIndex} / {questions.length}</span>
+                                        </div>
+                                        <div className="flex justify-between text-green-700">
+                                            <span>Room:</span>
+                                            <span className="font-medium">{currentRoomID}</span>
+                                        </div>
+                                        <div className="flex justify-between text-green-700">
+                                            <span>Status:</span>
+                                            <span className="font-medium">✅ Complete</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-col space-y-3 max-w-md mx-auto">
+                                    <div className="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg text-sm font-medium">
+                                        📈 Results will be available from your instructor
+                                    </div>
+                                    <div className="bg-purple-100 text-purple-800 px-4 py-2 rounded-lg text-sm font-medium">
+                                        💾 All answers have been safely saved
+                                    </div>
+                                </div>
+                                
+                                <div className="mt-8 text-sm text-gray-500">
+                                    Thank you for participating in the test session!
+                                </div>
+                            </div>
+                        </div>
+                    ) : questions.length > 0 && questions[currentIndex] ? (
+                        // Active Question UI
                         <div className="bg-white rounded-lg shadow-lg h-full">
                             <div className="p-6 border-b border-gray-200">
                                 <div className="flex items-center justify-between">
@@ -203,6 +258,7 @@ export default function Student({params}) {
                             </div>
                         </div>
                     ) : (
+                        // Waiting/Not Connected UI
                         <div className="bg-white rounded-lg shadow-lg h-full flex items-center justify-center">
                             <div className="text-center py-12">
                                 <div className="text-8xl mb-6">📚</div>
@@ -228,6 +284,7 @@ export default function Student({params}) {
                     )}
                 </div>
             </div>
+            <Dashboard />
 
             {/* Join Room Modal */}
             <JoinRoomModal
