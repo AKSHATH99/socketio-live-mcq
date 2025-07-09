@@ -24,6 +24,7 @@ export default function Student({ params }) {
     const [TestEnded, setTestEnded] = useState(false);
     const [studentTests, setStudentTests] = useState([]);
     const [studentTestsWithPerformance, setStudentTestsWithPerformance] = useState([]);
+    const [openLiveTestModal, setOpenLiveTestModal] = useState(false);
 
     useEffect(() => {
         console.log(studentData)
@@ -122,6 +123,7 @@ export default function Student({ params }) {
             if (receivedQuestions.length > 0) {
                 setQuestions(receivedQuestions);
                 setCurrentIndex(0);
+                setOpenLiveTestModal(true);
             } else {
                 console.warn("⚠️ No questions received");
             }
@@ -232,53 +234,7 @@ export default function Student({ params }) {
             {/* Main Content - Questions */}
             <div className="max-w-7xl mx-auto px-6 py-8">
                 <div className="min-h-[70vh]">
-                    {TestEnded ? (
-                        // ✅ Test Ended UI
-                        <div className="bg-white rounded-lg shadow-lg h-full flex items-center justify-center">
-                            <div className="text-center py-12">
-                                <div className="text-8xl mb-6">🎉</div>
-                                <h3 className="text-3xl font-bold text-slate-900 mb-4">
-                                    Test Session Completed!
-                                </h3>
-                                <p className="text-slate-600 text-lg mb-6 max-w-lg mx-auto">
-                                    Great job, {studentData?.name}! The instructor has ended the test session.
-                                    Your responses have been successfully submitted and recorded.
-                                </p>
-
-                                <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-6 max-w-md mx-auto mb-6">
-                                    <div className="text-emerald-800 font-semibold text-lg mb-3">📊 Session Summary</div>
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between text-emerald-700">
-                                            <span>Questions Answered:</span>
-                                            <span className="font-medium">{currentIndex} / {questions.length}</span>
-                                        </div>
-                                        <div className="flex justify-between text-emerald-700">
-                                            <span>Room:</span>
-                                            <span className="font-medium">{currentRoomID}</span>
-                                        </div>
-                                        <div className="flex justify-between text-emerald-700">
-                                            <span>Status:</span>
-                                            <span className="font-medium">✅ Complete</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="flex flex-col space-y-3 max-w-md mx-auto">
-                                    <div className="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg text-sm font-medium">
-                                        📈 Results will be available from your instructor
-                                    </div>
-                                    <div className="bg-purple-100 text-purple-800 px-4 py-2 rounded-lg text-sm font-medium">
-                                        💾 All answers have been safely saved
-                                    </div>
-                                </div>
-
-                                <div className="mt-8 text-sm text-slate-500">
-                                    Thank you for participating in the test session!
-                                </div>
-                            </div>
-                        </div>
-                    ) : (questions.length > 0 && questions[currentIndex] ? (
-                        // ✅ Active Question UI
+                    {openLiveTestModal && questions.length > 0 && questions[currentIndex] ? (
                         <div className="bg-white rounded-lg shadow-lg h-full">
                             <div className="p-6 border-b border-slate-200">
                                 <div className="flex items-center justify-between">
@@ -310,11 +266,14 @@ export default function Student({ params }) {
                                     studentId={studentId}
                                     studentName={studentName}
                                     TestEnded={TestEnded}
+                                    openLiveTestModal={openLiveTestModal}
+                                    setOpenLiveTestModal={setOpenLiveTestModal}
                                 />
                             </div>
                         </div>
-                    ) : null)}
+                    ) : null}
                 </div>
+
 
             </div>
 
