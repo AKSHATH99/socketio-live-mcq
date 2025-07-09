@@ -15,7 +15,7 @@ module.exports.StudentSignup = async (req, res) => {
     try {
         const { name, email, password } = req.body;
         if (!name || !email || !password) {
-            return res.status(400).json({message:"All fields are required"});
+            return res.status(400).json({ message: "All fields are required" });
         }
 
         const existingAccount = await prisma.student.findUnique({
@@ -24,7 +24,7 @@ module.exports.StudentSignup = async (req, res) => {
             }
         });
         if (existingAccount) {
-            return res.status(400).json({message:"Account already exists"});
+            return res.status(400).json({ message: "Account already exists" });
         }
 
         const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -39,7 +39,7 @@ module.exports.StudentSignup = async (req, res) => {
 
         const { password: _, ...studentWithoutPassword } = student;
         const token = generateToken(student.id);
-        
+
         // Set HTTP-only cookie
         res.cookie('jwt', token, {
             httpOnly: true,
@@ -66,7 +66,7 @@ module.exports.StudentLogin = async (req, res) => {
     try {
         const { email, password } = req.body;
         if (!email || !password) {
-            return res.status(400).json({message:"All fields are required"});
+            return res.status(400).json({ message: "All fields are required" });
         }
 
         const student = await prisma.student.findUnique({
@@ -75,17 +75,17 @@ module.exports.StudentLogin = async (req, res) => {
             }
         });
         if (!student) {
-            return res.status(400).json({message:"Invalid email or password"});
+            return res.status(400).json({ message: "Invalid email or password" });
         }
 
         const isPasswordValid = await bcrypt.compare(password, student.password);
         if (!isPasswordValid) {
-            return res.status(400).json({message:"Invalid email or password"});
+            return res.status(400).json({ message: "Invalid email or password" });
         }
 
         const { password: _, ...studentWithoutPassword } = student;
         const token = generateToken(student.id);
-        
+
         // Set HTTP-only cookie
         res.cookie('jwt', token, {
             httpOnly: true,
@@ -106,14 +106,14 @@ module.exports.StudentLogin = async (req, res) => {
             error: process.env.NODE_ENV === 'development' ? error.message : undefined
         });
     }
-}   
+}
 
 
 module.exports.studentDetailsById = async (req, res) => {
     try {
         const { id } = req.body;
         if (!id) {
-            return res.status(400).json({message:"All fields are required"});
+            return res.status(400).json({ message: "All fields are required" });
         }
 
         const student = await prisma.student.findUnique({
@@ -122,7 +122,7 @@ module.exports.studentDetailsById = async (req, res) => {
             }
         });
         if (!student) {
-            return res.status(400).json({message:"Invalid id"});
+            return res.status(400).json({ message: "Invalid id" });
         }
 
         const { password: _, ...studentWithoutPassword } = student;
@@ -138,3 +138,145 @@ module.exports.studentDetailsById = async (req, res) => {
         });
     }
 }
+
+module.exports.fetchStudentTests = async (req, res) => {
+    try {
+        const { id } = req.body;
+        if (!id) {
+            return res.status(400).json({ message: "All fields are required" });
+        }
+
+        // Method 1: Using distinct to get unique test IDs, then fetch full test details
+        const studentTests = await prisma.testResult.findMany({
+            where: {
+                studentId: id
+            },
+            select: {
+                testId: true,
+                test: {
+                    select: {
+                        id: true,
+                        title: true,
+                        description: true,
+                        createdAt: true,
+                        teacherId: true,
+                        teacher: {
+                            select: {
+                                name: true,
+                                email: true
+                            }
+                        }
+                    }
+                }
+            },
+            distinct: ['testId'], // This ensures we get unique test IDs only
+            orderBy: {
+                timestamp: 'desc' // Most recently attended tests first
+            }
+        });
+
+        if (!studentTests || studentTests.length === 0) {
+            return res.status(404).json({ message: "No tests found for this student" });
+        }
+
+        // Extract just the test details (removing the testId wrapper)
+        const tests = studentTests.map(result => result.test);
+
+        return res.status(200).json({
+            message: "Tests fetched successfully",
+            tests: tests,
+            count: tests.length
+        });
+
+    } catch (error) {
+        console.error('Error fetching student tests:', error);
+        return res.status(500).json({
+            message: "Internal Server Error",
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+}
+
+module.exports.fetchStudentTestsWithPerformance = async (req, res) => {
+  try {
+    const { id } = req.body;
+    if (!id) {
+      return res.status(400).json({ message: "Student ID is required" });
+    }
+
+    // Step 1: Fetch all results for the student
+    const results = await prisma.testResult.findMany({
+      where: { studentId: id },
+      select: {
+        testId: true,
+        isCorrect: true
+      }
+    });
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: "No test results found" });
+    }
+
+    // Step 2: Group results by testId and calculate performance
+    const performanceByTest = {};
+    for (const result of results) {
+      const testId = result.testId;
+      if (!performanceByTest[testId]) {
+        performanceByTest[testId] = {
+          total: 0,
+          correct: 0
+        };
+      }
+      performanceByTest[testId].total++;
+      if (result.isCorrect) {
+        performanceByTest[testId].correct++;
+      }
+    }
+
+    const testIds = Object.keys(performanceByTest);
+
+    // Step 3: Fetch test details
+    const tests = await prisma.test.findMany({
+      where: { id: { in: testIds } },
+      include: {
+        teacher: {
+          select: {
+            name: true,
+            email: true
+          }
+        },
+        questions: {
+          select: {
+            id: true
+          }
+        }
+      }
+    });
+
+    // Step 4: Merge performance data
+    const testsWithPerformance = tests.map(test => {
+      const perf = performanceByTest[test.id];
+      return {
+        ...test,
+        performance: {
+          questionsAttempted: perf.total,
+          correctAnswers: perf.correct,
+          totalQuestions: test.questions.length,
+          score: ((perf.correct / perf.total) * 100).toFixed(2)
+        }
+      };
+    });
+
+    return res.status(200).json({
+      message: "Tests fetched successfully",
+      tests: testsWithPerformance,
+      count: testsWithPerformance.length
+    });
+  } catch (error) {
+    console.error('Error fetching student tests:', error);
+    return res.status(500).json({
+      message: "Internal Server Error",
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};

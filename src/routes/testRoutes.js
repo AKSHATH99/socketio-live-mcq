@@ -4,7 +4,7 @@ const { createTest, fetchTests , fetchTestByTeacherID ,fetchTestDetails} = requi
 const { addQuestionToTest, getQuestionsByTestId } = require('../controllers/questionController');
 const {addTestResult, getTestResults, getLeaderBoard , getLiveLeaderBoard ,getTestResultsDetailed} = require('../controllers/testResultController.js');
 const {TeacherSignup , TeacherLogin} = require('../controllers/TeacherControllers.js');
-const {StudentSignup , StudentLogin, studentDetailsById} = require('../controllers/StudentController.js');
+const {StudentSignup , StudentLogin, studentDetailsById, fetchStudentTests, fetchStudentTestsWithPerformance} = require('../controllers/StudentController.js');
 const {sendOTP, verifyOTP} = require('../controllers/authVerify/OtpControllers.js')
 
 
@@ -38,8 +38,9 @@ module.exports = function(io) {
   router.post('/get-live-leaderboard', getLiveLeaderBoard)
   router.post('/get-teacher-tests',fetchTestByTeacherID)
   router.post('/get-test',fetchTestDetails)
+  router.post('/get-student-tests',fetchStudentTests)
+  router.post('/get-student-tests-with-performance',fetchStudentTestsWithPerformance)
   router.use(protectStudent); // All routes after this will be for student to pass through middleware
-  
 
   return router;
 };
