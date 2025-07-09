@@ -4,7 +4,9 @@ import { io } from "socket.io-client";
 import LiveQuestion from "@/controllers/DisplayQuestionBox";
 import JoinRoomModal from "@/components/StudentInterface/JoinRoom";
 import Dashboard from "@/components/StudentInterface/Dashboard";
-export default function Student({params}) {
+import { Trophy, Target, BookOpen, Calendar, User, Award } from "lucide-react";
+
+export default function Student({ params }) {
 
     const studentId = params.slug;
     const [roomId, setRoomId] = useState("");
@@ -19,11 +21,13 @@ export default function Student({params}) {
     const [isJoining, setIsJoining] = useState(false);
     const [showJoinModal, setShowJoinModal] = useState(false);
     const [studentName, setStudentName] = useState("");
-    const [TestEnded , setTestEnded] = useState(false);
+    const [TestEnded, setTestEnded] = useState(false);
+    const [studentTests, setStudentTests] = useState([]);
+    const [studentTestsWithPerformance, setStudentTestsWithPerformance] = useState([]);
 
-    useEffect(()=>{
+    useEffect(() => {
         console.log(studentData)
-    },[studentData])
+    }, [studentData])
 
     const getStudentDetailsById = async () => {
         try {
@@ -42,6 +46,11 @@ export default function Student({params}) {
             console.log("✅ Fetched student data:", data.student.id);
             setStudentData(data.student);
             setStudentName(data.student.name);
+
+            // Fetch student tests
+            await fetchStudentTests(data.student.id);
+            // Fetch student tests with performance
+            await fetchStudentTestsWithPerformance(data.student.id);
         } catch (error) {
             console.error("❌ Error fetching student details:", error);
         } finally {
@@ -49,7 +58,41 @@ export default function Student({params}) {
         }
     }
 
-    const [currentRoomID, setCurrentRoomID] = useState("")
+    const [currentRoomID, setCurrentRoomID] = useState("");
+
+    const fetchStudentTests = async (studentId) => {
+        try {
+            const response = await fetch('http://localhost:3000/api/get-student-tests', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ id: studentId }),
+            });
+            const data = await response.json();
+            console.log('Student Tests:', data);
+            setStudentTests(data);
+        } catch (error) {
+            console.error('Error fetching student tests:', error);
+        }
+    };
+
+    const fetchStudentTestsWithPerformance = async (studentId) => {
+        try {
+            const response = await fetch('http://localhost:3000/api/get-student-tests-with-performance', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ id: studentId }),
+            });
+            const data = await response.json();
+            console.log('Student Tests with Performance:', data);
+            setStudentTestsWithPerformance(data);
+        } catch (error) {
+            console.error('Error fetching student tests with performance:', error);
+        }
+    };
 
     useEffect(() => {
         getStudentDetailsById();
@@ -122,8 +165,6 @@ export default function Student({params}) {
         socketRef.current.emit("answer-validate", data);
     }
 
-
-
     if (isLoading) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
@@ -137,21 +178,32 @@ export default function Student({params}) {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-
-
-            {/* Header with Room Status */}
-            <div className="bg-white shadow-sm border-b border-gray-200">
-                <div className="container mx-auto px-4 py-4">
+            {/* Header */}
+            <div className="bg-white shadow-sm border-b border-slate-200">
+                <div className="max-w-7xl mx-auto px-6 py-8">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center">
-                            <h1 className="text-2xl font-bold text-gray-800 mr-6">
-                                Welcome, {studentData?.name}! 👋
-                            </h1>
+                        <div>
+                            <h1 className="text-3xl font-bold text-slate-900">Student Dashboard</h1>
+                            <p className="text-slate-600 mt-1">Track your learning progress and performance</p>
+                        </div>
+                        <div className="flex items-center space-x-2 bg-slate-100 px-4 py-2 rounded-full">
+                            <User className="w-5 h-5 text-slate-600" />
+                            <span className="text-sm font-medium text-slate-700">Welcome {studentData?.name}!</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Room Status and Join Room Section */}
+            <div className="bg-white shadow-sm border-b border-slate-200">
+                <div className="max-w-7xl mx-auto px-6 py-4">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
                             {/* Room Status Badge */}
                             <div className="flex items-center">
                                 {currentRoomID ? (
-                                    <div className="flex items-center bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
-                                        <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
+                                    <div className="flex items-center bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-sm font-medium">
+                                        <div className="w-2 h-2 bg-emerald-500 rounded-full mr-2 animate-pulse"></div>
                                         Room: {currentRoomID}
                                     </div>
                                 ) : (
@@ -162,11 +214,11 @@ export default function Student({params}) {
                                 )}
                             </div>
                         </div>
-                        
+
                         {/* Join Room Button */}
-                        <button 
+                        <button
                             onClick={() => setShowJoinModal(true)}
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center"
+                            className="bg-slate-900 hover:bg-slate-800 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center"
                         >
                             {currentRoomID ? 'Change Room' : 'Join Room'}
                         </button>
@@ -174,36 +226,37 @@ export default function Student({params}) {
                 </div>
             </div>
 
-            {/* Main Content - Questions Take Center Stage */}
-            <div className="container mx-auto px-4 py-8">
+            {/* Dashboard */}
+            <Dashboard studentTestData={studentTests} studentPerformanceData={studentTestsWithPerformance} />
 
-                {/* Main Question Area - Takes up most of the screen */}
+            {/* Main Content - Questions */}
+            <div className="max-w-7xl mx-auto px-6 py-8">
                 <div className="min-h-[70vh]">
                     {TestEnded ? (
-                        // Test Ended UI
+                        // ✅ Test Ended UI
                         <div className="bg-white rounded-lg shadow-lg h-full flex items-center justify-center">
                             <div className="text-center py-12">
                                 <div className="text-8xl mb-6">🎉</div>
-                                <h3 className="text-3xl font-bold text-gray-800 mb-4">
+                                <h3 className="text-3xl font-bold text-slate-900 mb-4">
                                     Test Session Completed!
                                 </h3>
-                                <p className="text-gray-600 text-lg mb-6 max-w-lg mx-auto">
-                                    Great job, {studentData?.name}! The instructor has ended the test session. 
+                                <p className="text-slate-600 text-lg mb-6 max-w-lg mx-auto">
+                                    Great job, {studentData?.name}! The instructor has ended the test session.
                                     Your responses have been successfully submitted and recorded.
                                 </p>
-                                
-                                <div className="bg-green-50 border border-green-200 rounded-lg p-6 max-w-md mx-auto mb-6">
-                                    <div className="text-green-800 font-semibold text-lg mb-3">📊 Session Summary</div>
+
+                                <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-6 max-w-md mx-auto mb-6">
+                                    <div className="text-emerald-800 font-semibold text-lg mb-3">📊 Session Summary</div>
                                     <div className="space-y-2">
-                                        <div className="flex justify-between text-green-700">
+                                        <div className="flex justify-between text-emerald-700">
                                             <span>Questions Answered:</span>
                                             <span className="font-medium">{currentIndex} / {questions.length}</span>
                                         </div>
-                                        <div className="flex justify-between text-green-700">
+                                        <div className="flex justify-between text-emerald-700">
                                             <span>Room:</span>
                                             <span className="font-medium">{currentRoomID}</span>
                                         </div>
-                                        <div className="flex justify-between text-green-700">
+                                        <div className="flex justify-between text-emerald-700">
                                             <span>Status:</span>
                                             <span className="font-medium">✅ Complete</span>
                                         </div>
@@ -218,73 +271,52 @@ export default function Student({params}) {
                                         💾 All answers have been safely saved
                                     </div>
                                 </div>
-                                
-                                <div className="mt-8 text-sm text-gray-500">
+
+                                <div className="mt-8 text-sm text-slate-500">
                                     Thank you for participating in the test session!
                                 </div>
                             </div>
                         </div>
-                    ) : questions.length > 0 && questions[currentIndex] ? (
-                        // Active Question UI
+                    ) : (questions.length > 0 && questions[currentIndex] ? (
+                        // ✅ Active Question UI
                         <div className="bg-white rounded-lg shadow-lg h-full">
-                            <div className="p-6 border-b border-gray-200">
+                            <div className="p-6 border-b border-slate-200">
                                 <div className="flex items-center justify-between">
-                                    <h2 className="text-2xl font-bold text-gray-800">
+                                    <h2 className="text-2xl font-bold text-slate-900">
                                         Question {currentIndex + 1}
                                     </h2>
-                                    <div className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-medium">
-                                        {questions.length > 1 ? `${questions.length - currentIndex - 1} remaining` : 'Last question'}
+                                    <div className="bg-slate-100 text-slate-800 px-3 py-1 rounded-full text-sm font-medium">
+                                        {questions.length - currentIndex - 1 > 0
+                                            ? `${questions.length - currentIndex - 1} remaining`
+                                            : 'Last question'}
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div className="p-6">
                                 <LiveQuestion
                                     question={questions[currentIndex]}
                                     onAnswer={(data) => {
                                         console.log("✅ Parent received answer", data);
                                         socketRef.current.emit("answer-validate", data);
-                                        // advance to next question
+
+                                        // Move to next question if available
                                         if (currentIndex + 1 < questions.length) {
                                             setCurrentIndex(currentIndex + 1);
                                         } else {
                                             console.log("✅ All questions completed");
                                         }
-                                        
                                     }}
-                                    studentId = {studentId}
-                                    studentName = {studentName}
+                                    studentId={studentId}
+                                    studentName={studentName}
+                                    TestEnded={TestEnded}
                                 />
                             </div>
                         </div>
-                    ) : (
-                        // Waiting/Not Connected UI
-                        <div className="bg-white rounded-lg shadow-lg h-full flex items-center justify-center">
-                            <div className="text-center py-12">
-                                <div className="text-8xl mb-6">📚</div>
-                                <h3 className="text-2xl font-bold text-gray-800 mb-4">
-                                    {currentRoomID ? "Ready to Learn!" : "Join a Room to Get Started"}
-                                </h3>
-                                <p className="text-gray-600 text-lg mb-6 max-w-md mx-auto">
-                                    {currentRoomID ? 
-                                        "You're all set! Your instructor will send questions when the session begins." : 
-                                        "Connect to your learning session by joining a room with the code provided by your instructor."
-                                    }
-                                </p>
-                                {!currentRoomID && (
-                                    <button 
-                                        onClick={() => setShowJoinModal(true)}
-                                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200 text-lg"
-                                    >
-                                        Join Room Now
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                    )}
+                    ) : null)}
                 </div>
+
             </div>
-            <Dashboard />
 
             {/* Join Room Modal */}
             <JoinRoomModal
