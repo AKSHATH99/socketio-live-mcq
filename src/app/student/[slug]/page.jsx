@@ -25,6 +25,8 @@ export default function Student({ params }) {
     const [studentTests, setStudentTests] = useState([]);
     const [studentTestsWithPerformance, setStudentTestsWithPerformance] = useState([]);
     const [openLiveTestModal, setOpenLiveTestModal] = useState(false);
+    const [studentStatus , setStudentStatus]  = useState(false)
+
 
     useEffect(() => {
         console.log(studentData)
@@ -95,6 +97,7 @@ export default function Student({ params }) {
         }
     };
 
+    //SOCKET IO 
     useEffect(() => {
         getStudentDetailsById();
         const alreadyjoined = localStorage.getItem("roomid");
@@ -135,6 +138,7 @@ export default function Student({ params }) {
             // setIsTestLive(false);
             setTestEnded(true);
         });
+
         return () => {
             socket.disconnect()
         }
@@ -145,11 +149,17 @@ export default function Student({ params }) {
         console.log("Student joining the room ", roomCode)
         setIsJoining(true);
         try {
-            const joined = await socketRef.current.emit('join-room', roomCode);
+            const joined = await socketRef.current.emit('join-room', roomCode, studentId, 'student');
             if (joined) {
                 setCurrentRoomID(roomCode);
                 setShowJoinModal(false);
                 console.log("Joined hahaha")
+
+                //adding to list of students 
+                socketRef.current.emit('student-ready', { roomId: roomCode, studentName: studentName });
+                setStudentStatus(true)
+                
+
             }
         } catch (error) {
             console.error("Failed to join room:", error);
@@ -214,6 +224,10 @@ export default function Student({ params }) {
                                         Not in room
                                     </div>
                                 )}
+                            </div>
+
+                            <div>
+                                Student Status: {studentStatus}
                             </div>
                         </div>
 

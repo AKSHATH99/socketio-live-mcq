@@ -19,17 +19,24 @@ const TimerBox = ({ time, isSelected, onClick }) => {
 
 export default function InputBox({ index, question, options, onQuestionChange, onOptionChange, timer, onTimerChange, answer, onAnswerChange, onSubmit }) {
   const [openCustomTimer, setOpenCustomTimer] = useState(false);
+  const [selectedAnswerIndex, setSelectedAnswerIndex] = useState(null);
   const timerValues = [5, 10, 15, 20];
   
   const handleTimerSelect = (selectedTime) => {
     onTimerChange(index, selectedTime);
-    setOpenCustomTimer(false); // Close custom timer when preset is selected
+    setOpenCustomTimer(false);
   };
 
   const handleCustomTimerClick = () => {
     setOpenCustomTimer(true);
-    // Clear the preset timer selection when custom is opened
     onTimerChange(index, '');
+  };
+
+  const handleAnswerSelect = (optionIndex, optionValue) => {
+    if (optionValue.trim() === '') return;
+    
+    setSelectedAnswerIndex(optionIndex);
+    onAnswerChange(index, optionValue);
   };
 
   return (
@@ -99,92 +106,55 @@ export default function InputBox({ index, question, options, onQuestionChange, o
         </div>
       )}
 
-      {/* Options Section
+      {/* Options Section */}
       <div className="mb-8">
-        <label className="block text-lg font-semibold text-gray-700 mb-3">
+        <label className="block text-lg font-semibold text-gray-700 my-3">
           Answer Options
         </label>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <p className="text-sm text-gray-500 mb-2">Write down options and click on the green tick to mark the answer to the question</p>
+        <div className="grid grid-cols-1 gap-4">
           {options.map((opt, j) => (
-            <div key={j} className="relative">
-              <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">
+            <div key={j} className={`relative flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${
+              selectedAnswerIndex === j && opt.trim() !== '' 
+                ? 'border-green-500 bg-green-50' 
+                : 'border-gray-300'
+            }`}>
+              <span className="text-gray-500 font-medium min-w-[20px]">
                 {String.fromCharCode(65 + j)}.
               </span>
               <input
                 placeholder={`Option ${String.fromCharCode(65 + j)}`}
-                className="w-full h-12 pl-12 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all text-lg"
+                className="flex-1 h-10 px-3 py-2 border border-gray-300 rounded focus:border-blue-500 focus:ring-1 focus:ring-blue-200 focus:outline-none transition-all"
                 value={opt}
                 onChange={(e) => onOptionChange(index, j, e.target.value)}
               />
+              <button
+                type="button"
+                onClick={() => handleAnswerSelect(j, opt)}
+                disabled={opt.trim() === ''}
+                className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${
+                  selectedAnswerIndex === j && opt.trim() !== ''
+                    ? 'border-green-500 bg-green-500 text-white'
+                    : opt.trim() !== ''
+                    ? 'border-gray-300 hover:border-green-400 hover:bg-green-50'
+                    : 'border-gray-200 bg-gray-100 cursor-not-allowed'
+                }`}
+              >
+                {selectedAnswerIndex === j && opt.trim() !== '' && (
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                )}
+              </button>
             </div>
           ))}
         </div>
-      </div> */}
-
-      {/* Answer Section */}
-      {/* <div className="mb-4">
-        <label className="block text-lg font-semibold text-gray-700 mb-3">
-          Correct Answer
-        </label>
-        <input
-          className="w-full h-12 px-4 py-3 border-2 border-green-300 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 focus:outline-none transition-all text-lg bg-green-50"
-          placeholder="Enter the correct answer..."
-          value={answer}
-          onChange={(e) => onAnswerChange(index, e.target.value)}
-        />
-        <p className="text-sm text-gray-500 mt-2">
-          Enter the exact text that matches one of the options above
-        </p>
-      </div> */}
-      {/* Options Section */}
-<div className="mb-8">
-  <label className="block text-lg font-semibold text-gray-700 my-3">
-    Answer Options
-  </label>
-  <p className="text-sm text-gray-500 mb-2">Write down options and click on the green tick to mark the answer to the question</p>
-  <div className="grid grid-cols-1 gap-4">
-    {options.map((opt, j) => (
-      <div key={j} className={`relative flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${
-        answer === opt && opt.trim() !== '' 
-          ? 'border-green-500 bg-green-50' 
-          : 'border-gray-300'
-      }`}>
-        <span className="text-gray-500 font-medium min-w-[20px]">
-          {String.fromCharCode(65 + j)}.
-        </span>
-        <input
-          placeholder={`Option ${String.fromCharCode(65 + j)}`}
-          className="flex-1 h-10 px-3 py-2 border border-gray-300 rounded focus:border-blue-500 focus:ring-1 focus:ring-blue-200 focus:outline-none transition-all"
-          value={opt}
-          onChange={(e) => onOptionChange(index, j, e.target.value)}
-        />
-        <button
-          type="button"
-          onClick={() => onAnswerChange(index, opt)}
-          disabled={opt.trim() === ''}
-          className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${
-            answer === opt && opt.trim() !== ''
-              ? 'border-green-500 bg-green-500 text-white'
-              : opt.trim() !== ''
-              ? 'border-gray-300 hover:border-green-400 hover:bg-green-50'
-              : 'border-gray-200 bg-gray-100 cursor-not-allowed'
-          }`}
-        >
-          {answer === opt && opt.trim() !== '' && (
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-            </svg>
-          )}
-        </button>
+        {selectedAnswerIndex !== null && options[selectedAnswerIndex]?.trim() && (
+          <p className="text-sm text-green-600 mt-2 font-medium">
+            ✓ Correct answer: {String.fromCharCode(65 + selectedAnswerIndex)}. {options[selectedAnswerIndex]}
+          </p>
+        )}
       </div>
-    ))}
-  </div>
-  {answer && (
-    <p className="text-sm text-green-600 mt-2 font-medium">
-      ✓ Correct answer: {answer}
-    </p>
-  )}
-</div>
     </div>
   );
 }

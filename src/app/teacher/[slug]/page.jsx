@@ -16,6 +16,28 @@ export default function Teacher({ params }) {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [teacherData, setTeacherData] = useState(null);
+  const [fetchedTest, setFetchedTest] = useState(null);
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [roomId, setRoomId] = useState("");
+
+  const [openCreateRoomModal, setOpenCreateRoomModal] = useState(false);
+  const [openCreateTestModal, setOpenCreateTestModal] = useState(false);
+  const [allStudentsReady, setAllStudentsReady] = useState()
+  const [liveStudentList, setLiveStudentList] = useState([])
+
+  const [questions, setQuestions] = useState([
+    {
+      question: "",
+      options: ["", "", "", ""]
+    }
+  ]);
+
+  const [testMeta, setTestMeta] = useState({
+    title: "",
+    description: "",
+    teacherId: teacherId
+  });
+
 
   // Fetch teacher data when component mounts
   const fetchTeacherData = async () => {
@@ -37,8 +59,6 @@ export default function Teacher({ params }) {
 
 
   useEffect(() => {
-
-
     if (teacherId) {
       fetchTests();
       fetchTeacherData();
@@ -46,24 +66,6 @@ export default function Teacher({ params }) {
   }, [teacherId]);
 
 
-  const [questions, setQuestions] = useState([
-    {
-      question: "",
-      options: ["", "", "", ""]
-    }
-  ]);
-
-  const [testMeta, setTestMeta] = useState({
-    title: "",
-    description: "",
-    teacherId: teacherId
-  });
-  const [fetchedTest, setFetchedTest] = useState(null);
-  const [leaderboard, setLeaderboard] = useState([]);
-  const [roomId, setRoomId] = useState("");
-
-  const [openCreateRoomModal, setOpenCreateRoomModal] = useState(false);
-  const [openCreateTestModal, setOpenCreateTestModal] = useState(false);
 
 
   const createTest = async () => {
@@ -190,14 +192,35 @@ export default function Teacher({ params }) {
     socketRef.current = socket;
 
     socket.on('connect', () => {
-      console.log('connected from frontend', socket.id)
-    })
-
-
+      console.log('connected from frontend', socket.id);
+      // Join the room immediately after connection
+      if (roomId) {
+        socket.emit('join-room', roomId, teacherId, 'teacher');
+      }
+    });
 
     socket.on('receive-message', (data) => {
       console.log("📥 New message", data);
       setMessages((prev) => [...prev, data.message]);
+    });
+
+    socket.on('lobby-status', (data) => {
+      console.log("lobby status", data);
+      // Update your state here if needed
+      setLiveStudentList(data)
+    });
+
+    socket.on('all-students-ready', (data) => {
+      console.log("all students ready", data);
+      setAllStudentsReady(true);
+    })
+
+    // Handle reconnection
+    socket.on('reconnect', () => {
+      console.log('Reconnected to server');
+      if (roomId) {
+        socket.emit('join-room', roomId, teacherId, 'teacher');
+      }
     });
 
     return () => {
@@ -207,7 +230,7 @@ export default function Teacher({ params }) {
 
   const createRoom = () => {
     console.log("CREATING THE ROOM BROOOOOOOOOO", roomId);
-    socketRef.current.emit('join-room', roomId);
+    socketRef.current.emit('join-room', roomId, teacherId, 'teacher');
     socketRef.current.emit('send-message', {
       roomId: roomId,
       message: 'Hello quiz team'
@@ -232,113 +255,127 @@ export default function Teacher({ params }) {
 
 
   return (
-    <div className="text-red-700">
-      <p > Hey Teacher , Welcome ! </p>
-      <br />
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
 
-      <button className="border px-2 py-1 ml-10 rounded-lg bg-black  text-white" onClick={() => { setOpenCreateRoomModal(true) }}>
-        +  Create room
-      </button>
-      {openCreateRoomModal && (
-        <CreateRoomModal
-          onCreateRoom={() => {
-            createRoom();
-            setOpenCreateRoomModal(false);
-          }}
-          roomId={roomId}
-          setRoomId={setRoomId}
-          onClose={() => setOpenCreateRoomModal(false)}
-        />
-      )}
-      <button className="border px-2 py-1 ml-10 rounded-lg bg-black  text-white" onClick={() => { setOpenCreateTestModal(true) }}>
-        +  Create test
-      </button>
-
-      {openCreateTestModal && (
-        <CreateTestModal
-          onCreateTest={() => {
-            createTest();
-            setOpenCreateTestModal(false);
-          }}
-          testMeta={testMeta}
-          setTestMeta={setTestMeta}
-          onClose={() => setOpenCreateTestModal(false)}
-        />
-      )}
-
-      <p>Type you message here to send to the group</p>
-
-      <input value={message} type="text" onChange={(e) => { setMessage(e.target.value) }} />
-
-
-      <button onClick={() => { sendMessage() }} >
-        Send message
-      </button>
-
-      <div>
-        <h3>Messages:</h3>
-        <ul>
-          {messages.map((msg, idx) => (
-            <li key={idx}>{msg}</li>
-          ))}
-        </ul>
-      </div>
-
-      <div>
-        {/* <input
-          type="text"
-          placeholder="Test Title"
-          value={testMeta.title}
-          onChange={(e) => setTestMeta({ ...testMeta, title: e.target.value })}
-        />
-        <input
-          type="text"
-          placeholder="Test Description"
-          value={testMeta.description}
-          onChange={(e) => setTestMeta({ ...testMeta, description: e.target.value })}
-        /> */}
-
-        {/* <div className="mt-10 p-4 border border-gray-500 rounded">
-          <h2 className="text-black font-bold text-lg mb-4">Fetched Test Data:</h2>
-
-          {fetchedTest && fetchedTest.length > 0 ? (
-            <div className="space-y-4">
-              {fetchedTest.map((test) => (
-                <div key={test.id} className="p-4 border border-gray-300 rounded text-black">
-                  <h3 className="font-semibold text-lg">{test.title}</h3>
-                  <p className="text-sm text-gray-700">{test.description}</p>
-                  <p className="text-xs text-gray-500 mt-1">Created At: {new Date(test.createdAt).toLocaleString()}</p>
-
-                  <button
-                    className="mt-2 bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
-                    onClick={() => startTest(test.id)}
-                  >
-                    ▶ Start Test
-                  </button>
-                </div>
-              ))}
+        {/* Header */}
+        <div className="bg-white rounded-lg shadow-sm border p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-semibold text-gray-900 mb-1">
+                Hey Teacher, Welcome!
+              </h1>
+              <p className="text-gray-600">Manage your classroom and assignments</p>
             </div>
-          ) : (
-            <p className="text-gray-700">No Test Created yet </p>
-          )}
-        </div> */}
-        <div className="mt-10 p-6 bg-white rounded-lg">
-          <h2 className="text-black font-bold text-xl mb-6">Your Tests</h2>
+            <div className="flex gap-3">
+              <button
+                className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors"
+                onClick={() => setOpenCreateRoomModal(true)}
+              >
+                + Create Room
+              </button>
+              <button
+                className="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors"
+                onClick={() => setOpenCreateTestModal(true)}
+              >
+                + Create Test
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Room Management */}
+        <div className="bg-white rounded-lg shadow-sm border p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Room Management</h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-gray-50 rounded-lg p-4 border">
+              <div className="flex items-center gap-2 mb-2">
+                <div className={`w-2 h-2 rounded-full ${allStudentsReady ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
+                <span className="text-sm font-medium text-gray-700">Student Status</span>
+              </div>
+              <div>
+                {Object.entries(liveStudentList).map(([key, value]) => (
+                  value ? (
+                    <li key={key}>
+                      <p className={`text-sm font-medium text-gray-700 ${value ? 'text-green-500' : 'text-yellow-500'}`}>{key}</p>
+                    </li>
+                  ) : null
+                ))}
+              </div>
+              <p className="text-sm text-gray-600">
+                {allStudentsReady ? "All students are ready" : "Waiting for students"}
+              </p>
+            </div>
+
+            <div className="bg-gray-50 rounded-lg p-4 border">
+              <div className="flex items-center gap-2 mb-2">
+                <div className={`w-2 h-2 rounded-full ${roomId ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                <span className="text-sm font-medium text-gray-700">Room Status</span>
+              </div>
+              <p className="text-sm text-gray-600">
+                {roomId ? `Joined: ${roomId}` : "Not Joined"}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Modals */}
+        {openCreateRoomModal && (
+          <CreateRoomModal
+            onCreateRoom={() => {
+              createRoom();
+              setOpenCreateRoomModal(false);
+            }}
+            roomId={roomId}
+            setRoomId={setRoomId}
+            onClose={() => setOpenCreateRoomModal(false)}
+          />
+        )}
+
+        {openCreateTestModal && (
+          <CreateTestModal
+            onCreateTest={() => {
+              createTest();
+              setOpenCreateTestModal(false);
+            }}
+            testMeta={testMeta}
+            setTestMeta={setTestMeta}
+            onClose={() => setOpenCreateTestModal(false)}
+          />
+        )}
+
+        {/* Tests Section */}
+        <div className="bg-white rounded-lg shadow-sm border p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-6">Your Tests</h2>
+
           {fetchedTest && fetchedTest.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {fetchedTest.map((test) => (
-                <div onClick={()=>{router.push(`/teacher/test/${test.id}`)}} key={test.id} className="bg-gray-50 p-4 rounded-lg hover:bg-gray-100 transition-colors">
+                <div
+                  key={test.id}
+                  className="bg-gray-50 border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+                  onClick={() => { router.push(`/teacher/test/${test.id}`) }}
+                >
                   <div className="flex flex-col h-full">
-                    <h3 className="font-semibold text-base text-black mb-2 line-clamp-2">{test.title}</h3>
-                    <p className="text-gray-700 text-sm mb-3 flex-1 line-clamp-3">{test.description}</p>
+                    <h3 className="font-medium text-gray-900 mb-2 line-clamp-2">
+                      {test.title}
+                    </h3>
+                    <p className="text-sm text-gray-600 mb-4 flex-1 line-clamp-3">
+                      {test.description}
+                    </p>
                     <div className="mt-auto">
-                      <p className="text-xs text-gray-500 mb-3">Created: {new Date(test.createdAt).toLocaleDateString()}</p>
+                      <p className="text-xs text-gray-500 mb-3">
+                        Created: {new Date(test.createdAt).toLocaleDateString()}
+                      </p>
                       <button
-                        className="w-full bg-black text-white px-3 py-2 rounded text-sm hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
-                        onClick={() => startTest(test.id)}
+                        className="w-full bg-black text-white px-3 py-2 rounded text-sm hover:bg-gray-800 transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          startTest(test.id);
+                        }}
                       >
-                        <span>▶</span>
-                        Start Test
+                        ▶ Start Test
                       </button>
                     </div>
                   </div>
@@ -346,51 +383,55 @@ export default function Teacher({ params }) {
               ))}
             </div>
           ) : (
-            <div className="text-center py-8">
-              <p className="text-gray-500 text-lg">No tests created yet</p>
-              <p className="text-gray-400 text-sm mt-1">Create your first test to get started</p>
+            <div className="text-center py-12">
+              <p className="text-gray-500 mb-2">No tests created yet</p>
+              <p className="text-sm text-gray-400">Create your first test to get started</p>
             </div>
           )}
         </div>
 
+        {/* Communication Panel */}
+        <div className="bg-white rounded-lg shadow-sm border p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-6">Class Communication</h2>
 
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600">Type your message here to send to the group</p>
 
-      </div>
+            {/* Message Input */}
+            <div className="flex gap-3">
+              <input
+                type="text"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                placeholder="Type your message..."
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none"
+              />
+              <button
+                onClick={() => sendMessage()}
+                className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors"
+              >
+                Send
+              </button>
+            </div>
 
-
-
-      {/* <QuestionsInput questions={questions} setQuestions={setQuestions} /> */}
-
-
-      <button onClick={() => { sendQuestions() }} className="border border-green-600 bg-green-500 text-white m-10 p-3">
-        Send qustions
-      </button>
-
-      <p className="text-xl text-blue-200">LEADERBOARD</p>
-      <button className="border border-black rouded-lg mt-10" onClick={() => { fetchLeaderboard() }}> Refresh Leaderboard</button>
-      <div className="p-4">
-        <h1 className="text-xl font-bold mb-4">Leaderboard</h1>
-        {leaderboard.length > 0 ?
-          // <p>heyyy</p>
-          <table className="min-w-full border border-gray-300">
-            <thead>
-              <tr className="bg-gray-100 border-b">
-                <th className="text-left p-2 border-r">#</th>
-                <th className="text-left p-2 border-r">Student ID</th>
-                <th className="text-left p-2">Score</th>
-              </tr>
-            </thead>
-            <tbody>
-              {leaderboard.map((entry, index) => (
-                <tr key={entry.studentId} className="border-b">
-                  <td className="p-2 border-r">{index + 1}</td>
-                  <td className="p-2 border-r">{entry.studentId}</td>
-                  <td className="p-2">{entry.score}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          : "my"}
+            {/* Messages Display */}
+            <div className="bg-gray-50 rounded-lg p-4 border">
+              <h3 className="font-medium text-gray-900 mb-3">Messages:</h3>
+              <div className="max-h-64 overflow-y-auto space-y-2">
+                {messages.length > 0 ? (
+                  messages.map((msg, idx) => (
+                    <div key={idx} className="bg-white p-3 rounded border-l-4 border-black">
+                      <p className="text-sm text-gray-800">{msg}</p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-500 text-center py-8">No messages yet</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

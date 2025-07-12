@@ -1,5 +1,4 @@
 import { useState } from "react";
-// import InputBox from "../QuestionsInput/QuestionInputBox"; // Adjust path as needed
 import InputBox from "../QuestionInputBox";
 
 const AddQuestionModal = ({ testid, onClose }) => {
@@ -37,41 +36,58 @@ const AddQuestionModal = ({ testid, onClose }) => {
     };
 
     const addNewQuestion = () => {
-        setQuestions(prev => [...prev, { question: "", options: ["", "", "", ""], timer: "" }]);
+        setQuestions(prev => [...prev, { question: "", options: ["", "", "", ""], timer: "", answer: "" }]);
     };
 
     const handleDone = async () => {
         try {
-            const questionData = {
-                testId: testid,
-                question: questions[0].question,
-                options: questions[0].options,
-                answer: questions[0].answer,
-                timer: questions[0].timer || 0
-            };
+            // Validate that all questions have required fields
+            const incompleteQuestions = questions.filter(q => 
+                !q.question.trim() || 
+                !q.answer.trim() || 
+                q.options.every(opt => !opt.trim())
+            );
 
-            const response = await fetch('http://localhost:3000/api/add-question', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(questionData)
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to add question');
+            if (incompleteQuestions.length > 0) {
+                alert('Please fill in all required fields for each question (question text, at least one option, and correct answer).');
+                return;
             }
 
-            const result = await response.json();
-            console.log('Question added successfully:', result);
+            // Send all questions to the database
+            const promises = questions.map(async (question, index) => {
+                const questionData = {
+                    testId: testid,
+                    question: question.question,
+                    options: question.options,
+                    answer: question.answer,
+                    timer: question.timer || 0
+                };
+
+                const response = await fetch('http://localhost:3000/api/add-question', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(questionData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to add question ${index + 1}`);
+                }
+
+                return response.json();
+            });
+
+            // Wait for all questions to be added
+            const results = await Promise.all(promises);
+            console.log('All questions added successfully:', results);
             
             // Close the modal after successful submission
             onClose();
-            // Optional: Show success message to user
-            alert('Question added successfully!');
+            alert(`${questions.length} question(s) added successfully!`);
         } catch (error) {
-            console.error('Error adding question:', error);
-            alert('Failed to add question. Please try again.');
+            console.error('Error adding questions:', error);
+            alert('Failed to add questions. Please try again.');
         }
     };
 
