@@ -16,7 +16,7 @@ module.exports.TeacherSignup = async (req, res) => {
     try {
         const { name, email, password } = req.body;
         if (!name || !email || !password) {
-            return res.status(400).json({message:"All fields are required"});
+            return res.status(400).json({success: false,error:"All fields are required"});
         }
 
         const existingAccount = await prisma.teacher.findUnique({
@@ -25,7 +25,7 @@ module.exports.TeacherSignup = async (req, res) => {
             }
         });
         if (existingAccount) {
-            return res.status(400).json({message:"Account already exists"});
+            return res.status(400).json({success: false,error:"Account already exists"});
         }
 
         const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -57,7 +57,8 @@ module.exports.TeacherSignup = async (req, res) => {
     } catch (error) {
         console.error('Error creating teacher:', error);
         return res.status(500).json({
-            message: "Internal Server Error",
+            success: false,
+            error: "Internal Server Error",
             error: process.env.NODE_ENV === 'development' ? error.message : undefined
         });
     }
@@ -68,7 +69,7 @@ module.exports.TeacherLogin = async (req, res) => {
     try {
         const { email, password } = req.body;
         if (!email || !password) {
-            return res.status(400).json({message:"All fields are required"});
+            return res.status(400).json({success: false,error:"All fields are required"});
         }
 
         const teacher = await prisma.teacher.findUnique({
@@ -77,12 +78,12 @@ module.exports.TeacherLogin = async (req, res) => {
             }
         });
         if (!teacher) {
-            return res.status(400).json({message:"Invalid email or password"});
+            return res.status(400).json({success: false,error:"Invalid email or password"});
         }
 
         const isPasswordValid = await bcrypt.compare(password, teacher.password);
         if (!isPasswordValid) {
-            return res.status(400).json({message:"Invalid email or password"});
+            return res.status(400).json({success: false,error:"Invalid password"});
         }
 
         const { password: _, ...teacherWithoutPassword } = teacher;
@@ -104,7 +105,8 @@ module.exports.TeacherLogin = async (req, res) => {
     } catch (error) {
         console.error('Error logging in teacher:', error);
         return res.status(500).json({
-            message: "Internal Server Error",
+            success: false,
+            error: "Internal Server Error",
             error: process.env.NODE_ENV === 'development' ? error.message : undefined
         });
     }

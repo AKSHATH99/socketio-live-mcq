@@ -1,7 +1,8 @@
 // const redis = require('../../lib/redis.js');
 const { generateOTP } = require("../../utils/generateOTP.js");
 const sendMail = require("../../utils/sendOTp.js");
-const {Redis} = require('@upstash/redis')
+const { Redis } = require('@upstash/redis')
+const { prisma } = require('../../lib/prisma.js');
 
 const redis = new Redis({
   url: process.env.UPSTASH_REDIS_REST_URL,
@@ -12,9 +13,24 @@ const OtpControllers = {
   sendOTP: async (req, res) => {
     try {
       const { email } = req.body;
-      
+
       if (!email) {
-        return res.status(400).json({ message: 'Email is required' });
+        return res.status(400).json({ success: false, error: 'Email is required' });
+      }
+      const existingStudentAccount = await prisma.student.findUnique({
+        where: {
+          email
+        }
+      });
+
+      const existingTeacherAccount = await prisma.teacher.findUnique({
+        where: {
+          email
+        }
+      });
+
+      if (existingStudentAccount || existingTeacherAccount) {
+        return res.status(400).json({ success: false, error: "Account already exists. Please login." });
       }
 
       const otp = generateOTP();
@@ -27,29 +43,29 @@ const OtpControllers = {
         await redis.expire(throttleKey, 60); // Reset counter after 1 minute
       }
       if (attempts > 3) {
-        return res.status(429).json({ message: 'Too many OTP requests. Please try again later.' });
+        return res.status(429).json({ success: false, error: 'Too many OTP requests. Please try again later.' });
       }
-      
+
       const mailResult = await sendMail(email, otp);
 
       if (!mailResult || !mailResult.success) {
-        return res.status(500).json({ 
-          message: `Error sending OTP to ${email}`,
-          error: mailResult?.error || 'Unknown error'
+        return res.status(500).json({
+          success: false,
+          error: mailResult?.error || `Error sending OTP to ${email}`
         });
       }
 
-      return res.status(200).json({ 
+      return res.status(200).json({
         success: true,
         message: `OTP sent to ${email}`
       });
-      
+
     } catch (error) {
       console.error('Error in sendOTP:', error);
-      return res.status(500).json({ 
+      return res.status(500).json({
         success: false,
         message: 'Internal server error',
-        error: error.message 
+        error: error.message
       });
     }
   },
@@ -59,18 +75,18 @@ const OtpControllers = {
       const { email, otp } = req.body;
 
       if (!email || !otp) {
-        return res.status(400).json({ 
+        return res.status(400).json({
           success: false,
-          message: 'Email and OTP are required' 
+          message: 'Email and OTP are required'
         });
       }
 
       const redisOTP = await redis.get(email);
 
       if (!redisOTP) {
-        return res.status(400).json({ 
+        return res.status(400).json({
           success: false,
-          message: 'OTP has expired or is invalid' 
+          message: 'OTP has expired or is invalid'
         });
       }
       console.log("from redis", redisOTP, typeof redisOTP);
@@ -78,23 +94,23 @@ const OtpControllers = {
       // Convert both to strings for comparison to handle type differences
       if (String(redisOTP) === String(otp)) {
         await redis.del(email); // Remove the OTP after successful verification
-        return res.status(200).json({ 
+        return res.status(200).json({
           success: true,
-          message: 'OTP verification successful' 
+          message: 'OTP verification successful'
         });
       }
 
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        message: 'Invalid OTP' 
+        message: 'Invalid OTP'
       });
-      
+
     } catch (error) {
       console.error('Error in verifyOTP:', error);
-      return res.status(500).json({ 
+      return res.status(500).json({
         success: false,
         message: 'Internal server error',
-        error: error.message 
+        error: error.message
       });
     }
   }
