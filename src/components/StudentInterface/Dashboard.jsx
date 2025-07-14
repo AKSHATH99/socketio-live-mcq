@@ -105,11 +105,11 @@ export default function Dashboard({ studentTestData, studentPerformanceData }) {
     return 'bg-red-500';
   };
 
-  const averageScore = performanceData.tests.length > 0 
+  const averageScore = performanceData?.tests?.length > 0 
     ? (performanceData.tests.reduce((sum, test) => sum + parseFloat(test.performance.score), 0) / performanceData.tests.length).toFixed(1)
     : 0;
 
-  const totalQuestions = performanceData.tests.reduce((sum, test) => sum + test.performance.questionsAttempted, 0);
+  const totalQuestions = performanceData?.tests?.reduce((sum, test) => sum + test.performance.questionsAttempted, 0);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
@@ -168,7 +168,7 @@ export default function Dashboard({ studentTestData, studentPerformanceData }) {
               </div>
               
               <div className="space-y-4">
-                {testData.tests.map((test) => (
+                {testData?.tests?.map((test) => (
                   <div key={test.id} className="group border border-slate-200 rounded-xl p-4 hover:bg-slate-50 transition-colors cursor-pointer">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -205,7 +205,7 @@ export default function Dashboard({ studentTestData, studentPerformanceData }) {
               </div>
               
               <div className="space-y-6">
-                {performanceData.tests.map((test) => (
+                {performanceData?.tests?.map((test) => (
                   <div key={test.id} className="border border-slate-200 rounded-xl p-6 hover:shadow-sm transition-shadow">
                     <div className="flex items-start justify-between mb-4">
                       <div>

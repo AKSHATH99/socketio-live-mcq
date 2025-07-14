@@ -304,7 +304,7 @@ export default function Teacher({ params }) {
                 ))}
               </div>
               <p className="text-sm text-gray-600">
-                {allStudentsReady ? "All students are ready" : "Waiting for students"}
+                {allStudentsReady ? "All students are ready" : <p className="text-yellow-500" >Waiting for students</p>}
               </p>
             </div>
 
