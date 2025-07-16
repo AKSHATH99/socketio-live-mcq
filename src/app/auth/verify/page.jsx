@@ -99,7 +99,7 @@ export default function Auth() {
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 to-black p-4">
             <div className="bg-gray-800 border border-gray-600 rounded-lg shadow-2xl p-8 w-full max-w-md">
-                <div className="mb-8">
+                <div className="mb-6">
                     <h1 className="text-2xl font-semibold text-white mb-2 text-center">Email Verification</h1>
                     <p className="text-gray-400 text-sm text-center mb-6">Enter your email address to receive a verification code</p>
 
@@ -121,6 +121,10 @@ export default function Auth() {
                         >
                             {isLoading ? 'Sending...' : 'Send Verification Code'}
                         </button>
+                    </div>
+
+                    <div className="text-gray-500 text-center mt-6">
+                        <p>Already a member? <span onClick={() => router.push(`/${userType}/auth/signin`)} className="text-white cursor-pointer hover:underline">Login</span></p>
                     </div>
                 </div>
 
@@ -158,4 +162,4 @@ export default function Auth() {
             </div>
         </div>
     )
-}   
+}
