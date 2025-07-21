@@ -4,7 +4,7 @@ import { io } from "socket.io-client";
 import LiveQuestion from "@/controllers/DisplayQuestionBox";
 import JoinRoomModal from "@/components/StudentInterface/JoinRoom";
 import Dashboard from "@/components/StudentInterface/Dashboard";
-import { Trophy, Target, BookOpen, Calendar, User, Award } from "lucide-react";
+import { Trophy, Target, BookOpen, Calendar, User, Award, Megaphone } from "lucide-react";
 import { useSearchParams } from 'next/navigation';
 export default function Student({ params }) {
 
@@ -237,7 +237,7 @@ export default function Student({ params }) {
                                 )}
                             </div>
 
-                            <div>
+                            <div className="text-sm text-slate-600">
                                 Student Status: {studentStatus}
                             </div>
                         </div>
@@ -245,7 +245,7 @@ export default function Student({ params }) {
                         {/* Join Room Button */}
                         <button
                             onClick={() => setShowJoinModal(true)}
-                            className="bg-slate-900 hover:bg-slate-800 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center"
+                            className="bg-slate-900 hover:bg-slate-800 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
                         >
                             {currentRoomID ? 'Change Room' : 'Join Room'}
                         </button>
@@ -253,54 +253,91 @@ export default function Student({ params }) {
                 </div>
             </div>
 
+            {/* Announcements Section */}
+            {messages.length > 0 && (
+                <div className="bg-white shadow-sm border-b border-slate-200">
+                    <div className="max-w-7xl mx-auto px-6 py-4">
+                        <div className="bg-white rounded-lg border border-gray-300 shadow-sm">
+                            <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
+                                <div className="flex items-center space-x-3">
+                                    <Megaphone className="w-5 h-5 text-gray-700" />
+                                    <h3 className="font-semibold text-gray-900">Room Announcements</h3>
+                                    <span className="text-xs text-gray-600 bg-white px-2 py-1 rounded-full border border-gray-200">
+                                        {messages.length} announcement{messages.length !== 1 ? 's' : ''}
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="max-h-32 overflow-y-auto">
+                                <div className="p-4 space-y-2">
+                                    {messages.slice(-5).map((msg, idx) => (
+                                        <div
+                                            key={idx}
+                                            className="flex items-start space-x-3 bg-white rounded-lg p-3 border border-gray-200 hover:bg-gray-50 transition-colors"
+                                        >
+                                            <div className="flex-shrink-0 w-2 h-2 bg-gray-900 rounded-full mt-2"></div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm text-gray-800 leading-relaxed">{msg}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {messages.length > 5 && (
+                                        <div className="text-center pt-2">
+                                            <span className="text-xs text-gray-500">
+                                                Showing latest 5 announcements
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Dashboard */}
             <Dashboard studentTestData={studentTests} studentPerformanceData={studentTestsWithPerformance} />
 
             {/* Main Content - Questions */}
-            <div className="max-w-7xl mx-auto px-6 py-8">
-                <div className="min-h-[70vh]">
-                    {openLiveTestModal && questions.length > 0 && questions[currentIndex] ? (
-                        <div className="bg-white rounded-lg shadow-lg h-full">
-                            <div className="p-6 border-b border-slate-200">
-                                <div className="flex items-center justify-between">
-                                    <h2 className="text-2xl font-bold text-slate-900">
-                                        Question {currentIndex + 1}
-                                    </h2>
-                                    <div className="bg-slate-100 text-slate-800 px-3 py-1 rounded-full text-sm font-medium">
-                                        {questions.length - currentIndex - 1 > 0
-                                            ? `${questions.length - currentIndex - 1} remaining`
-                                            : 'Last question'}
-                                    </div>
+            {openLiveTestModal && questions.length > 0 && questions[currentIndex] && (
+                <div className="max-w-7xl mx-auto px-6 pb-8">
+                    <div className="bg-white rounded-lg shadow-lg">
+                        <div className="p-6 border-b border-slate-200">
+                            <div className="flex items-center justify-between">
+                                <h2 className="text-2xl font-bold text-slate-900">
+                                    Question {currentIndex + 1}
+                                </h2>
+                                <div className="bg-slate-100 text-slate-800 px-3 py-1 rounded-full text-sm font-medium">
+                                    {questions.length - currentIndex - 1 > 0
+                                        ? `${questions.length - currentIndex - 1} remaining`
+                                        : 'Last question'}
                                 </div>
                             </div>
-
-                            <div className="p-6">
-                                <LiveQuestion
-                                    question={questions[currentIndex]}
-                                    onAnswer={(data) => {
-                                        console.log("✅ Parent received answer", data);
-                                        socketRef.current.emit("answer-validate", data);
-
-                                        // Move to next question if available
-                                        if (currentIndex + 1 < questions.length) {
-                                            setCurrentIndex(currentIndex + 1);
-                                        } else {
-                                            console.log("✅ All questions completed");
-                                        }
-                                    }}
-                                    studentId={studentId}
-                                    studentName={studentName}
-                                    TestEnded={TestEnded}
-                                    openLiveTestModal={openLiveTestModal}
-                                    setOpenLiveTestModal={setOpenLiveTestModal}
-                                />
-                            </div>
                         </div>
-                    ) : null}
+
+                        <div className="p-6">
+                            <LiveQuestion
+                                question={questions[currentIndex]}
+                                onAnswer={(data) => {
+                                    console.log("✅ Parent received answer", data);
+                                    socketRef.current.emit("answer-validate", data);
+
+                                    // Move to next question if available
+                                    if (currentIndex + 1 < questions.length) {
+                                        setCurrentIndex(currentIndex + 1);
+                                    } else {
+                                        console.log("✅ All questions completed");
+                                    }
+                                }}
+                                studentId={studentId}
+                                studentName={studentName}
+                                TestEnded={TestEnded}
+                                openLiveTestModal={openLiveTestModal}
+                                setOpenLiveTestModal={setOpenLiveTestModal}
+                            />
+                        </div>
+                    </div>
                 </div>
-
-
-            </div>
+            )}
 
             {/* Join Room Modal */}
             <JoinRoomModal

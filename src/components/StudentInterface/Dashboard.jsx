@@ -112,7 +112,7 @@ export default function Dashboard({ studentTestData, studentPerformanceData }) {
   const totalQuestions = performanceData?.tests?.reduce((sum, test) => sum + test.performance.questionsAttempted, 0);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className=" bg-gradient-to-br from-slate-50 to-slate-100 mt-10">
       {/* Header */}
 
       <div className="max-w-7xl mx-auto px-6 py-8">
