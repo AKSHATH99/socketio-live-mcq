@@ -9,12 +9,19 @@ export default function Auth() {
     const router = useRouter();
     const searchParams = useSearchParams()
     const userType = searchParams.get("type");
+    const emailFromURL = searchParams.get('email')
 
     const [email, setEmail] = useState("");
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [otpSent, setOtpSent] = useState(false);
     const [otp, setOtp] = useState("");
+
+    useEffect(() => {
+        if (emailFromURL) {
+            setEmail(emailFromURL)
+        }
+    }, [emailFromURL])
 
     const sendOTP = async () => {
         if (!email) {
@@ -111,6 +118,7 @@ export default function Auth() {
                                 placeholder="Enter your email address"
                                 className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all duration-200"
                                 onChange={(e) => setEmail(e.target.value)}
+                                value={email}
                             />
                         </div>
 

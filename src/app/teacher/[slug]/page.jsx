@@ -1,8 +1,8 @@
-
 'use client'
 import Image from "next/image";
 import { io } from "socket.io-client";
 import { useEffect, useRef, useState } from "react";
+import { Users, Wifi, WifiOff, Calendar, Play, MessageSquare, Send, Plus } from "lucide-react";
 // import QuestionsInput from "@/components/QuestionsInput";
 import CreateRoomModal from "@/components/TeacherInterface/CreateRoomModal";
 import CreateTestModal from "@/components/TeacherInterface/CreateTestModal";
@@ -255,30 +255,32 @@ export default function Teacher({ params }) {
 
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gray-50 p-4">
+      <div className="max-w-6xl mx-auto space-y-4">
 
         {/* Header */}
         <div className="bg-white rounded-lg shadow-sm border p-6">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-semibold text-gray-900 mb-1">
-                Hey Teacher, Welcome!
+                Teacher Dashboard
               </h1>
               <p className="text-gray-600">Manage your classroom and assignments</p>
             </div>
             <div className="flex gap-3">
               <button
-                className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors"
+                className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2"
                 onClick={() => setOpenCreateRoomModal(true)}
               >
-                + Create Room
+                <Plus size={16} />
+                Create Room
               </button>
               <button
-                className="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors"
+                className="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2"
                 onClick={() => setOpenCreateTestModal(true)}
               >
-                + Create Test
+                <Plus size={16} />
+                Create Test
               </button>
             </div>
           </div>
@@ -290,32 +292,42 @@ export default function Teacher({ params }) {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bg-gray-50 rounded-lg p-4 border">
-              <div className="flex items-center gap-2 mb-2">
-                <div className={`w-2 h-2 rounded-full ${allStudentsReady ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
+              <div className="flex items-center gap-2 mb-3">
+                <Users size={18} className="text-gray-600" />
                 <span className="text-sm font-medium text-gray-700">Student Status</span>
               </div>
-              <div>
+              <div className="space-y-2 mb-3">
                 {Object.entries(liveStudentList).map(([key, value]) => (
                   value ? (
-                    <li key={key}>
-                      <p className={`text-sm font-medium text-gray-700 ${value ? 'text-green-500' : 'text-yellow-500'}`}>{key}</p>
-                    </li>
+                    <div key={key} className="flex items-center justify-between bg-white p-2 rounded border">
+                      <span className="text-sm text-gray-700">{key}</span>
+                      <div className="flex items-center gap-1">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span className="text-xs text-green-600">Ready</span>
+                      </div>
+                    </div>
                   ) : null
                 ))}
               </div>
               <p className="text-sm text-gray-600">
-                {allStudentsReady ? "All students are ready" : <p className="text-yellow-500" >Waiting for students</p>}
+                {allStudentsReady ? (
+                  <span className="text-green-600">All students are ready</span>
+                ) : (
+                  <span className="text-yellow-600">Waiting for students</span>
+                )}
               </p>
             </div>
 
             <div className="bg-gray-50 rounded-lg p-4 border">
-              <div className="flex items-center gap-2 mb-2">
-                <div className={`w-2 h-2 rounded-full ${roomId ? 'bg-green-500' : 'bg-red-500'}`}></div>
+              <div className="flex items-center gap-2 mb-3">
+                {roomId ? <Wifi size={18} className="text-green-600" /> : <WifiOff size={18} className="text-red-600" />}
                 <span className="text-sm font-medium text-gray-700">Room Status</span>
               </div>
-              <p className="text-sm text-gray-600">
-                {roomId ? `Joined: ${roomId}` : "Not Joined"}
-              </p>
+              <div className="bg-white p-3 rounded border">
+                <p className="text-sm font-mono text-gray-800">
+                  {roomId ? `Connected: ${roomId}` : "Not Connected"}
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -347,7 +359,7 @@ export default function Teacher({ params }) {
 
         {/* Tests Section */}
         <div className="bg-white rounded-lg shadow-sm border p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-6">Your Tests</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Your Tests</h2>
 
           {fetchedTest && fetchedTest.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -365,26 +377,28 @@ export default function Teacher({ params }) {
                       {test.description}
                     </p>
                     <div className="mt-auto">
-                      <p className="text-xs text-gray-500 mb-3">
-                        Created: {new Date(test.createdAt).toLocaleDateString()}
-                      </p>
-                      <button
-                        className="w-full bg-black text-white px-3 py-2 rounded text-sm hover:bg-gray-800 transition-colors"
+                      <div className="flex items-center gap-1 text-xs text-gray-500 mb-3">
+                        <Calendar size={12} />
+                        <span>Created: {new Date(test.createdAt).toLocaleDateString()}</span>
+                      </div>
+                      {/* <button
+                        className="w-full bg-black text-white px-3 py-2 rounded text-sm hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
                         onClick={(e) => {
                           e.stopPropagation();
                           startTest(test.id);
                         }}
                       >
-                        ▶ Start Test
-                      </button>
+                        <Play size={14} />
+                        Start Test
+                      </button> */}
                     </div>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="text-center py-12">
-              <p className="text-gray-500 mb-2">No tests created yet</p>
+            <div className="text-center py-8 bg-gray-50 rounded-lg border">
+              <p className="text-gray-500 mb-1">No tests created yet</p>
               <p className="text-sm text-gray-400">Create your first test to get started</p>
             </div>
           )}
@@ -392,11 +406,12 @@ export default function Teacher({ params }) {
 
         {/* Communication Panel */}
         <div className="bg-white rounded-lg shadow-sm border p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-6">Class Communication</h2>
+          <div className="flex items-center gap-2 mb-4">
+            <MessageSquare size={20} className="text-gray-600" />
+            <h2 className="text-lg font-semibold text-gray-900">Class Communication</h2>
+          </div>
 
           <div className="space-y-4">
-            <p className="text-sm text-gray-600">Type your message here to send to the group</p>
-
             {/* Message Input */}
             <div className="flex gap-3">
               <input
@@ -409,16 +424,17 @@ export default function Teacher({ params }) {
               />
               <button
                 onClick={() => sendMessage()}
-                className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors"
+                className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2"
               >
+                <Send size={16} />
                 Send
               </button>
             </div>
 
             {/* Messages Display */}
             <div className="bg-gray-50 rounded-lg p-4 border">
-              <h3 className="font-medium text-gray-900 mb-3">Messages:</h3>
-              <div className="max-h-64 overflow-y-auto space-y-2">
+              <h3 className="font-medium text-gray-900 mb-3">Messages</h3>
+              <div className="max-h-48 overflow-y-auto space-y-2">
                 {messages.length > 0 ? (
                   messages.map((msg, idx) => (
                     <div key={idx} className="bg-white p-3 rounded border-l-4 border-black">
@@ -426,7 +442,7 @@ export default function Teacher({ params }) {
                     </div>
                   ))
                 ) : (
-                  <p className="text-gray-500 text-center py-8">No messages yet</p>
+                  <p className="text-gray-500 text-center py-4 text-sm">No messages yet</p>
                 )}
               </div>
             </div>
