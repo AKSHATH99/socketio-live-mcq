@@ -10,6 +10,7 @@ const AddQuestionModal = ({ testid, onClose }) => {
             answer: ""
         }
     ]);
+    const [validationErrors, setValidationErrors] = useState({});
 
     const handleQuestionChange = (index, value) => {
         const updated = [...questions];
@@ -17,10 +18,47 @@ const AddQuestionModal = ({ testid, onClose }) => {
         setQuestions(updated);
     };
 
+    const hasDuplicateOptions = (options) => {
+        const filledOptions = options.filter(opt => opt.trim() !== '');
+        const uniqueOptions = [...new Set(filledOptions.map(opt => opt.trim().toLowerCase()))];
+        return filledOptions.length !== uniqueOptions.length;
+    };
+
+    const getDuplicateOptions = (options) => {
+        const filledOptions = options.filter(opt => opt.trim() !== '');
+        const optionCounts = {};
+        const duplicates = [];
+
+        filledOptions.forEach(opt => {
+            const normalizedOpt = opt.trim().toLowerCase();
+            optionCounts[normalizedOpt] = (optionCounts[normalizedOpt] || 0) + 1;
+        });
+
+        Object.keys(optionCounts).forEach(opt => {
+            if (optionCounts[opt] > 1) {
+                duplicates.push(opt);
+            }
+        });
+
+        return duplicates;
+    };
+
+
     const handleOptionChange = (qIndex, optIndex, value) => {
         const updated = [...questions];
         updated[qIndex].options[optIndex] = value;
         setQuestions(updated);
+
+        const newErrors = { ...validationErrors };
+
+        if (value.trim() && hasDuplicateOptions(updated[qIndex].options)) {
+            const duplicates = getDuplicateOptions(updated[qIndex].options);
+            newErrors[qIndex] = `Duplicate options detected: "${duplicates.join('", "')}"`;
+        } else {
+            delete newErrors[qIndex];
+        }
+
+        setValidationErrors(newErrors);
     };
 
     const handleTimerChange = (index, value) => {
@@ -41,15 +79,38 @@ const AddQuestionModal = ({ testid, onClose }) => {
 
     const handleDone = async () => {
         try {
-            // Validate that all questions have required fields
-            const incompleteQuestions = questions.filter(q => 
-                !q.question.trim() || 
-                !q.answer.trim() || 
-                q.options.every(opt => !opt.trim())
-            );
+            setValidationErrors({});
 
-            if (incompleteQuestions.length > 0) {
-                alert('Please fill in all required fields for each question (question text, at least one option, and correct answer).');
+            const errors = [];
+
+            // Validate each question
+            questions.forEach((q, index) => {
+                // Check for incomplete questions
+                if (!q.question.trim()) {
+                    errors.push(`Question ${index + 1}: Missing question text`);
+                }
+                if (!q.answer.trim()) {
+                    errors.push(`Question ${index + 1}: Missing correct answer`);
+                }
+                if (q.options.every(opt => !opt.trim())) {
+                    errors.push(`Question ${index + 1}: No options provided`);
+                }
+
+                // Check for duplicate options
+                if (hasDuplicateOptions(q.options)) {
+                    const duplicates = getDuplicateOptions(q.options);
+                    errors.push(`Question ${index + 1}: Duplicate options - "${duplicates.join('", "')}"`);
+                }
+
+                // Check if the correct answer exists in options
+                const filledOptions = q.options.filter(opt => opt.trim() !== '');
+                if (q.answer.trim() && !filledOptions.some(opt => opt.trim().toLowerCase() === q.answer.trim().toLowerCase())) {
+                    errors.push(`Question ${index + 1}: Correct answer "${q.answer}" is not among the options`);
+                }
+            });
+
+            if (errors.length > 0) {
+                alert(`Please fix the following issues:\n\n${errors.join('\n')}`);
                 return;
             }
 
@@ -81,7 +142,7 @@ const AddQuestionModal = ({ testid, onClose }) => {
             // Wait for all questions to be added
             const results = await Promise.all(promises);
             console.log('All questions added successfully:', results);
-            
+
             // Close the modal after successful submission
             onClose();
             alert(`${questions.length} question(s) added successfully!`);
@@ -96,44 +157,54 @@ const AddQuestionModal = ({ testid, onClose }) => {
             <div className="bg-white rounded-lg shadow-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl font-bold text-gray-800">Create your quiz</h2>
-                    <button 
+                    <button
                         onClick={onClose}
                         className="text-gray-500 hover:text-gray-700 text-xl font-bold"
                     >
                         ×
                     </button>
                 </div>
-                
+
                 <div className="space-y-6">
                     {questions.map((q, i) => (
-                        <InputBox
-                            key={i}
-                            index={i}
-                            question={q.question}
-                            options={q.options}
-                            answer={q.answer}
-                            onQuestionChange={handleQuestionChange}
-                            onOptionChange={handleOptionChange}
-                            onAnswerChange={handleAnswerChange}
-                            onSubmit={handleDone}
-                            timer={q.timer}
-                            onTimerChange={handleTimerChange}
-                        />
+                        <div key={i}>
+                            <InputBox
+                                index={i}
+                                question={q.question}
+                                options={q.options}
+                                answer={q.answer}
+                                onQuestionChange={handleQuestionChange}
+                                onOptionChange={handleOptionChange}
+                                onAnswerChange={handleAnswerChange}
+                                onSubmit={handleDone}
+                                timer={q.timer}
+                                onTimerChange={handleTimerChange}
+                                validationError={validationErrors[i]}
+                            />
+                            {/* Display validation error for this question */}
+                            {validationErrors[i] && (
+                                <div className="bg-red-50 border border-red-200 rounded-lg p-3 mt-4">
+                                    <p className="text-red-600 text-sm font-medium">
+                                         {validationErrors[i]}
+                                    </p>
+                                </div>
+                            )}
+                        </div>
                     ))}
                 </div>
-                
+
                 <div className="flex justify-end gap-4 mt-6 pt-4 border-t">
-                    <button 
-                        onClick={addNewQuestion} 
+                    <button
+                        onClick={addNewQuestion}
                         className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                     >
                         + Add Question
                     </button>
-                    <button 
-                        onClick={handleDone} 
+                    <button
+                        onClick={handleDone}
                         className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                     >
-                        Create Test  
+                        Create Test
                     </button>
                 </div>
             </div>
