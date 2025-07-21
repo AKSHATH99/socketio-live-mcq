@@ -1,8 +1,14 @@
 'use client'
-import { useState } from 'react';
+import { useState , useEffect } from 'react';
 
-export default function JoinRoomModal({ isOpen, onClose, onJoinRoom, isJoining }) {
+export default function JoinRoomModal({ isOpen, onClose, onJoinRoom, isJoining, joinRoomFromParams }) {
     const [roomId, setRoomId] = useState("");
+
+    useEffect(() => {
+        if (joinRoomFromParams) {
+            setRoomId(joinRoomFromParams);
+        }
+    }, [joinRoomFromParams]);
 
     const handleSubmit = (e) => {
         e.preventDefault();

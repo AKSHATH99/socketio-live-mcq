@@ -16,6 +16,8 @@ export default function StudentSignup() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const verifyEmail = searchParams.get("verify");
+    const roomId = searchParams.get('roomId');
+
     useEffect(() => {
         if(verifyEmail){
             setEmail(verifyEmail)
@@ -42,7 +44,7 @@ export default function StudentSignup() {
             } else {
                 toast.success("Signed up successfully")
                 setTimeout(() => {
-                    router.push("/student/auth/signin")
+                    router.push(`/student/auth/signin?redirect=joinRoom&roomId=${roomId}`)
                 }, 2000);
             }
         } catch (error) {

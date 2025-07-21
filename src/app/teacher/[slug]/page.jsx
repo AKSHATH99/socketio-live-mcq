@@ -24,6 +24,7 @@ export default function Teacher({ params }) {
   const [openCreateTestModal, setOpenCreateTestModal] = useState(false);
   const [allStudentsReady, setAllStudentsReady] = useState()
   const [liveStudentList, setLiveStudentList] = useState([])
+  const [roomCreated, setRoomCreated] = useState(false);
 
   const [questions, setQuestions] = useState([
     {
@@ -236,6 +237,7 @@ export default function Teacher({ params }) {
       message: 'Hello quiz team'
     });
     localStorage.setItem('roomId', roomId);
+    setRoomCreated(true);
   };
 
   const sendMessage = () => {
@@ -337,11 +339,12 @@ export default function Teacher({ params }) {
           <CreateRoomModal
             onCreateRoom={() => {
               createRoom();
-              setOpenCreateRoomModal(false);
+              // setOpenCreateRoomModal(false);
             }}
             roomId={roomId}
             setRoomId={setRoomId}
             onClose={() => setOpenCreateRoomModal(false)}
+            roomCreated={roomCreated}
           />
         )}
 

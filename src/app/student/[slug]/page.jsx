@@ -5,7 +5,7 @@ import LiveQuestion from "@/controllers/DisplayQuestionBox";
 import JoinRoomModal from "@/components/StudentInterface/JoinRoom";
 import Dashboard from "@/components/StudentInterface/Dashboard";
 import { Trophy, Target, BookOpen, Calendar, User, Award } from "lucide-react";
-
+import { useSearchParams } from 'next/navigation';
 export default function Student({ params }) {
 
     const studentId = params.slug;
@@ -25,8 +25,19 @@ export default function Student({ params }) {
     const [studentTests, setStudentTests] = useState([]);
     const [studentTestsWithPerformance, setStudentTestsWithPerformance] = useState([]);
     const [openLiveTestModal, setOpenLiveTestModal] = useState(false);
-    const [studentStatus , setStudentStatus]  = useState(false)
+    const [studentStatus, setStudentStatus] = useState(false)
 
+
+    const searchParams = useSearchParams();
+
+    useEffect(() => {
+        const roomIdFromParams = searchParams.get('joinRoom');
+
+        if (roomIdFromParams) {
+            setRoomId(roomIdFromParams);
+            setShowJoinModal(true);
+        }
+    }, []);
 
     useEffect(() => {
         console.log(studentData)
@@ -158,7 +169,7 @@ export default function Student({ params }) {
                 //adding to list of students 
                 socketRef.current.emit('student-ready', { roomId: roomCode, studentName: studentName });
                 setStudentStatus(true)
-                
+
 
             }
         } catch (error) {
@@ -297,6 +308,7 @@ export default function Student({ params }) {
                 onClose={() => setShowJoinModal(false)}
                 onJoinRoom={joinRoom}
                 isJoining={isJoining}
+                joinRoomFromParams={roomId}
             />
         </div>
     );
