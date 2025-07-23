@@ -7,6 +7,7 @@ import { Users, Wifi, WifiOff, Calendar, Play, MessageSquare, Send, Plus } from 
 import CreateRoomModal from "@/components/TeacherInterface/CreateRoomModal";
 import CreateTestModal from "@/components/TeacherInterface/CreateTestModal";
 import { useRouter } from "next/navigation";
+import ThemeToggle from "@/components/ThemeToggler";
 
 export default function Teacher({ params }) {
   const router = useRouter();
@@ -257,7 +258,7 @@ export default function Teacher({ params }) {
 
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div className="min-h-screen bg-gray-50 p-4 dark:bg-black">
       <div className="max-w-6xl mx-auto space-y-4">
 
         {/* Header */}
@@ -267,6 +268,7 @@ export default function Teacher({ params }) {
               <h1 className="text-2xl font-semibold text-gray-900 mb-1">
                 Teacher Dashboard
               </h1>
+              <ThemeToggle />
               <p className="text-gray-600">Manage your classroom and assignments</p>
             </div>
             <div className="flex gap-3">

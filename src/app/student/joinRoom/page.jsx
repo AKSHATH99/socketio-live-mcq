@@ -15,11 +15,11 @@ const JoinRoomPage = () => {
         // Simulate checking authentication
         setTimeout(() => {
             const isStudentLoggedIn = localStorage?.getItem("studentId");
-            
+
             if (!isStudentLoggedIn) {
                 setStatus("redirectingToLogin");
                 setMessage("Authentication required. Redirecting to login...");
-                
+
                 // Simulate redirect delay
                 setTimeout(() => {
                     window.location.href = `/student/auth/signin?redirect=joinRoom&roomId=${id}`;
@@ -28,7 +28,7 @@ const JoinRoomPage = () => {
             } else {
                 setStatus("redirectingToRoom");
                 setMessage("Let's get you aboard! Joining the room...");
-                
+
                 // Simulate redirect delay
                 setTimeout(() => {
                     window.location.href = `/student/${isStudentLoggedIn}?joinRoom=${id}`;
@@ -65,38 +65,35 @@ const JoinRoomPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-white flex items-center justify-center px-4">
+        <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center px-4">
             <div className="max-w-md w-full">
                 <div className="text-center space-y-6">
                     {/* Main Icon */}
                     <div className="flex justify-center">
                         {getIcon()}
                     </div>
-
                     {/* Main Message */}
                     <div className="space-y-2">
-                        <h1 className="text-2xl font-semibold text-gray-900">
+                        <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
                             {message}
                         </h1>
-                        <p className="text-gray-600">
+                        <p className="text-gray-600 dark:text-gray-400">
                             {getSubMessage()}
                         </p>
                     </div>
-
                     {/* Room ID Display */}
                     {roomId && (
-                        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                        <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
                             <div className="flex items-center justify-center space-x-2">
-                                <span className="text-sm font-medium text-gray-700">Room ID:</span>
-                                <code className="text-sm font-mono bg-white px-2 py-1 rounded border text-gray-900">
+                                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Room ID:</span>
+                                <code className="text-sm font-mono bg-white dark:bg-gray-900 px-2 py-1 rounded border border-gray-200 dark:border-gray-600 text-gray-900 dark:text-gray-100">
                                     {roomId}
                                 </code>
                             </div>
                         </div>
                     )}
-
                     {/* Footer */}
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
                         Please wait while we process your request
                     </p>
                 </div>

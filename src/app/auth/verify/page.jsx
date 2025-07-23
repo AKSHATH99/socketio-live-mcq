@@ -104,19 +104,19 @@ export default function Auth() {
         }
     }
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 to-black p-4">
-            <div className="bg-gray-800 border border-gray-600 rounded-lg shadow-2xl p-8 w-full max-w-md">
+        <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-black p-4">
+            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-xl dark:shadow-2xl p-8 w-full max-w-md">
                 <div className="mb-6">
-                    <h1 className="text-2xl font-semibold text-white mb-2 text-center">Email Verification</h1>
-                    <p className="text-gray-400 text-sm text-center mb-6">Enter your email address to receive a verification code</p>
+                    <h1 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2 text-center">Email Verification</h1>
+                    <p className="text-gray-600 dark:text-gray-400 text-sm text-center mb-6">Enter your email address to receive a verification code</p>
 
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email Address</label>
                             <input
                                 type="email"
                                 placeholder="Enter your email address"
-                                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all duration-200"
+                                className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 dark:focus:ring-gray-500 focus:border-transparent transition-all duration-200"
                                 onChange={(e) => setEmail(e.target.value)}
                                 value={email}
                             />
@@ -125,33 +125,33 @@ export default function Auth() {
                         <button
                             onClick={sendOTP}
                             disabled={isLoading}
-                            className="w-full bg-white text-black font-medium py-3 px-4 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full bg-black dark:bg-white text-white dark:text-black font-medium py-3 px-4 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500 dark:focus:ring-gray-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {isLoading ? 'Sending...' : 'Send Verification Code'}
                         </button>
                     </div>
 
-                    <div className="text-gray-500 text-center mt-6">
-                        <p>Already a member? <span onClick={() => router.push(`/${userType}/auth/signin`)} className="text-white cursor-pointer hover:underline">Login</span></p>
+                    <div className="text-gray-500 dark:text-gray-500 text-center mt-6">
+                        <p>Already a member? <span onClick={() => router.push(`/${userType}/auth/signin`)} className="text-gray-900 dark:text-white cursor-pointer hover:underline font-medium">Login</span></p>
                     </div>
                 </div>
 
                 {otpSent && (
-                    <div className="border-t border-gray-600 pt-6">
-                        <div className="bg-gray-700 border border-gray-600 rounded-lg p-4 mb-4">
+                    <div className="border-t border-gray-200 dark:border-gray-600 pt-6">
+                        <div className="bg-green-50 dark:bg-gray-700 border border-green-200 dark:border-gray-600 rounded-lg p-4 mb-4">
                             <div className="flex items-center">
                                 <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
-                                <span className="text-green-400 text-sm font-medium">Verification code sent successfully</span>
+                                <span className="text-green-700 dark:text-green-400 text-sm font-medium">Verification code sent successfully</span>
                             </div>
                         </div>
 
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Verification Code</label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Verification Code</label>
                                 <input
                                     type="text"
                                     placeholder="Enter 6-digit code"
-                                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all duration-200"
+                                    className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 dark:focus:ring-gray-500 focus:border-transparent transition-all duration-200"
                                     onChange={(e) => setOtp(e.target.value)}
                                     maxLength="6"
                                 />
@@ -160,7 +160,7 @@ export default function Auth() {
                             <button
                                 onClick={verifyOTP}
                                 disabled={isLoading}
-                                className="w-full bg-white text-black font-medium py-3 px-4 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="w-full bg-black dark:bg-white text-white dark:text-black font-medium py-3 px-4 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500 dark:focus:ring-gray-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {isLoading ? 'Verifying...' : 'Verify Code'}
                             </button>

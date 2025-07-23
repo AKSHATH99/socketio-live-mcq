@@ -6,6 +6,7 @@ import JoinRoomModal from "@/components/StudentInterface/JoinRoom";
 import Dashboard from "@/components/StudentInterface/Dashboard";
 import { Trophy, Target, BookOpen, Calendar, User, Award, Megaphone } from "lucide-react";
 import { useSearchParams } from 'next/navigation';
+import ThemeToggle from "@/components/ThemeToggler";
 export default function Student({ params }) {
 
     const studentId = params.slug;
@@ -200,44 +201,45 @@ export default function Student({ params }) {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+<div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-black">
             {/* Header */}
-            <div className="bg-white shadow-sm border-b border-slate-200">
+            <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-slate-200 dark:border-gray-600">
                 <div className="max-w-7xl mx-auto px-6 py-8">
                     <div className="flex items-center justify-between">
                         <div>
-                            <h1 className="text-3xl font-bold text-slate-900">Student Dashboard</h1>
-                            <p className="text-slate-600 mt-1">Track your learning progress and performance</p>
+                            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Student Dashboard</h1>
+                            <p className="text-slate-600 dark:text-gray-400 mt-1">Track your learning progress and performance</p>
                         </div>
-                        <div className="flex items-center space-x-2 bg-slate-100 px-4 py-2 rounded-full">
-                            <User className="w-5 h-5 text-slate-600" />
-                            <span className="text-sm font-medium text-slate-700">Welcome {studentData?.name}!</span>
+                        <ThemeToggle/>
+                        <div className="flex items-center space-x-2 bg-slate-100 dark:bg-gray-700 px-4 py-2 rounded-full">
+                            <User className="w-5 h-5 text-slate-600 dark:text-gray-300" />
+                            <span className="text-sm font-medium text-slate-700 dark:text-gray-200">Welcome {studentData?.name}!</span>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Room Status and Join Room Section */}
-            <div className="bg-white shadow-sm border-b border-slate-200">
+            <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-slate-200 dark:border-gray-600">
                 <div className="max-w-7xl mx-auto px-6 py-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4">
                             {/* Room Status Badge */}
                             <div className="flex items-center">
                                 {currentRoomID ? (
-                                    <div className="flex items-center bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-sm font-medium">
+                                    <div className="flex items-center bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 px-3 py-1 rounded-full text-sm font-medium">
                                         <div className="w-2 h-2 bg-emerald-500 rounded-full mr-2 animate-pulse"></div>
                                         Room: {currentRoomID}
                                     </div>
                                 ) : (
-                                    <div className="flex items-center bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-sm font-medium">
+                                    <div className="flex items-center bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-200 px-3 py-1 rounded-full text-sm font-medium">
                                         <div className="w-2 h-2 bg-amber-500 rounded-full mr-2"></div>
                                         Not in room
                                     </div>
                                 )}
                             </div>
 
-                            <div className="text-sm text-slate-600">
+                            <div className="text-sm text-slate-600 dark:text-gray-400">
                                 Student Status: {studentStatus}
                             </div>
                         </div>
@@ -245,7 +247,7 @@ export default function Student({ params }) {
                         {/* Join Room Button */}
                         <button
                             onClick={() => setShowJoinModal(true)}
-                            className="bg-slate-900 hover:bg-slate-800 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+                            className="bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-gray-100 text-white dark:text-black font-medium py-2 px-4 rounded-lg transition-colors duration-200"
                         >
                             {currentRoomID ? 'Change Room' : 'Join Room'}
                         </button>
@@ -255,14 +257,14 @@ export default function Student({ params }) {
 
             {/* Announcements Section */}
             {messages.length > 0 && (
-                <div className="bg-white shadow-sm border-b border-slate-200">
+                <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-slate-200 dark:border-gray-600">
                     <div className="max-w-7xl mx-auto px-6 py-4">
-                        <div className="bg-white rounded-lg border border-gray-300 shadow-sm">
-                            <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
+                        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm">
+                            <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700">
                                 <div className="flex items-center space-x-3">
-                                    <Megaphone className="w-5 h-5 text-gray-700" />
-                                    <h3 className="font-semibold text-gray-900">Room Announcements</h3>
-                                    <span className="text-xs text-gray-600 bg-white px-2 py-1 rounded-full border border-gray-200">
+                                    <Megaphone className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+                                    <h3 className="font-semibold text-gray-900 dark:text-white">Room Announcements</h3>
+                                    <span className="text-xs text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 px-2 py-1 rounded-full border border-gray-200 dark:border-gray-600">
                                         {messages.length} announcement{messages.length !== 1 ? 's' : ''}
                                     </span>
                                 </div>
@@ -272,17 +274,17 @@ export default function Student({ params }) {
                                     {messages.slice(-5).map((msg, idx) => (
                                         <div
                                             key={idx}
-                                            className="flex items-start space-x-3 bg-white rounded-lg p-3 border border-gray-200 hover:bg-gray-50 transition-colors"
+                                            className="flex items-start space-x-3 bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                                         >
-                                            <div className="flex-shrink-0 w-2 h-2 bg-gray-900 rounded-full mt-2"></div>
+                                            <div className="flex-shrink-0 w-2 h-2 bg-gray-900 dark:bg-white rounded-full mt-2"></div>
                                             <div className="flex-1 min-w-0">
-                                                <p className="text-sm text-gray-800 leading-relaxed">{msg}</p>
+                                                <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">{msg}</p>
                                             </div>
                                         </div>
                                     ))}
                                     {messages.length > 5 && (
                                         <div className="text-center pt-2">
-                                            <span className="text-xs text-gray-500">
+                                            <span className="text-xs text-gray-500 dark:text-gray-400">
                                                 Showing latest 5 announcements
                                             </span>
                                         </div>
@@ -300,13 +302,13 @@ export default function Student({ params }) {
             {/* Main Content - Questions */}
             {openLiveTestModal && questions.length > 0 && questions[currentIndex] && (
                 <div className="max-w-7xl mx-auto px-6 pb-8">
-                    <div className="bg-white rounded-lg shadow-lg">
-                        <div className="p-6 border-b border-slate-200">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+                        <div className="p-6 border-b border-slate-200 dark:border-gray-600">
                             <div className="flex items-center justify-between">
-                                <h2 className="text-2xl font-bold text-slate-900">
+                                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
                                     Question {currentIndex + 1}
                                 </h2>
-                                <div className="bg-slate-100 text-slate-800 px-3 py-1 rounded-full text-sm font-medium">
+                                <div className="bg-slate-100 dark:bg-gray-700 text-slate-800 dark:text-gray-200 px-3 py-1 rounded-full text-sm font-medium">
                                     {questions.length - currentIndex - 1 > 0
                                         ? `${questions.length - currentIndex - 1} remaining`
                                         : 'Last question'}

@@ -55,60 +55,60 @@ export default function StudentSignup() {
 
 
     return (
-<div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 to-black p-4">
-    <div className="bg-gray-800 border border-gray-600 rounded-lg shadow-2xl p-8 w-full max-w-md">
+<div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-black p-4">
+    <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-2xl p-8 w-full max-w-md">
         <div className="mb-8">
-            <h1 className="text-3xl font-semibold text-white text-center mb-2">Student Registration</h1>
-            <p className="text-gray-400 text-sm text-center">Create your student account to get started</p>
+            <h1 className="text-3xl font-semibold text-black dark:text-white text-center mb-2">Student Registration</h1>
+            <p className="text-gray-600 dark:text-gray-400 text-sm text-center">Create your student account to get started</p>
         </div>
 
         <form onSubmit={Signup} className="space-y-6">
             <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Full Name</label>
                 <input 
                     type="text" 
                     placeholder="Enter your full name" 
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all duration-200"
+                    className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-black dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500 focus:border-transparent transition-all duration-200"
                 />
             </div>
 
             <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email Address</label>
                 <input 
                     type="email" 
                     placeholder="Enter your email address" 
                     value={email}
                     disabled={verifyEmail}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-black dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500 focus:border-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 />
             </div>
 
             <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Password</label>
                 <input 
                     type="password" 
                     placeholder="Create a secure password" 
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all duration-200"
+                    className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-black dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500 focus:border-transparent transition-all duration-200"
                 />
             </div>
 
             <button 
                 type="submit" 
                 disabled={isLoading}
-                className="w-full bg-white text-black font-medium py-3 px-4 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-black dark:bg-white text-white dark:text-black font-medium py-3 px-4 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 {isLoading ? 'Creating Account...' : 'Create Account'}
             </button>
 
-            <div className="text-center pt-4 border-t border-gray-600">
-                <p className="text-gray-400 text-sm">
+            <div className="text-center pt-4 border-t border-gray-300 dark:border-gray-600">
+                <p className="text-gray-600 dark:text-gray-400 text-sm">
                     Already have an account? {' '}
-                    <Link href="/student/auth/signin" className="text-white hover:text-gray-300 font-medium transition-colors duration-200">
+                    <Link href="/student/auth/signin" className="text-black dark:text-white hover:text-gray-700 dark:hover:text-gray-300 font-medium transition-colors duration-200">
                         Sign In
                     </Link>
                 </p>
