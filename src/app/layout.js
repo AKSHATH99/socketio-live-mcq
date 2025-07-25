@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import { SocketProvider } from "@/Contexts/SocketContexts";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,6 +24,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
+        <SocketProvider>
         {children}
         <ToastContainer
           position="top-right"
@@ -36,6 +38,7 @@ export default function RootLayout({ children }) {
           pauseOnHover
           theme="dark" 
         />
+        </SocketProvider>
       </body>
     </html>
   );

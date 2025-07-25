@@ -7,6 +7,8 @@ import Dashboard from "@/components/StudentInterface/Dashboard";
 import { Trophy, Target, BookOpen, Calendar, User, Award, Megaphone } from "lucide-react";
 import { useSearchParams } from 'next/navigation';
 import ThemeToggle from "@/components/ThemeToggler";
+import { useSocket } from "@/Contexts/SocketContexts";
+
 export default function Student({ params }) {
 
     const studentId = params.slug;
@@ -28,6 +30,7 @@ export default function Student({ params }) {
     const [openLiveTestModal, setOpenLiveTestModal] = useState(false);
     const [studentStatus, setStudentStatus] = useState(false)
 
+    const socket = useSocket();
 
     const searchParams = useSearchParams();
 
@@ -111,6 +114,8 @@ export default function Student({ params }) {
 
     //SOCKET IO 
     useEffect(() => {
+        if (!socket) return;
+
         getStudentDetailsById();
         const alreadyjoined = localStorage.getItem("roomid");
 
@@ -118,8 +123,8 @@ export default function Student({ params }) {
             setCurrentRoomID(alreadyjoined);
             return;
         }
-        const socket = io();
-        socketRef.current = socket;
+        // const socket = io();
+        // socketRef.current = socket;
 
         socket.on('connect', () => {
             console.log('connected from frontend', socket.id)
@@ -143,6 +148,9 @@ export default function Student({ params }) {
                 console.warn("⚠️ No questions received");
             }
         })
+        // socket.onAny((event, ...args) => {
+        //     console.log("📡 Received event:", event, args);
+        // });
 
         socket.on("test-ended", (roomId, testId) => {
             console.log("Test ended for room:", roomId);
@@ -152,23 +160,26 @@ export default function Student({ params }) {
         });
 
         return () => {
-            socket.disconnect()
+            // socket.disconnect()
+            socket.off("receive-message");
+            socket.off("recieve-questions");
+            socket.off("test-ended");
         }
 
-    }, [])
+    }, [socket])
 
     const joinRoom = async (roomCode) => {
         console.log("Student joining the room ", roomCode)
         setIsJoining(true);
         try {
-            const joined = await socketRef.current.emit('join-room', roomCode, studentId, 'student');
+            const joined = await socket.emit('join-room', roomCode, studentId, 'student');
             if (joined) {
                 setCurrentRoomID(roomCode);
                 setShowJoinModal(false);
                 console.log("Joined hahaha")
 
-                //adding to list of students 
-                socketRef.current.emit('student-ready', { roomId: roomCode, studentName: studentName });
+                //adding to list of students
+                socket.emit('student-ready', { roomId: roomCode, studentName: studentName });
                 setStudentStatus(true)
 
 
@@ -186,7 +197,7 @@ export default function Student({ params }) {
 
     function handleAnswer(data) {
         console.log("✅ Parent received answer", data);
-        socketRef.current.emit("answer-validate", data);
+        socket.emit("answer-validate", data);
     }
 
     if (isLoading) {
@@ -201,7 +212,7 @@ export default function Student({ params }) {
     }
 
     return (
-<div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-black">
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-black">
             {/* Header */}
             <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-slate-200 dark:border-gray-600">
                 <div className="max-w-7xl mx-auto px-6 py-8">
@@ -210,7 +221,7 @@ export default function Student({ params }) {
                             <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Student Dashboard</h1>
                             <p className="text-slate-600 dark:text-gray-400 mt-1">Track your learning progress and performance</p>
                         </div>
-                        <ThemeToggle/>
+                        <ThemeToggle />
                         <div className="flex items-center space-x-2 bg-slate-100 dark:bg-gray-700 px-4 py-2 rounded-full">
                             <User className="w-5 h-5 text-slate-600 dark:text-gray-300" />
                             <span className="text-sm font-medium text-slate-700 dark:text-gray-200">Welcome {studentData?.name}!</span>
@@ -321,7 +332,7 @@ export default function Student({ params }) {
                                 question={questions[currentIndex]}
                                 onAnswer={(data) => {
                                     console.log("✅ Parent received answer", data);
-                                    socketRef.current.emit("answer-validate", data);
+                                    socket.emit("answer-validate", data);
 
                                     // Move to next question if available
                                     if (currentIndex + 1 < questions.length) {

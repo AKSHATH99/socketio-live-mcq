@@ -8,6 +8,8 @@ import CreateRoomModal from "@/components/TeacherInterface/CreateRoomModal";
 import CreateTestModal from "@/components/TeacherInterface/CreateTestModal";
 import { useRouter } from "next/navigation";
 import ThemeToggle from "@/components/ThemeToggler";
+import { useSocket } from "@/Contexts/SocketContexts";
+
 
 export default function Teacher({ params }) {
   const router = useRouter();
@@ -39,6 +41,8 @@ export default function Teacher({ params }) {
     description: "",
     teacherId: teacherId
   });
+
+  const socket = useSocket();
 
 
   // Fetch teacher data when component mounts
@@ -181,7 +185,7 @@ export default function Teacher({ params }) {
       testId: currentTestId
     }));
 
-    socketRef.current.emit('send-questions', {
+    socket.emit('send-questions', {
       roomId: roomId,
       questions: questionsWithTestId
     });
@@ -190,8 +194,9 @@ export default function Teacher({ params }) {
   }
 
   useEffect(() => {
-    const socket = io();
-    socketRef.current = socket;
+    if (!socket) return;
+    // const socket = io();
+    // socketRef.current = socket;
 
     socket.on('connect', () => {
       console.log('connected from frontend', socket.id);
@@ -226,14 +231,14 @@ export default function Teacher({ params }) {
     });
 
     return () => {
-      socket.disconnect()
+      // socket.disconnect()
     }
-  }, []);
+  }, [socket]);
 
   const createRoom = () => {
     console.log("CREATING THE ROOM BROOOOOOOOOO", roomId);
-    socketRef.current.emit('join-room', roomId, teacherId, 'teacher');
-    socketRef.current.emit('send-message', {
+    socket.emit('join-room', roomId, teacherId, 'teacher');
+    socket.emit('send-message', {
       roomId: roomId,
       message: 'Hello quiz team'
     });
@@ -242,8 +247,8 @@ export default function Teacher({ params }) {
   };
 
   const sendMessage = () => {
-    console.log("Sedinign message")
-    socketRef.current.emit('send-message', {
+    console.log("Sending message")
+    socket.emit('send-message', {
       roomId: roomId,
       message: message
     })

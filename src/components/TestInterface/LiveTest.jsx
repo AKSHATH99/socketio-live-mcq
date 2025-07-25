@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import { Loader2, Clock, Trophy, Users } from "lucide-react";
+import { useSocket } from "@/Contexts/SocketContexts";
 
 const LiveTest = ({ testid, isTestLive, startTest , setIsTestLive , testEnded , setTestEnded }) => {
-    const socketRef = useRef();
+    // const socketRef = useRef();
     const [roomId, setRoomId] = useState("");
     const [questions, setQuestions] = useState([]);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -11,11 +12,12 @@ const LiveTest = ({ testid, isTestLive, startTest , setIsTestLive , testEnded , 
     const timerRef = useRef(null);
     const [leaderboard, setLeaderboard] = useState([]);
     const [testId, setTestId] = useState(testid);
+    const socket = useSocket();
 
     useEffect(() => {
         setTestId(testid);
-        const socket = io();
-        socketRef.current = socket;
+        // const socket = io();
+        // socketRef.current = socket;
         const currentRoom = localStorage.getItem('roomId');
 
         socket.emit('join-room', currentRoom);
@@ -65,9 +67,9 @@ const LiveTest = ({ testid, isTestLive, startTest , setIsTestLive , testEnded , 
             if (timerRef.current) {
                 clearInterval(timerRef.current);
             }
-            socket.disconnect();
+            // socket.disconnect();
         };
-    }, []);
+    }, [socket]);
 
     const formatTime = (seconds) => {
         const mins = Math.floor(seconds / 60);
