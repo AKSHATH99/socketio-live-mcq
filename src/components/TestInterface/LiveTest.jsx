@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
-import { Loader2, Clock, Trophy, Users } from "lucide-react";
+import { Loader2, Clock, Trophy, Users , Play } from "lucide-react";
 import { useSocket } from "@/Contexts/SocketContexts";
 
 const LiveTest = ({ testid, isTestLive, startTest , setIsTestLive , testEnded , setTestEnded }) => {
@@ -142,7 +142,7 @@ const LiveTest = ({ testid, isTestLive, startTest , setIsTestLive , testEnded , 
                             <div className="space-y-4">
                                 {isTestLive ? (
                                     questions.map((question, index) => (
-                                        <div key={question.id} className="bg-gray-50 rounded-lg p-4">
+                                        <div  className="bg-gray-50 rounded-lg p-4">
                                             <div className="flex items-center justify-between">
                                                 <div className="flex-1">
                                                     <h3 className="font-medium text-gray-800">
@@ -223,7 +223,7 @@ const LiveTest = ({ testid, isTestLive, startTest , setIsTestLive , testEnded , 
                                             </thead>
                                             <tbody>
                                                 {leaderboard.map((entry, index) => (
-                                                    <tr key={entry.studentId} className="border-b">
+                                                    <tr  className="border-b">
                                                         <td className="p-2 border-r">{index + 1}</td>
                                                         <td className="p-2 border-r">{entry.studentId}</td>
                                                         <td className="p-2">{entry.score}</td>
@@ -250,8 +250,9 @@ const LiveTest = ({ testid, isTestLive, startTest , setIsTestLive , testEnded , 
                         <div className="text-center">
                             <button
                                 onClick={() => startTest(testid)}
-                                className="px-8 py-4 bg-blue-600 text-white rounded-xl shadow-lg hover:bg-blue-700 transition transform hover:scale-105 text-lg font-medium"
+                                className="px-8 py-4 bg-black text-white rounded-xl shadow-lg hover:bg-gray-700 transition transform hover:scale-105 text-lg font-medium"
                             >
+                                <Play className="inline-block mr-2" />
                                 Start Test
                             </button>
                             <p className="text-white mt-3 text-sm">Click to begin the live test session</p>
