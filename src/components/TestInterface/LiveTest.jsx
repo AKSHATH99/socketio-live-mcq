@@ -102,37 +102,37 @@ const LiveTest = ({ testid, isTestLive, startTest , setIsTestLive , testEnded , 
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 p-6">
+<div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
             <div className="max-w-7xl mx-auto relative">
                 {/* Header */}
-                <div className="bg-white rounded-lg shadow p-4 mb-6">
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-6">
                     <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600">Room: {roomId}</span>
-                        <span className={`px-2 py-1 rounded text-sm ${isTestLive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                        <span className="text-sm text-gray-600 dark:text-gray-400">Room: {roomId}</span>
+                        <span className={`px-2 py-1 rounded text-sm ${isTestLive ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'}`}>
                             {isTestLive ? 'Live' : 'Ready'}
                         </span>
                     </div>
                 </div>
 
                 {/* Split Layout - Always rendered */}
-                <div className={`bg-white rounded-lg shadow overflow-hidden ${!isTestLive ? 'blur-sm' : ''}`}>
+                <div className={`bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden ${!isTestLive ? 'blur-sm' : ''}`}>
                     <div className="flex min-h-[600px]">
                         {/* Left Section - Questions */}
                         <div className="flex-1 p-6">
                             {/* Questions Header with Timer */}
                             <div className="flex items-center justify-between mb-4">
                                 <div>
-                                    <h2 className="text-xl font-semibold text-gray-800 flex items-center">
+                                    <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100 flex items-center">
                                         <Clock className="w-5 h-5 mr-2" />
                                         Questions
                                     </h2>
-                                    <p className="text-sm text-gray-600 mt-1" >Here you can view live questions as it is sent to students in  your room</p>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1" >Here you can view live questions as it is sent to students in  your room</p>
                                 </div>
                                 {/* Timer Display - Fixed Position */}
                                 {isTestLive && getCurrentQuestion() && timeLeft > 0 && (
-                                    <div className="flex items-center space-x-2 bg-blue-50 px-3 py-2 rounded-lg">
-                                        <Clock className="w-4 h-4 text-blue-600" />
-                                        <span className="text-sm font-medium text-blue-600">
+                                    <div className="flex items-center space-x-2 bg-blue-50 dark:bg-blue-900/30 px-3 py-2 rounded-lg">
+                                        <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                                        <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
                                             {formatTime(timeLeft)}
                                         </span>
                                     </div>
@@ -142,13 +142,13 @@ const LiveTest = ({ testid, isTestLive, startTest , setIsTestLive , testEnded , 
                             <div className="space-y-4">
                                 {isTestLive ? (
                                     questions.map((question, index) => (
-                                        <div  className="bg-gray-50 rounded-lg p-4">
+                                        <div  className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
                                             <div className="flex items-center justify-between">
                                                 <div className="flex-1">
-                                                    <h3 className="font-medium text-gray-800">
+                                                    <h3 className="font-medium text-gray-800 dark:text-gray-100">
                                                         Q{index + 1}: {question.question}
                                                     </h3>
-                                                    <p className="text-sm text-gray-600 mt-1">
+                                                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                                                         Answer: {question.answer}
                                                     </p>
                                                 </div>
@@ -158,9 +158,9 @@ const LiveTest = ({ testid, isTestLive, startTest , setIsTestLive , testEnded , 
                                                     {index === currentQuestionIndex && (
                                                         <div className="flex items-center space-x-2">
                                                             {timeLeft > 0 ? (
-                                                                <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></div>
+                                                                <div className="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full animate-pulse"></div>
                                                             ) : (
-                                                                <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
+                                                                <Loader2 className="w-4 h-4 animate-spin text-blue-600 dark:text-blue-400" />
                                                             )}
                                                             {/* <span className="text-xs text-blue-600 font-medium">
                                                                 {timeLeft > 0 ? 'Active' : 'Processing...'}
@@ -171,8 +171,8 @@ const LiveTest = ({ testid, isTestLive, startTest , setIsTestLive , testEnded , 
                                                     {/* Completed question indicator */}
                                                     {index < currentQuestionIndex && (
                                                         <div className="flex items-center space-x-2">
-                                                            <div className="w-2 h-2 bg-green-600 rounded-full"></div>
-                                                            <span className="text-xs text-green-600 font-medium">
+                                                            <div className="w-2 h-2 bg-green-600 dark:bg-green-400 rounded-full"></div>
+                                                            <span className="text-xs text-green-600 dark:text-green-400 font-medium">
                                                                 Completed
                                                             </span>
                                                         </div>
@@ -185,27 +185,27 @@ const LiveTest = ({ testid, isTestLive, startTest , setIsTestLive , testEnded , 
 
                                 {/* Waiting for first question - only show when live */}
                                 {isTestLive && questions.length === 0 && (
-                                    <div className="bg-gray-50 rounded-lg p-6 text-center">
-                                        <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-3" />
-                                        <p className="text-gray-600">Waiting for questions...</p>
+                                    <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 text-center">
+                                        <Loader2 className="w-8 h-8 animate-spin text-blue-600 dark:text-blue-400 mx-auto mb-3" />
+                                        <p className="text-gray-600 dark:text-gray-400">Waiting for questions...</p>
                                     </div>
                                 )}
                             </div>
                         </div>
 
                         {/* Vertical Border */}
-                        <div className="w-px bg-gray-200"></div>
+                        <div className="w-px bg-gray-200 dark:bg-gray-700"></div>
 
                         {/* Right Section - Leaderboard */}
                         <div className="flex-1 p-6">
-                            <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center">
                                 <Trophy className="w-5 h-5 mr-2" />
                                 Live Leaderboard
                             </h2>
 
 
                             <button 
-                                className="border border-black rounded-lg px-4 py-2 mb-4 hover:bg-gray-100 transition-colors" 
+                                className="border border-black dark:border-gray-600 rounded-lg px-4 py-2 mb-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-black dark:text-white" 
                                 onClick={() => { fetchLeaderboard() }}
                             >
                                 Refresh Leaderboard
@@ -213,29 +213,29 @@ const LiveTest = ({ testid, isTestLive, startTest , setIsTestLive , testEnded , 
                             <div className="space-y-3">
                                 {isTestLive ? (
                                     leaderboard.length > 0 ? (
-                                        <table className="min-w-full border border-gray-300">
+                                        <table className="min-w-full border border-gray-300 dark:border-gray-600">
                                             <thead>
-                                                <tr className="bg-gray-100 border-b">
-                                                    <th className="text-left p-2 border-r">#</th>
-                                                    <th className="text-left p-2 border-r">Student ID</th>
-                                                    <th className="text-left p-2">Score</th>
+                                                <tr className="bg-gray-100 dark:bg-gray-700 border-b dark:border-gray-600">
+                                                    <th className="text-left p-2 border-r dark:border-gray-600 text-gray-800 dark:text-gray-100">#</th>
+                                                    <th className="text-left p-2 border-r dark:border-gray-600 text-gray-800 dark:text-gray-100">Student ID</th>
+                                                    <th className="text-left p-2 text-gray-800 dark:text-gray-100">Score</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 {leaderboard.map((entry, index) => (
-                                                    <tr  className="border-b">
-                                                        <td className="p-2 border-r">{index + 1}</td>
-                                                        <td className="p-2 border-r">{entry.studentId}</td>
-                                                        <td className="p-2">{entry.score}</td>
+                                                    <tr className="border-b dark:border-gray-600">
+                                                        <td className="p-2 border-r dark:border-gray-600 text-gray-800 dark:text-gray-200">{index + 1}</td>
+                                                        <td className="p-2 border-r dark:border-gray-600 text-gray-800 dark:text-gray-200">{entry.studentId}</td>
+                                                        <td className="p-2 text-gray-800 dark:text-gray-200">{entry.score}</td>
                                                     </tr>
                                                 ))}
                                             </tbody>
                                         </table>
                                     ) : (
-                                        <div className="bg-gray-50 rounded-lg p-4 text-center">
-                                            <Users className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                                            <p className="text-gray-500">No leaderboard data available</p>
-                                            <p className="text-sm text-gray-400 mt-1">Click refresh to update</p>
+                                        <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 text-center">
+                                            <Users className="w-8 h-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
+                                            <p className="text-gray-500 dark:text-gray-400">No leaderboard data available</p>
+                                            <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Click refresh to update</p>
                                         </div>
                                     )
                                 ) : null}
@@ -246,11 +246,11 @@ const LiveTest = ({ testid, isTestLive, startTest , setIsTestLive , testEnded , 
 
                 {/* Overlay Start Test Button */}
                 {!isTestLive && !testEnded && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-lg">
+                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 dark:bg-black dark:bg-opacity-50 rounded-lg">
                         <div className="text-center">
                             <button
                                 onClick={() => startTest(testid)}
-                                className="px-8 py-4 bg-black text-white rounded-xl shadow-lg hover:bg-gray-700 transition transform hover:scale-105 text-lg font-medium"
+                                className="px-8 py-4 bg-black dark:bg-gray-700 text-white rounded-xl shadow-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition transform hover:scale-105 text-lg font-medium"
                             >
                                 <Play className="inline-block mr-2" />
                                 Start Test
@@ -260,14 +260,14 @@ const LiveTest = ({ testid, isTestLive, startTest , setIsTestLive , testEnded , 
                     </div>
                 )}
                 {testEnded && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-70 rounded-lg">
-                        <div className="text-center p-6 bg-white rounded-xl shadow-xl max-w-md w-full mx-4">
+                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-70 dark:bg-black dark:bg-opacity-80 rounded-lg">
+                        <div className="text-center p-6 bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full mx-4">
                             <Trophy className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
-                            <h3 className="text-2xl font-bold text-gray-800 mb-2">Test Completed!</h3>
-                            <p className="text-gray-600 mb-6">You've successfully completed the test. Redirecting to results...</p>
+                            <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">Test Completed!</h3>
+                            <p className="text-gray-600 dark:text-gray-400 mb-6">You've successfully completed the test. Redirecting to results...</p>
                             <div className="flex justify-center items-center space-x-2">
-                                <Loader2 className="h-5 w-5 text-blue-600 animate-spin" />
-                                <span className="text-sm text-gray-500">Preparing your results</span>
+                                <Loader2 className="h-5 w-5 text-blue-600 dark:text-blue-400 animate-spin" />
+                                <span className="text-sm text-gray-500 dark:text-gray-400">Preparing your results</span>
                             </div>
                         </div>
                     </div>

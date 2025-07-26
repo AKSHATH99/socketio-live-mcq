@@ -89,6 +89,9 @@ export default function Teacher({ params }) {
   }, [teacherId]);
 
   useEffect(() => {
+    if(!teacherId){
+      router.push('teacher/auth/signin');
+    }
     const storedRoomId = localStorage.getItem('roomId');
     if (storedRoomId) {
       setRoomId(storedRoomId);

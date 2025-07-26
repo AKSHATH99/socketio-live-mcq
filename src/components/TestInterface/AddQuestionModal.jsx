@@ -153,18 +153,17 @@ const AddQuestionModal = ({ testid, onClose }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+<div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-black dark:bg-opacity-70 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-800">Create your quiz</h2>
+                    <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Create your quiz</h2>
                     <button
                         onClick={onClose}
-                        className="text-gray-500 hover:text-gray-700 text-xl font-bold"
+                        className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-xl font-bold"
                     >
                         ×
                     </button>
                 </div>
-
                 <div className="space-y-6">
                     {questions.map((q, i) => (
                         <div key={i}>
@@ -183,8 +182,8 @@ const AddQuestionModal = ({ testid, onClose }) => {
                             />
                             {/* Display validation error for this question */}
                             {validationErrors[i] && (
-                                <div className="bg-red-50 border border-red-200 rounded-lg p-3 mt-4">
-                                    <p className="text-red-600 text-sm font-medium">
+                                <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg p-3 mt-4">
+                                    <p className="text-red-600 dark:text-red-400 text-sm font-medium">
                                          {validationErrors[i]}
                                     </p>
                                 </div>
@@ -192,17 +191,16 @@ const AddQuestionModal = ({ testid, onClose }) => {
                         </div>
                     ))}
                 </div>
-
-                <div className="flex justify-end gap-4 mt-6 pt-4 border-t">
+                <div className="flex justify-end gap-4 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
                     <button
                         onClick={addNewQuestion}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                        className="bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                     >
                         + Add Question
                     </button>
                     <button
                         onClick={handleDone}
-                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                        className="bg-green-600 dark:bg-green-500 hover:bg-green-700 dark:hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                     >
                         Create Test
                     </button>
