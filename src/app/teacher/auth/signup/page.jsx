@@ -4,6 +4,8 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { toast } from "react-toastify"
+import Spinner from "@/components/Spinner"
+import { set } from "@/lib/nodemailer"
 
 export default function Signup() {
     const [name, setName] = useState("")
@@ -48,13 +50,15 @@ export default function Signup() {
             } else {
                 toast.error(data.error || "Signup failed")
                 setError(data.error)
+                setIsLoading(false)
             }
         } catch (error) {
             console.error(error)
             toast.error("An error occurred while signing up")
             setError("An unexpected error occurred")
-        } finally {
             setIsLoading(false)
+        } finally {
+            // setIsLoading(false)
         }
     }
 
@@ -106,7 +110,7 @@ export default function Signup() {
                         disabled={isLoading}
                         className="w-full bg-white text-black font-medium py-3 px-4 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {isLoading ? 'Creating Account...' : 'Create Account'}
+                        {isLoading ? <Spinner /> : 'Create Account'}
                     </button>
 
                     <div className="text-center pt-4 border-t border-gray-600">

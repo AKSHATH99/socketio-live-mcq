@@ -5,13 +5,15 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { toast } from "react-toastify"
 import { useSearchParams } from "next/navigation";
+import Spinner from "@/components/Spinner";
 
 export default function StudentSignup() {
 
     const [name , setName] = useState("")
     const [email , setEmail] = useState("")
     const [password , setPassword] = useState("")
-    const {error , isLoading , isSuccess} = useState(false)
+    const {error  , isSuccess} = useState(false)
+    const [loading, setLoading] = useState(false);
 
     const router = useRouter()
     const searchParams = useSearchParams()
@@ -41,6 +43,7 @@ export default function StudentSignup() {
             const data = await res.json()
             if (data.error) {
                 toast.error(data.error)
+                setLoading(false);
             } else {
                 toast.success("Signed up successfully")
                 setTimeout(() => {
@@ -50,6 +53,7 @@ export default function StudentSignup() {
         } catch (error) {
             console.error(error)
             toast.error("Error occured while signing up")
+            setLoading(false);
         }
     }
 
@@ -99,10 +103,10 @@ export default function StudentSignup() {
 
             <button 
                 type="submit" 
-                disabled={isLoading}
+                disabled={loading}
                 className="w-full bg-black dark:bg-white text-white dark:text-black font-medium py-3 px-4 rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-                {isLoading ? 'Creating Account...' : 'Create Account'}
+                {loading ? <Spinner />   : 'Create Account'}
             </button>
 
             <div className="text-center pt-4 border-t border-gray-300 dark:border-gray-600">
