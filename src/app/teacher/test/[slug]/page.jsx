@@ -1,11 +1,12 @@
 'use client'
-import { useEffect, useState } from "react";
+import { useEffect, useState , useRef } from "react";
 import { use } from "react";
-import { Plus, Play, FileText, Trophy, BarChart3, Calendar, Hash, ChevronDown, ChevronUp, HomeIcon } from "lucide-react";
+import { Plus, Play, FileText, Trophy, BarChart3, Calendar, Hash, ChevronDown, ChevronUp, HomeIcon, LogOut, Settings } from "lucide-react";
 import AddQuestionModal from "@/components/TestInterface/AddQuestionModal";
 import LiveTest from "@/components/TestInterface/LiveTest";
 import LeaderBoard from "@/components/TestInterface/LeaderBoard";
 import TestResult from "@/components/TestInterface/TestResult";
+import ThemeToggle from "@/components/ThemeToggler.jsx";
 
 import CreateRoomModal from "@/components/TeacherInterface/CreateRoomModal";
 export default function Test({ params }) {
@@ -21,7 +22,9 @@ export default function Test({ params }) {
     const [roomId, setRoomId] = useState("");
     const [testEnded, setTestEnded] = useState(false);
     const [openCreateRoomModal, setOpenCreateRoomModal] = useState(false);
+      const [openSettingsModal, setOpenSettingsModal] = useState(false);
 
+    const settingsRef = useRef(null);
     const fetchTestDetails = async () => {
         try {
             const res = await fetch(`/api/get-test`, {
@@ -94,6 +97,21 @@ export default function Test({ params }) {
         }
     }, [testEnded])
 
+      useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (settingsRef.current && !settingsRef.current.contains(event.target)) {
+        setOpenSettingsModal(false);
+      }
+    };
+
+    if (openSettingsModal) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [openSettingsModal]);
     if (loading) {
         return (
             <div className="min-h-screen bg-white flex items-center justify-center">
@@ -105,6 +123,7 @@ export default function Test({ params }) {
         );
     }
 
+    
     const tabs = [
         { id: "questions", label: "Questions", icon: FileText },
         { id: "Live Test", label: "Start Test", icon: Play },
@@ -114,6 +133,88 @@ export default function Test({ params }) {
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-black">
+            <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200 dark:bg-gray-900/95 dark:border-gray-800">
+                <div className="max-w-7xl mx-auto px-6 py-4">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <div>
+                                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                                    Teacher Dashboard
+                                </h1>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            {!roomId ? (
+                                <button
+                                    className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2 dark:bg-white dark:text-black dark:hover:bg-gray-200"
+                                    onClick={() => setOpenCreateRoomModal(true)}
+                                >
+                                    <Plus size={16} />
+                                    Create Room
+                                </button>
+                            ) : (
+                                <button
+                                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-500 transition-colors flex items-center gap-2 dark:bg-red-500 dark:hover:bg-red-400"
+                                    onClick={() => {
+
+                                        leaveRoom()
+
+                                    }}
+                                >
+                                    <LogOut size={16} />
+                                    Leave Room
+                                </button>
+                            )}
+                            <button
+                                className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center gap-2 dark:bg-gray-700 dark:hover:bg-gray-600"
+                                onClick={() => setOpenCreateTestModal(true)}
+                            >
+                                <Plus size={16} />
+                                Create Test
+                            </button>
+
+                            {/* Settings dropdown container with relative positioning and ref */}
+                            <div className="relative" ref={settingsRef}>
+                                <button
+                                    onClick={() => setOpenSettingsModal(!openSettingsModal)}
+                                    className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                >
+                                    <Settings className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+                                </button>
+
+                                {/* Settings dropdown menu */}
+                                {openSettingsModal && (
+                                    <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-10">
+                                        {/* Logout option */}
+                                        <button
+                                            className="w-full px-4 py-2 text-left text-red-600 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-2"
+                                            onClick={() => {
+                                                setOpenSettingsModal(false);
+                                            }}
+                                        >
+                                            <LogOut size={16} />
+                                            Logout
+                                        </button>
+
+                                        {/* Divider */}
+                                        <div className="border-t border-gray-200 dark:border-gray-600 my-2"></div>
+
+                                        {/* Theme toggle section */}
+                                        <div className="px-4 py-2">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                    Theme
+                                                </span>
+                                                <ThemeToggle />
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div className="max-w-7xl mx-auto">
                 {/* Fixed Header - Compact */}
                 {testdata && (
