@@ -4,7 +4,7 @@ import { io } from "socket.io-client";
 import LiveQuestion from "@/controllers/DisplayQuestionBox";
 import JoinRoomModal from "@/components/StudentInterface/JoinRoom";
 import Dashboard from "@/components/StudentInterface/Dashboard";
-import { Trophy, Target, BookOpen, Calendar, User, Award, Megaphone } from "lucide-react";
+import { Trophy, Target, BookOpen, Calendar, User, Award, Megaphone, Clock, FileText, Loader2, Users } from "lucide-react";
 import { useSearchParams } from 'next/navigation';
 import ThemeToggle from "@/components/ThemeToggler";
 import { useSocket } from "@/Contexts/SocketContexts";
@@ -29,6 +29,8 @@ export default function Student({ params }) {
     const [studentTestsWithPerformance, setStudentTestsWithPerformance] = useState([]);
     const [openLiveTestModal, setOpenLiveTestModal] = useState(false);
     const [studentStatus, setStudentStatus] = useState(false)
+    const [openLobby, setOpenLobby] = useState(false);
+    const [lobbyData, setLobbyData] = useState(null);
 
     const socket = useSocket();
 
@@ -77,6 +79,15 @@ export default function Student({ params }) {
     }
 
     const [currentRoomID, setCurrentRoomID] = useState("");
+
+
+    const formatDate = (dateString) => {
+        return new Date(dateString).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
+        });
+    };
 
     const fetchStudentTests = async (studentId) => {
         try {
@@ -133,6 +144,17 @@ export default function Student({ params }) {
         socket.on('receive-message', (data) => {
             console.log("📥 New message", data);
             setMessages((prev) => [...prev, data.message]);
+        });
+
+        socket.on('open-student-lobby', (testData) => {
+            setOpenLobby(true);
+            console.log(`🔵 Student lobby opened for room with data of question ${testData}`);
+            setLobbyData(testData);
+        })
+
+        socket.on('close-student-lobby', () => {
+            setOpenLobby(false);
+            console.log(`🔴 Student lobby closed`);
         });
 
         socket.on("recieve-questions", (questions) => {
@@ -360,6 +382,97 @@ export default function Student({ params }) {
                 isJoining={isJoining}
                 joinRoomFromParams={roomId}
             />
+
+            {
+                openLobby && (
+                    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm z-50 p-4">
+                        <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full border border-gray-200">
+                            {/* Header */}
+                            <div className="bg-gray-900 text-white rounded-t-xl px-8 py-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="bg-gray-900 p-2 rounded-lg">
+                                        {/* <FileText className="w-5 h-5" /> */}
+                                    </div>
+                                    {/* <h2 className="text-xl font-semibold">Test Lobby</h2> */}
+                                </div>
+                            </div>
+
+                            {/* Content */}
+                            <div className="p-6">
+                                {/* Status indicator */}
+                                <div className="flex items-center justify-center gap-3 bg-gray-50 rounded-lg py-3 px-6 mb-6">
+                                    <Loader2 className="w-5 h-5 text-gray-600 animate-spin" />
+                                    <span className="text-gray-700 font-medium">
+                                        Waiting for administrator to start the test
+                                    </span>
+                                </div>
+
+                                {/* Test details in grid */}
+                                <div className="grid grid-cols-3 gap-6 mb-6">
+                                    <div className="flex items-center gap-3">
+                                        <div className="bg-gray-100 p-2 rounded-lg">
+                                            <FileText className="w-4 h-4 text-gray-600" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <h3 className="font-medium text-gray-900 text-sm">Test Title</h3>
+                                            <p className="text-gray-700 text-sm">{lobbyData?.title}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-3">
+                                        <div className="bg-gray-100 p-2 rounded-lg">
+                                            <Calendar className="w-4 h-4 text-gray-600" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <h3 className="font-medium text-gray-900 text-sm">Created</h3>
+                                            <p className="text-gray-700 text-sm">{formatDate(lobbyData?.createdAt)}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-3">
+                                        <div className="bg-gray-100 p-2 rounded-lg">
+                                            <Users className="w-4 h-4 text-gray-600" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <h3 className="font-medium text-gray-900 text-sm">Status</h3>
+                                            <p className="text-gray-700 text-sm">Connected</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Description */}
+                                <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                                    <div className="flex items-start gap-3">
+                                        <User className="w-4 h-4 text-gray-600 mt-0.5" />
+                                        <div>
+                                            <h4 className="font-medium text-gray-900 text-sm mb-1">Description</h4>
+                                            <p className="text-gray-700 text-sm">{lobbyData?.description}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Instructions - compact */}
+                                <div className="flex items-start gap-3 bg-gray-50 rounded-lg p-4">
+                                    <Clock className="w-4 h-4 text-gray-600 mt-0.5" />
+                                    <div className="flex-1">
+                                        <h4 className="font-medium text-gray-900 text-sm mb-1">Instructions</h4>
+                                        <p className="text-sm text-gray-700">
+                                            Stay on this page • Ensure stable connection • Close other tabs • Have materials ready
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Footer */}
+                            <div className="bg-gray-50 rounded-b-xl px-6 py-3 border-t border-gray-200">
+                                <p className="text-center text-sm text-gray-600">
+                                    The test will begin automatically once started by your administrator
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
         </div>
     );
 }

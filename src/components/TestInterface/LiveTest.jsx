@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
-import { Loader2, Clock, Trophy, Users , Play } from "lucide-react";
+import { Loader2, Clock, Trophy, Users, Play, User , Shield ,FileText, Calendar, X} from "lucide-react";
 import { useSocket } from "@/Contexts/SocketContexts";
 
-const LiveTest = ({ testid, isTestLive, startTest , setIsTestLive , testEnded , setTestEnded }) => {
+const LiveTest = ({ testid, isTestLive, startTest, setIsTestLive, testEnded, setTestEnded, testData }) => {
     // const socketRef = useRef();
     const [roomId, setRoomId] = useState("");
     const [questions, setQuestions] = useState([]);
@@ -12,7 +12,15 @@ const LiveTest = ({ testid, isTestLive, startTest , setIsTestLive , testEnded , 
     const timerRef = useRef(null);
     const [leaderboard, setLeaderboard] = useState([]);
     const [testId, setTestId] = useState(testid);
+    const [showLobby, setShowLobby] = useState(false);
+    const [liveStudentList, setLiveStudentList] = useState([])
     const socket = useSocket();
+
+    useEffect(() => {
+        if (testData) {
+            console.log("Test data received:", testData);
+        };
+    }, []);
 
     useEffect(() => {
         setTestId(testid);
@@ -21,6 +29,8 @@ const LiveTest = ({ testid, isTestLive, startTest , setIsTestLive , testEnded , 
         const currentRoom = localStorage.getItem('roomId');
 
         socket.emit('join-room', currentRoom);
+
+        socket.emit('lobby-status-update', currentRoom);
 
         socket.on('connect', () => {
             console.log('connected from teacher side', socket.id);
@@ -61,6 +71,12 @@ const LiveTest = ({ testid, isTestLive, startTest , setIsTestLive , testEnded , 
             setTestEnded(true);
         });
 
+        socket.on('lobby-status', (data) => {
+            console.log("lobby status", data);
+            // Update your state here if needed
+            setLiveStudentList(data)
+        });
+
         setRoomId(currentRoom);
 
         return () => {
@@ -71,6 +87,25 @@ const LiveTest = ({ testid, isTestLive, startTest , setIsTestLive , testEnded , 
         };
     }, [socket]);
 
+    useEffect(() => {
+        if (showLobby && testData) {
+            console.log("showing lobby");
+            console.log("test data in lobby", testData);
+            socket.emit('open-student-lobby', { testData, roomId: roomId });
+        }
+        if(showLobby=== false) {
+            socket.emit('close-student-lobby', { roomId: roomId });
+        }
+    }, [showLobby, testData]);
+
+    const formatDate = (dateString) => {
+        return new Date(dateString).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
+        });
+    };
+
     const formatTime = (seconds) => {
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
@@ -80,8 +115,6 @@ const LiveTest = ({ testid, isTestLive, startTest , setIsTestLive , testEnded , 
     const getCurrentQuestion = () => {
         return questions[currentQuestionIndex];
     };
-
-
 
     const fetchLeaderboard = async () => {
         console.log("fetching leaderboard")
@@ -102,7 +135,7 @@ const LiveTest = ({ testid, isTestLive, startTest , setIsTestLive , testEnded , 
     };
 
     return (
-<div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
             <div className="max-w-7xl mx-auto relative">
                 {/* Header */}
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-6">
@@ -142,7 +175,7 @@ const LiveTest = ({ testid, isTestLive, startTest , setIsTestLive , testEnded , 
                             <div className="space-y-4">
                                 {isTestLive ? (
                                     questions.map((question, index) => (
-                                        <div  className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                        <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
                                             <div className="flex items-center justify-between">
                                                 <div className="flex-1">
                                                     <h3 className="font-medium text-gray-800 dark:text-gray-100">
@@ -204,8 +237,8 @@ const LiveTest = ({ testid, isTestLive, startTest , setIsTestLive , testEnded , 
                             </h2>
 
 
-                            <button 
-                                className="border border-black dark:border-gray-600 rounded-lg px-4 py-2 mb-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-black dark:text-white" 
+                            <button
+                                className="border border-black dark:border-gray-600 rounded-lg px-4 py-2 mb-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-black dark:text-white"
                                 onClick={() => { fetchLeaderboard() }}
                             >
                                 Refresh Leaderboard
@@ -249,7 +282,9 @@ const LiveTest = ({ testid, isTestLive, startTest , setIsTestLive , testEnded , 
                     <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 dark:bg-black dark:bg-opacity-50 rounded-lg">
                         <div className="text-center">
                             <button
-                                onClick={() => startTest(testid)}
+                                // onClick={() => startTest(testid)}
+                                onClick={() => { setShowLobby(true); }}
+
                                 className="px-8 py-4 bg-black dark:bg-gray-700 text-white rounded-xl shadow-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition transform hover:scale-105 text-lg font-medium"
                             >
                                 <Play className="inline-block mr-2" />
@@ -259,6 +294,147 @@ const LiveTest = ({ testid, isTestLive, startTest , setIsTestLive , testEnded , 
                         </div>
                     </div>
                 )}
+                {
+                    showLobby && (
+                        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm z-50 p-4">
+                            <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full border border-gray-200">
+                                {/* Header */}
+                                <div className="bg-gray-900 text-white rounded-t-xl px-6 py-4">
+                                    <div className="flex items-center justify-between">
+                                        <X onClick={() => setShowLobby(false)} className="w-5 h-5 text-gray-400 hover:text-gray-200 cursor-pointer" />
+                                        {/* <div className="flex items-center gap-3">
+                                            <div className="bg-gray-700 p-2 rounded-lg">
+                                                <Shield className="w-5 h-5" />
+                                            </div>
+                                            <h2 className="text-xl font-semibold">Admin Lobby</h2>
+                                        </div> */}
+                                        <div className="flex items-center gap-2 text-sm">
+                                            {/* <Clock className="w-4 h-4" /> */}
+                                            {/* <span>Ready to start</span> */}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Content */}
+                                <div className="p-6">
+                                    {/* Status and Action */}
+                                    <div className="flex items-center justify-between bg-gray-50 rounded-lg p-4 mb-6">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-3 h-3 bg-yellow-500 rounded-full animate-pulse"></div>
+                                            <span className="text-gray-700 font-medium">
+                                                You are about to start the test. Please ensure all students are ready.
+                                            </span>
+                                        </div>
+                                        <button
+                                            onClick={() => {
+                                                setShowLobby(false);
+                                                startTest("testid");
+                                            }}
+                                            className="px-6 py-2 bg-gray-900 text-white rounded-lg shadow-lg hover:bg-gray-700 transition-all duration-200 transform hover:scale-105 flex items-center gap-2 font-medium"
+                                        >
+                                            <Play className="w-4 h-4" />
+                                            Start Test
+                                        </button>
+                                    </div>
+
+                                    {/* Test Details Grid */}
+                                    <div className="grid grid-cols-3 gap-4 mb-6">
+                                        <div className="flex items-center gap-3">
+                                            <div className="bg-gray-100 p-2 rounded-lg">
+                                                <FileText className="w-4 h-4 text-gray-600" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <h3 className="font-medium text-gray-900 text-sm">Test Title</h3>
+                                                <p className="text-gray-700 text-sm">{testData?.title}</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center gap-3">
+                                            <div className="bg-gray-100 p-2 rounded-lg">
+                                                <Calendar className="w-4 h-4 text-gray-600" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <h3 className="font-medium text-gray-900 text-sm">Created</h3>
+                                                <p className="text-gray-700 text-sm">{formatDate(testData?.createdAt)}</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center gap-3">
+                                            <div className="bg-gray-100 p-2 rounded-lg">
+                                                <Users className="w-4 h-4 text-gray-600" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <h3 className="font-medium text-gray-900 text-sm">Students Online</h3>
+                                                <p className="text-gray-700 text-sm">
+                                                    {Object.values(liveStudentList).filter(Boolean).length} connected
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-6">
+                                        {/* Description */}
+                                        <div className="bg-gray-50 rounded-lg p-4">
+                                            <div className="flex items-start gap-3">
+                                                <FileText className="w-4 h-4 text-gray-600 mt-0.5" />
+                                                <div>
+                                                    <h4 className="font-medium text-gray-900 text-sm mb-1">Description</h4>
+                                                    <p className="text-gray-700 text-sm">{testData?.description}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Connected Students */}
+                                        <div className="bg-gray-50 rounded-lg p-4">
+                                            <div className="flex items-center justify-between mb-3">
+                                                <div className="flex items-center gap-2">
+                                                    <Users className="w-4 h-4 text-gray-600" />
+                                                    <h4 className="font-medium text-gray-900 text-sm">Connected Students</h4>
+                                                </div>
+                                                <span className="text-xs text-gray-500">
+                                                    {Object.values(liveStudentList).filter(Boolean).length} online
+                                                </span>
+                                            </div>
+
+                                            <div className="space-y-2 max-h-32 overflow-y-auto">
+                                                {Object.entries(liveStudentList).map(([key, value]) => (
+                                                    value ? (
+                                                        <div key={key} className="flex items-center justify-between p-2 bg-white rounded border border-gray-200">
+                                                            <div className="flex items-center gap-2">
+                                                                <div className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center">
+                                                                    <User size={12} className="text-gray-600" />
+                                                                </div>
+                                                                <span className="text-sm font-medium text-gray-900">{key}</span>
+                                                            </div>
+                                                            <div className="flex items-center gap-1">
+                                                                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                                                <span className="text-xs text-gray-600">Online</span>
+                                                            </div>
+                                                        </div>
+                                                    ) : null
+                                                ))}
+
+                                                {Object.values(liveStudentList).filter(Boolean).length === 0 && (
+                                                    <div className="text-center py-4 text-gray-500">
+                                                        <Users size={24} className="mx-auto mb-1 opacity-50" />
+                                                        <p className="text-xs">No students connected</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Footer */}
+                                <div className="bg-gray-50 rounded-b-xl px-6 py-3 border-t border-gray-200">
+                                    <p className="text-center text-sm text-gray-600">
+                                        Click "Start Test" when all students are ready and connected
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                }
                 {testEnded && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-70 dark:bg-black dark:bg-opacity-80 rounded-lg">
                         <div className="text-center p-6 bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full mx-4">

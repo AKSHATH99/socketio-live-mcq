@@ -2,7 +2,7 @@ const lobbyStatus = {};
 
 
 module.exports = function handleRoomSocket(io, socket) {
-  socket.on('join-room', (roomId, userId, role ) => {
+  socket.on('join-room', (roomId, userId, role) => {
     socket.join(roomId);
     console.log(`🟢 ${role} -  ${userId} joined room ${roomId}`);
 
@@ -19,6 +19,22 @@ module.exports = function handleRoomSocket(io, socket) {
     }
   });
 
+  socket.on('lobby-status-update', (roomId) => {
+    if (!lobbyStatus[roomId]) return;
+
+    io.to(roomId).emit('lobby-status', lobbyStatus[roomId]);
+  });
+
+  socket.on('open-student-lobby', ({ testData, roomId }) => {
+    io.to(roomId).emit('open-student-lobby', testData); // This sends to all sockets in the room
+    console.log(`🔵 Student lobby opened for room with data of question ${testData}`);
+  });
+
+  socket.on('close-student-lobby', ({ roomId }) => {
+    io.to(roomId).emit('close-student-lobby');
+    console.log(`🔴 Student lobby closed for room ${roomId}`);
+  });
+
   socket.on('student-ready', ({ roomId, studentName }) => {
     if (!lobbyStatus[roomId]) return;
 
@@ -26,7 +42,7 @@ module.exports = function handleRoomSocket(io, socket) {
 
     io.to(roomId).emit('lobby-status', lobbyStatus[roomId]);
     console.log("lobby status2", lobbyStatus)
-    console.log(studentName,"ready in ",roomId)
+    console.log(studentName, "ready in ", roomId)
 
     const allReady = Object.values(lobbyStatus[roomId]).every(status => status === true);
 

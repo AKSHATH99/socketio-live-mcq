@@ -412,7 +412,7 @@ export default function Test({ params }) {
                                     </div>
                                 )}
 
-                                {activeTab === "Live Test" && <LiveTest testEnded={testEnded} setTestEnded={setTestEnded} testid={testId} setIsTestLive={setIsTestLive} isTestLive={isTestLive} startTest={startTest} />}
+                                {activeTab === "Live Test" && <LiveTest testEnded={testEnded}  setTestEnded={setTestEnded} testid={testId} testData= {testdata} setIsTestLive={setIsTestLive} isTestLive={isTestLive} startTest={startTest} />}
                                 {activeTab === "Test Results" && <TestResult testId={testId} />}
                                 {activeTab === "Leaderboard" && <LeaderBoard testId={testId} />}
                             </div>
