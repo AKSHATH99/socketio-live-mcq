@@ -440,11 +440,14 @@ const LiveTest = ({ testid, isTestLive, startTest, setIsTestLive, testEnded, set
                         <div className="text-center p-6 bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full mx-4">
                             <Trophy className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
                             <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">Test Completed!</h3>
-                            <p className="text-gray-600 dark:text-gray-400 mb-6">You've successfully completed the test. Redirecting to results...</p>
-                            <div className="flex justify-center items-center space-x-2">
+                            <p className="text-gray-600 dark:text-gray-400 mb-6">Successfully completed the test. Redirecting to results...</p>
+                            {/* <div className="flex justify-center items-center space-x-2">
                                 <Loader2 className="h-5 w-5 text-blue-600 dark:text-blue-400 animate-spin" />
                                 <span className="text-sm text-gray-500 dark:text-gray-400">Preparing your results</span>
-                            </div>
+                            </div> */}
+                            <button>
+                                
+                            </button>
                         </div>
                     </div>
                 )}
