@@ -46,8 +46,9 @@ export default function Student({ params }) {
     }, []);
 
     useEffect(() => {
-        console.log(studentData)
-    }, [studentData])
+        console.log("reloading the mf page")
+        getStudentDetailsById();
+    }, [])
 
     const getStudentDetailsById = async () => {
         try {
@@ -368,6 +369,7 @@ export default function Student({ params }) {
                                 TestEnded={TestEnded}
                                 openLiveTestModal={openLiveTestModal}
                                 setOpenLiveTestModal={setOpenLiveTestModal}
+                                fetchStudentDetailsById={getStudentDetailsById}
                             />
                         </div>
                     </div>

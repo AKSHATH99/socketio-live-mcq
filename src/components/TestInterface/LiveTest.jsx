@@ -328,7 +328,7 @@ const LiveTest = ({ testid, isTestLive, startTest, setIsTestLive, testEnded, set
                                         <button
                                             onClick={() => {
                                                 setShowLobby(false);
-                                                startTest("testid");
+                                                startTest(testid);
                                             }}
                                             className="px-6 py-2 bg-gray-900 text-white rounded-lg shadow-lg hover:bg-gray-700 transition-all duration-200 transform hover:scale-105 flex items-center gap-2 font-medium"
                                         >

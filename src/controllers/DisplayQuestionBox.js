@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-export default function LiveQuestion({ question, onAnswer, studentId, studentName,TestEnded ,openLiveTestModal , setOpenLiveTestModal }) {
+export default function LiveQuestion({fetchStudentDetailsById, question, onAnswer, studentId, studentName,TestEnded ,openLiveTestModal , setOpenLiveTestModal }) {
   const [timer, setTimer] = useState(question?.timer || 10);
   const [selected, setSelected] = useState(null);
   const [disabled, setDisabled] = useState(false);
@@ -180,7 +180,10 @@ export default function LiveQuestion({ question, onAnswer, studentId, studentNam
               <h2 className="text-2xl font-bold">Test Session Ended</h2>
               {/* X Close Button in top right */}
               <button 
-                onClick={() => {setOpenLiveTestModal(false)}}
+                onClick={() => {
+                  setOpenLiveTestModal(false);
+                  fetchStudentDetailsById();
+                }}
                 className="text-white hover:text-gray-200 transition-colors duration-200 p-1 rounded-full hover:bg-white hover:bg-opacity-20"
                 aria-label="Close modal"
               >
@@ -225,7 +228,10 @@ export default function LiveQuestion({ question, onAnswer, studentId, studentNam
 
               {/* Action Button */}
               <button 
-                onClick={() => {setOpenLiveTestModal(false)}}
+                onClick={() => {
+                  setOpenLiveTestModal(false);
+                  fetchStudentDetailsById();
+                }}
                 className="w-full bg-black hover:bg-gray-800 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-[1.02] shadow-lg"
               >
                 Go to Dashboard
