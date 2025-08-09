@@ -5,7 +5,6 @@ import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { toast } from "react-toastify"
 import Spinner from "@/components/Spinner"
-import { set } from "@/lib/nodemailer"
 
 export default function Signup() {
     const [name, setName] = useState("")

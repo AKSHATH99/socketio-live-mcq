@@ -156,7 +156,7 @@ export default function Home() {
 
                 {/* Benefits Preview */}
                 <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
-                  <h4 className="font-medium text-black dark:text-white mb-3">What you'll get:</h4>
+                  <h4 className="font-medium text-black dark:text-white mb-3">What you&apos;s ll get:</h4>
                   <ul className="space-y-2">
                     {benefits[userType].map((benefit, index) => (
                       <li key={index} className="text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2">
