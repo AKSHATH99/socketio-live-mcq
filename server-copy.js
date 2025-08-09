@@ -1,3 +1,4 @@
+
 // server.js
 const express = require('express');
 const next = require('next');
@@ -5,9 +6,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
-
-// Ensure PORT is a valid port number
-const port = parseInt(process.env.PORT, 10) || 3000;
+const port = process.env.PORT || 3000;
 const dev = process.env.NODE_ENV !== 'production';
 
 // Initialize Next.js app with custom configuration to avoid routing issues
@@ -24,46 +23,30 @@ const handleRoomSocket = require('./socketHandlers/room');
 const handleQuestionSocket = require('./socketHandlers/questions');
 const handleChatSocket = require('./socketHandlers/chat');
 const testRoutes = require('./src/routes/testRoutes.js');
-const handleAnswerValidation = require('./socketHandlers/answer');
-
+const handleAnswerValidation = require('./socketHandlers/answer')
 console.log('Starting Next.js app preparation...');
-console.log(`Environment: ${process.env.NODE_ENV}`);
-console.log(`Port: ${port}`);
 
 app.prepare()
   .then(() => {
     console.log('Next.js app prepared successfully');
+
     const expressApp = express();
 
     // Middleware
     expressApp.use(express.json());
     expressApp.use(cookieParser());
-
-    // CORS configuration for production
-    const corsOrigin = process.env.NODE_ENV === 'production'
-      ? [process.env.FRONTEND_URL, `https://socketio-live-mcq.onrender.com`].filter(Boolean)
-      : 'http://localhost:3000';
-
     expressApp.use(cors({
-      origin: corsOrigin,
-      credentials: true
+        origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+        credentials: true
     }));
 
     // Create HTTP server
     const server = http.createServer(expressApp);
-
-    // Socket.io configuration for production
     const io = new Server(server, {
       cors: {
-        origin: process.env.NODE_ENV === 'production'
-          ? [process.env.FRONTEND_URL, `https://socketio-live-mcq.onrender.com`].filter(Boolean)
-          : "*",
-        methods: ["GET", "POST"],
-        credentials: true
-      },
-      // Additional production settings
-      transports: ['websocket', 'polling'],
-      allowEIO3: true
+        origin: "*",
+        methods: ["GET", "POST"]
+      }
     });
 
     // Socket.io connection handling
@@ -83,12 +66,7 @@ app.prepare()
 
     // Health check endpoint (put this first)
     expressApp.get('/health', (req, res) => {
-      res.json({
-        status: 'OK',
-        timestamp: new Date().toISOString(),
-        port: port,
-        env: process.env.NODE_ENV
-      });
+      res.json({ status: 'OK', timestamp: new Date().toISOString() });
     });
 
     // Mount API routes from external file
@@ -99,12 +77,10 @@ app.prepare()
       return handle(req, res);
     });
 
-    // Listen on all interfaces (0.0.0.0) for Render
-    server.listen(port, '0.0.0.0', (err) => {
+    server.listen(port, (err) => {
       if (err) throw err;
-      console.log(`> Ready on port ${port}`);
-      console.log(`> Health check available at /health`);
-      console.log(`> Environment: ${process.env.NODE_ENV}`);
+      console.log(`> Ready on http://localhost:${port}`);
+      console.log(`> Health check: http://localhost:${port}/health`);
     });
   })
   .catch((ex) => {
