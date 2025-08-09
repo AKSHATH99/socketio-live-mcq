@@ -9,7 +9,7 @@ export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    const socketInstance = io('https://socketio-live-mcq.onrender.com', {
+    const socketInstance = io('https://socketio-live-mcq.onrender.com', { 
       withCredentials: true,
     });
 
