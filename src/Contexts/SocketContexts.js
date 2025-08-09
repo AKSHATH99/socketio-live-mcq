@@ -9,10 +9,12 @@ export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    const socketInstance = io('https://socketio-live-mcq.onrender.com', { 
+    const socketURL = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
+
+    const socketInstance = io(socketURL, {
       withCredentials: true,
     });
-
+    
     setSocket(socketInstance);
 
     return () => {
