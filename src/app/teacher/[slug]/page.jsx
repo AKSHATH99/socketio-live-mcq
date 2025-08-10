@@ -63,28 +63,28 @@ export default function Teacher({ params }) {
     };
   }, [openSettingsModal]);
   // Fetch teacher data when component mounts
-  const fetchTeacherData = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/teacher/${teacherId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      const data = await response.json();
-      if (data.teacher) {
-        setTeacherData(data.teacher);
-      }
-    } catch (error) {
-      console.error('Error fetching teacher data:', error);
-    }
-  };
+  // const fetchTeacherData = async () => {
+  //   try {
+  //     const token = localStorage.getItem('token');
+  //     const response = await fetch(`/api/teacher/${teacherId}`, {
+  //       headers: {
+  //         'Authorization': `Bearer ${token}`
+  //       }
+  //     });
+  //     const data = await response.json();
+  //     if (data.teacher) {
+  //       setTeacherData(data.teacher);
+  //     }
+  //   } catch (error) {
+  //     console.error('Error fetching teacher data:', error);
+  //   }
+  // };
 
 
   useEffect(() => {
     if (teacherId) {
       fetchTests();
-      fetchTeacherData();
+      // fetchTeacherData();
     }
   }, [teacherId]);
 
