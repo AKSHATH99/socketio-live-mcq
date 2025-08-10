@@ -53,7 +53,7 @@ export default function Student({ params }) {
     const getStudentDetailsById = async () => {
         try {
             setIsLoading(true);
-            const res = await fetch("http://localhost:3000/api/get-student-detail", {
+            const res = await fetch("/api/get-student-detail", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -93,7 +93,7 @@ export default function Student({ params }) {
 
     const fetchStudentTests = async (studentId) => {
         try {
-            const response = await fetch('http://localhost:3000/api/get-student-tests', {
+            const response = await fetch('/api/get-student-tests', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -110,7 +110,7 @@ export default function Student({ params }) {
 
     const fetchStudentTestsWithPerformance = async (studentId) => {
         try {
-            const response = await fetch('http://localhost:3000/api/get-student-tests-with-performance', {
+            const response = await fetch('/api/get-student-tests-with-performance', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
