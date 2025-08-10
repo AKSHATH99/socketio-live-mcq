@@ -58,6 +58,7 @@ export default function Student({ params }) {
                 headers: {
                     "Content-Type": "application/json"
                 },
+                credentials: 'include',
                 body: JSON.stringify({ id: studentId })
             });
             const data = await res.json();
