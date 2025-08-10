@@ -127,7 +127,7 @@ export default function Teacher({ params }) {
 
   const fetchTests = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/get-teacher-tests", {
+      const res = await fetch("/api/get-teacher-tests", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
