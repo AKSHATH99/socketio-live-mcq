@@ -1,20 +1,18 @@
-// server.js
 const express = require('express');
 const next = require('next');
 const http = require('http');
 const { Server } = require('socket.io');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
+const passport = require('passport');
+require('./src/lib/googleAuth.js'); // Load strategy
 
-// Ensure PORT is a valid port number
 const port = parseInt(process.env.PORT, 10) || 3000;
 const dev = process.env.NODE_ENV !== 'production';
 
-// Initialize Next.js app with custom configuration to avoid routing issues
 const app = next({
   dev,
   conf: {
-    // Disable file-system routing that might be causing the issue
     useFileSystemPublicRoutes: true,
   }
 });
@@ -38,8 +36,8 @@ app.prepare()
     // Middleware
     expressApp.use(express.json());
     expressApp.use(cookieParser());
+    expressApp.use(passport.initialize());
 
-    // CORS configuration for production
     const corsOrigin = process.env.NODE_ENV === 'production'
       ? [process.env.FRONTEND_URL, `https://socketio-live-mcq.onrender.com`].filter(Boolean)
       : 'http://localhost:3000';
@@ -49,10 +47,8 @@ app.prepare()
       credentials: true
     }));
 
-    // Create HTTP server
     const server = http.createServer(expressApp);
 
-    // Socket.io configuration for production
     const io = new Server(server, {
       cors: {
         origin: process.env.NODE_ENV === 'production'
@@ -61,7 +57,6 @@ app.prepare()
         methods: ["GET", "POST"],
         credentials: true
       },
-      // Additional production settings
       transports: ['websocket', 'polling'],
       allowEIO3: true
     });
@@ -81,7 +76,6 @@ app.prepare()
       });
     });
 
-    // Health check endpoint (put this first)
     expressApp.get('/health', (req, res) => {
       res.json({
         status: 'OK',
@@ -91,15 +85,13 @@ app.prepare()
       });
     });
 
-    // Mount API routes from external file
+    expressApp.use('/api/auth', require('./src/routes/authRoutes.js'));
     expressApp.use('/api', testRoutes(io));
 
-    // Let Next.js handle everything else - this was working before
     expressApp.use((req, res) => {
       return handle(req, res);
     });
 
-    // Listen on all interfaces (0.0.0.0) for Render
     server.listen(port, '0.0.0.0', (err) => {
       if (err) throw err;
       console.log(`> Ready on port ${port}`);
