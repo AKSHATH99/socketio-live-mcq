@@ -124,7 +124,7 @@ const AddQuestionModal = ({ testid, onClose }) => {
                     timer: question.timer || 0
                 };
 
-                const response = await fetch('http://localhost:3000/api/add-question', {
+                const response = await fetch('/api/add-question', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

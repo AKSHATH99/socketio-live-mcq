@@ -12,7 +12,7 @@ const LeaderBoard = ({ testId }) => {
         console.log("fetching leaderboard");
         
         try {
-            const res = await fetch("http://localhost:3000/api/get-leaderboard", {
+            const res = await fetch("/api/get-leaderboard", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"

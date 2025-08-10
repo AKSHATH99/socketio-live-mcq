@@ -68,7 +68,7 @@ export default function Test({ params }) {
                 setOpenCreateRoomModal(true);
                 return;
             }
-            const res = await fetch("http://localhost:3000/api/live-test", {
+            const res = await fetch("/api/live-test", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"

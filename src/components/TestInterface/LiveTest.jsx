@@ -119,7 +119,7 @@ const LiveTest = ({ testid, isTestLive, startTest, setIsTestLive, testEnded, set
     const fetchLeaderboard = async () => {
         console.log("fetching leaderboard")
         try {
-            const res = await fetch("http://localhost:3000/api/get-live-leaderboard", {
+            const res = await fetch("/api/get-live-leaderboard", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"

@@ -4,7 +4,7 @@ import { Copy } from "lucide-react";
 
 const CreateRoomModal = ({ onCreateRoom, roomId, setRoomId, onClose, roomCreated }) => {
     const [copied, setCopied] = useState(false);
-    const link = `http://localhost:3000/student/joinRoom?roomId=${roomId}`
+    const link = `/student/joinRoom?roomId=${roomId}`
 
     const handleCopy = async () => {
         try {

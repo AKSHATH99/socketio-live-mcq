@@ -102,7 +102,7 @@ export default function Teacher({ params }) {
 
   const createTest = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/test", {
+      const res = await fetch("/api/test", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -149,7 +149,7 @@ export default function Teacher({ params }) {
 
   const startTest = async (testId) => {
     try {
-      const res = await fetch("http://localhost:3000/api/live-test", {
+      const res = await fetch("/api/live-test", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -170,7 +170,7 @@ export default function Teacher({ params }) {
 
   const fetchLeaderboard = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/get-leaderboard", {
+      const res = await fetch("/api/get-leaderboard", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
