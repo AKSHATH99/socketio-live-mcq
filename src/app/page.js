@@ -1,7 +1,7 @@
 'use client'
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { Clock, BarChart3, Trophy, CheckCircle, ArrowRight, Users, Zap, Target, Mail, GraduationCap, BookOpen } from "lucide-react";
+import { useState , useEffect} from "react";
+import { Clock, BarChart3, Trophy, CheckCircle, ArrowRight, Users, Zap, Target, Mail, GraduationCap, BookOpen, Sparkles, Star, Globe, Shield } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggler";
 
 export default function Home() {
@@ -9,11 +9,21 @@ export default function Home() {
   const [userType, setUserType] = useState("student");
   const [email, setEmail] = useState("");
   const [isValidEmail, setIsValidEmail] = useState(false);
+  const [theme , setTheme] = useState("light");
+
+  const isDark = document.documentElement.classList.contains("dark");
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
+
+  useEffect(()=>{
+    const theme = localStorage.getItem("theme");
+    if (theme) {
+      setTheme(theme);
+    }
+  }, [])
 
   const handleEmailChange = (e) => {
     const newEmail = e.target.value;
@@ -65,30 +75,32 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
-      {/* Header Navigation */}
-      <nav className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
+      {/* Enhanced Header Navigation */}
+      <nav className="backdrop-blur-xl bg-white/80 dark:bg-gray-900/80 border-b border-gray-200/50 dark:border-gray-800/50 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex justify-between items-center h-20">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="text-2xl font-bold text-black dark:text-white">MCQ<span className="text-gray-600 dark:text-gray-400">Live</span></div>
+                <div className="text-3xl font-bold bg-gradient-to-r from-black to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                  MCQ<span className="text-gray-600 dark:text-gray-400">Live</span>
+                </div>
               </div>
             </div>
             <div className="flex items-center space-x-4">
               <ThemeToggle />
               <button
-                className="bg-white dark:bg-gray-800 text-black dark:text-white border border-gray-300 dark:border-gray-600 px-6 py-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 font-medium flex items-center gap-2"
+                className="group bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-black dark:text-white border border-gray-300/50 dark:border-gray-600/50 px-6 py-3 rounded-xl hover:bg-white dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-all duration-300 font-semibold flex items-center gap-2 hover:shadow-lg hover:shadow-gray-200/50 dark:hover:shadow-gray-800/50"
                 onClick={() => router.push("student/auth/signin")}
               >
-                <Users className="w-4 h-4" />
+                <Users className="w-4 h-4 group-hover:scale-110 transition-transform" />
                 Student Login
               </button>
               <button
-                className="bg-black dark:bg-white text-white dark:text-black px-6 py-2 rounded-md hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors duration-200 font-medium flex items-center gap-2"
+                className="group bg-gradient-to-r from-black to-gray-900 dark:from-white dark:to-gray-200 text-white dark:text-black px-6 py-3 rounded-xl hover:from-gray-900 hover:to-black dark:hover:from-gray-200 dark:hover:to-white transition-all duration-300 font-semibold flex items-center gap-2 hover:shadow-lg hover:shadow-black/25 dark:hover:shadow-white/25 hover:-translate-y-0.5"
                 onClick={() => router.push("teacher/auth/signin")}
               >
-                <Target className="w-4 h-4" />
+                <Target className="w-4 h-4 group-hover:scale-110 transition-transform" />
                 Teacher Login
               </button>
             </div>
@@ -96,84 +108,102 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="py-20 bg-gradient-to-b from-gray-50 to-white dark:from-gray-800 dark:to-gray-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Enhanced Hero Section */}
+      <section className="relative py-32 overflow-hidden">
+        {/* Background decorations - Gray only */}
+        <div className="absolute inset-0">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-gray-300/20 dark:bg-gray-600/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute top-40 right-10 w-96 h-96 bg-gray-400/20 dark:bg-gray-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute bottom-20 left-1/2 w-80 h-80 bg-gray-200/20 dark:bg-gray-700/20 rounded-full blur-3xl animate-pulse delay-2000"></div>
+        </div>
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-5xl md:text-6xl font-bold text-black dark:text-white mb-6 leading-tight">
+            {/* Floating badges */}
+            <div className="flex justify-center mb-8">
+            </div>
+
+            <h1 className="text-6xl md:text-8xl font-black text-black dark:text-white mb-8 leading-none tracking-tight">
               Create Live MCQ Tests
-              <span className="block text-gray-600 dark:text-gray-400">In Minutes</span>
+              <span className="block bg-gradient-to-r from-gray-600 via-gray-500 to-gray-700 dark:from-gray-400 dark:via-gray-300 dark:to-gray-500 bg-clip-text text-transparent">
+                In Minutes
+              </span>
             </h1>
-            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">
+
+            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed">
               Move beyond Google Forms with <strong className="text-black dark:text-white">live MCQ assessments</strong> that show
               real-time participation, instant scoring, and dynamic leaderboards. Watch students compete live
               while you get immediate results.
             </p>
 
             {/* Enhanced Login Form */}
-            <div className="max-w-lg mx-auto">
-              <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-xl dark:hover:shadow-2xl">
+            <div className="max-w-xl mx-auto">
+              <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl p-10 rounded-3xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50 transition-all duration-500 hover:shadow-3xl hover:bg-white/80 dark:hover:bg-gray-800/80">
                 {/* Header */}
-                <div className="text-center mb-8">
-                  <h3 className="text-2xl font-bold text-black dark:text-white mb-2">Get Started</h3>
-                  <p className="text-gray-600 dark:text-gray-400">Create your account to begin</p>
+                <div className="text-center mb-10">
+                  <h3 className="text-3xl font-bold text-black dark:text-white mb-3">Get Started</h3>
+                  <p className="text-gray-600 dark:text-gray-400 text-lg">Create your account to begin your journey</p>
                 </div>
 
                 {/* User Type Selection - Enhanced */}
-                <div className="mb-6">
-                  <label className="block text-sm font-medium text-black dark:text-white mb-4">Select Account Type</label>
-                  <div className="grid grid-cols-2 gap-3">
+                <div className="mb-8">
+                  <label className="block text-lg font-semibold text-black dark:text-white mb-6 text-center">Select Account Type</label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {[
-                      { type: "student", icon: <GraduationCap className="w-5 h-5" />, label: "Student", desc: "Take assessments" },
-                      { type: "teacher", icon: <BookOpen className="w-5 h-5" />, label: "Teacher", desc: "Create tests" }
+                      { type: "student", icon: <GraduationCap className="w-6 h-6" />, label: "Student", desc: "Take assessments" },
+                      { type: "teacher", icon: <BookOpen className="w-6 h-6" />, label: "Teacher", desc: "Create tests" }
                     ].map(({ type, icon, label, desc }) => (
                       <button
                         key={type}
                         onClick={() => setUserType(type)}
-                        className={`relative p-4 rounded-lg text-left transition-all duration-200 border-2 ${userType === type
-                          ? "bg-black dark:bg-white text-white dark:text-black border-black dark:border-white shadow-md"
-                          : "bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-black dark:text-white hover:border-gray-400 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-600"
+                        className={`relative p-6 rounded-2xl text-left transition-all duration-300 border-2 group hover:scale-105 ${userType === type
+                          ? "bg-gradient-to-br from-black to-gray-900 dark:from-white dark:to-gray-100 text-white dark:text-black border-black dark:border-white shadow-xl"
+                          : "bg-white/50 dark:bg-gray-700/50 border-gray-300/50 dark:border-gray-600/50 text-black dark:text-white hover:border-gray-400 dark:hover:border-gray-500 hover:bg-white/80 dark:hover:bg-gray-700/80 hover:shadow-lg"
                           }`}
                       >
-                        <div className="flex items-start gap-3">
-                          <div className={`p-2 rounded-lg ${userType === type ? "bg-gray-800 dark:bg-gray-200 text-white dark:text-black" : "bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-300"
+                        <div className="flex items-start gap-4">
+                          <div className={`p-3 rounded-xl transition-all duration-300 ${userType === type
+                            ? "bg-white/20 dark:bg-black/20 text-white dark:text-black"
+                            : "bg-gradient-to-br from-gray-500 to-gray-700 text-white shadow-lg group-hover:scale-110"
                             }`}>
                             {icon}
                           </div>
                           <div>
-                            <div className="font-semibold text-sm">{label}</div>
-                            <div className={`text-xs ${userType === type ? "text-gray-300 dark:text-gray-600" : "text-gray-500 dark:text-gray-400"}`}>
+                            <div className="font-bold text-lg mb-1">{label}</div>
+                            <div className={`text-sm ${userType === type ? "text-gray-300 dark:text-gray-600" : "text-gray-500 dark:text-gray-400"}`}>
                               {desc}
                             </div>
                           </div>
                         </div>
+                        {userType === type && (
+                          <div className="absolute top-3 right-3">
+                          </div>
+                        )}
                       </button>
                     ))}
                   </div>
                 </div>
 
                 {/* Benefits Preview */}
-                <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
-                  <h4 className="font-medium text-black dark:text-white mb-3">What you&apos;s ll get:</h4>
-                  <ul className="space-y-2">
+                <div className="mb-8 p-6 bg-gradient-to-br from-gray-50/80 to-gray-100/80 dark:from-gray-700/50 dark:to-gray-600/50 rounded-2xl border border-gray-200/50 dark:border-gray-600/50 backdrop-blur-sm">
+                  <h4 className="font-bold text-black dark:text-white mb-4 text-lg flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                    What you'll get:
+                  </h4>
+                  <ul className="space-y-3">
                     {benefits[userType].map((benefit, index) => (
-                      <li key={index} className="text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 bg-black dark:bg-white rounded-full"></div>
-                        {benefit}
+                      <li key={index} className="text-gray-700 dark:text-gray-300 flex items-center gap-3 group">
+                        <div className="w-2 h-2 bg-gradient-to-r from-black to-gray-600 dark:from-white dark:to-gray-300 rounded-full group-hover:scale-150 transition-transform"></div>
+                        <span className="group-hover:text-black dark:group-hover:text-white transition-colors">{benefit}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
 
+                {/* Google Sign-in Button */}
                 <a href={`/api/auth/google?role=${userType}`}
-                  class="flex items-center justify-center px-4 py-3 border my-10 
-         border-gray-300 rounded-lg shadow-sm bg-white text-gray-700 font-medium 
-         hover:bg-gray-50 hover:shadow-md transition-all duration-200 
-         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-         dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600 
-         dark:hover:bg-gray-700 dark:focus:ring-offset-gray-900">
-
-                  <svg class="w-5 h-5 mr-3" viewBox="0 0 24 24" fill="currentColor">
+                  className="flex items-center justify-center px-6 py-4 border border-gray-300/50 dark:border-gray-600/50 rounded-2xl shadow-lg bg-white/80 dark:bg-gray-800/80 text-gray-700 dark:text-gray-100 font-semibold hover:bg-white dark:hover:bg-gray-700 hover:shadow-xl transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-gray-500/20 focus:ring-offset-2 mb-6 group backdrop-blur-sm">
+                  <svg className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
                     <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
                     <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
@@ -183,34 +213,34 @@ export default function Home() {
                 </a>
 
                 {/* Email Input - Enhanced */}
-                <div className="mb-6">
-                  {/* <label className="block text-sm font-medium text-black dark:text-white mb-2">Email Address</label> */}
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
+                <div className="mb-8">
+                  <div className="relative group">
+                    <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400 dark:text-gray-500 group-focus-within:text-black dark:group-focus-within:text-white transition-colors" />
                     <input
                       type="email"
                       value={email}
                       onChange={handleEmailChange}
                       placeholder="Enter your email address"
-                      className={`w-full pl-11 pr-10 py-3 rounded-lg border-2 focus:outline-none transition-all duration-200 bg-white dark:bg-gray-700 text-black dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${email === ""
-                        ? "border-gray-300 dark:border-gray-600 focus:border-black dark:focus:border-white"
+                      className={`w-full pl-14 pr-12 py-4 rounded-2xl border-2 focus:outline-none transition-all duration-300 bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm text-black dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-lg ${email === ""
+                        ? "border-gray-300/50 dark:border-gray-600/50 focus:border-black dark:focus:border-white focus:shadow-lg"
                         : isValidEmail
-                          ? "border-gray-400 dark:border-gray-500 bg-gray-50 dark:bg-gray-600 focus:border-black dark:focus:border-white"
+                          ? "border-gray-400 dark:border-gray-500 bg-gray-50/50 dark:bg-gray-600/20 focus:border-black dark:focus:border-white shadow-lg"
                           : "border-gray-300 dark:border-gray-600 focus:border-gray-500 dark:focus:border-gray-500"
                         }`}
                     />
                     {email && (
-                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                      <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
                         {isValidEmail ? (
-                          <CheckCircle className="w-5 h-5 text-black dark:text-white" />
+                          <CheckCircle className="w-6 h-6 text-black dark:text-white animate-pulse" />
                         ) : (
-                          <div className="w-5 h-5 rounded-full border-2 border-gray-400 dark:border-gray-500"></div>
+                          <div className="w-6 h-6 rounded-full border-2 border-gray-400 dark:border-gray-500 animate-pulse"></div>
                         )}
                       </div>
                     )}
                   </div>
                   {email && !isValidEmail && (
-                    <p className="text-gray-600 dark:text-gray-400 text-sm mt-2 animate-in slide-in-from-top-1 duration-200">
+                    <p className="text-gray-600 dark:text-gray-400 text-sm mt-3 animate-in slide-in-from-top-1 duration-300 flex items-center gap-2">
+                      <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
                       Please enter a valid email address
                     </p>
                   )}
@@ -222,15 +252,15 @@ export default function Home() {
                     router.push(`/auth/verify?type=${userType}&email=${encodeURIComponent(email)}`)
                   }
                   disabled={!email}
-                  className={`w-full py-3 px-6 rounded-lg font-semibold text-white transition-all duration-200 flex items-center justify-center gap-2 ${email
-                    ? "bg-black dark:bg-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 shadow-md hover:shadow-lg"
-                    : "bg-gray-300 dark:bg-gray-600 cursor-not-allowed text-gray-500 dark:text-gray-400"
+                  className={`w-full py-4 px-8 rounded-2xl font-bold text-lg transition-all duration-300 flex items-center justify-center gap-3 group ${email
+                    ? "bg-gradient-to-r from-black to-gray-900 dark:from-white dark:to-gray-100 text-white dark:text-black hover:from-gray-900 hover:to-black dark:hover:from-gray-200 dark:hover:to-white shadow-xl hover:shadow-2xl hover:-translate-y-1 active:translate-y-0"
+                    : "bg-gray-300/50 dark:bg-gray-600/50 cursor-not-allowed text-gray-500 dark:text-gray-400"
                     }`}
                 >
                   {email ? (
                     <>
                       Sign Up
-                      <ArrowRight className="w-5 h-5" />
+                      <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
                     </>
                   ) : (
                     "Enter your email to continue"
@@ -238,178 +268,236 @@ export default function Home() {
                 </button>
               </div>
             </div>
-
           </div>
         </div>
       </section>
 
-      {/* Dashboard Preview Section */}
-      <section className="py-20 bg-white dark:bg-gray-900">
+      {/* Dashboard Preview Section - Enhanced */}
+      <section className="py-32 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-black dark:text-white mb-6">
+          <div className="text-center mb-20">
+            <h2 className="text-5xl md:text-6xl font-black text-black dark:text-white mb-8 leading-tight">
               Student Dashboard Experience
             </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 max-w-4xl mx-auto leading-relaxed">
               See how students track their progress with comprehensive analytics, test results, and performance metrics
             </p>
           </div>
 
-          {/* Dashboard Image with Styling */}
-          <div className="relative max-w-6xl mx-auto">
-            {/* Main dashboard container with subtle shadows */}
-            <div className="relative bg-gray-50 dark:bg-gray-800 rounded-2xl p-8 shadow-lg border border-gray-200 dark:border-gray-700">
-              {/* Dashboard Image */}
-              <div className="relative bg-white dark:bg-gray-700 rounded-xl shadow-sm border border-gray-100 dark:border-gray-600 overflow-hidden">
-                <img
-                  src="dashboard.png"
-                  alt="Student Dashboard Interface showing analytics, test results, and performance metrics"
-                  className="w-full h-auto object-cover"
-                />
+          {/* Dashboard Image with Enhanced Styling */}
+          <div className="relative max-w-6xl mx-auto group">
+            {/* Outer glow layers - Gray only */}
+            <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-gray-400 via-gray-300 to-gray-500 opacity-20 blur-3xl group-hover:opacity-30 transition-opacity duration-1000"></div>
+            <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-gray-500 via-gray-400 to-gray-600 opacity-10 blur-2xl group-hover:opacity-20 transition-opacity duration-1000"></div>
+
+            {/* Main dashboard container */}
+            <div className="relative bg-gradient-to-br from-gray-50/90 to-white/90 dark:from-gray-800/90 dark:to-gray-700/90 rounded-3xl p-12 shadow-2xl border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-xl group-hover:shadow-3xl transition-all duration-500">
+              {/* Dashboard Image Container */}
+              <div className="relative bg-white dark:bg-gray-600 rounded-2xl shadow-xl border border-gray-100/50 dark:border-gray-600/50 overflow-hidden group-hover:shadow-2xl transition-shadow duration-500">
+                <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center">
+                  {/* <div className="text-center">
+                    <BarChart3 className="w-24 h-24 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+                    <p className="text-gray-500 dark:text-gray-400 text-lg font-medium">Dashboard Preview</p>
+                    <p className="text-gray-400 dark:text-gray-500 text-sm">Analytics • Progress • Results</p>
+                  </div> */}
+                <img src={isDark ? "dahsboard-dark.png" : "dashboard.png"} alt="Dashboard Preview" className="w-full h-full object-cover" />
+                {/* <img src="dashboard.png" alt="Dashboard Preview" className="w-full h-full object-cover" /> */}
+                </div>
               </div>
 
-              {/* Fading border effects */}
-              <div className="absolute inset-0 rounded-2xl">
-                {/* Top fade */}
-                <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-white dark:from-gray-900 to-transparent pointer-events-none"></div>
-                {/* Bottom fade */}
-                <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white dark:from-gray-900 to-transparent pointer-events-none"></div>
-                {/* Left fade */}
-                <div className="absolute top-0 bottom-0 left-0 w-8 bg-gradient-to-r from-white dark:from-gray-900 to-transparent pointer-events-none"></div>
-                {/* Right fade */}
-                <div className="absolute top-0 bottom-0 right-0 w-8 bg-gradient-to-l from-white dark:from-gray-900 to-transparent pointer-events-none"></div>
-              </div>
+              {/* Floating feature badges */}
             </div>
-
-            {/* Outer glow effect */}
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 opacity-20 blur-xl -z-10"></div>
           </div>
         </div>
       </section>
 
-      {/* Features Grid */}
-      <section className="py-16 bg-gray-50 dark:bg-gray-800">
+      {/* Features Grid - Enhanced */}
+      <section className="py-32 bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-black dark:text-white mb-6">
-              Advanced Assessment Capabilities
+          <div className="text-center mb-20">
+            <div className="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-800/50 rounded-full mb-6">
+              <Zap className="w-4 h-4 mr-2 text-gray-600 dark:text-gray-400" />
+              <span className="text-sm font-medium text-gray-800 dark:text-gray-300">Advanced Features</span>
+            </div>
+            <h2 className="text-5xl md:text-6xl font-black text-black dark:text-white mb-8 leading-tight">
+              Assessment Capabilities
             </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 max-w-4xl mx-auto leading-relaxed">
               Comprehensive testing solutions designed for modern educational and professional environments
             </p>
           </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
-              <div key={index} className="bg-white dark:bg-gray-700 p-8 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 hover:shadow-md dark:hover:shadow-xl transition-shadow duration-200">
-                <div className="text-black dark:text-white mb-4">
-                  {feature.icon}
+              <div key={index} className="group relative">
+                {/* Background glow - Gray only */}
+                <div className="absolute inset-0 bg-gradient-to-r from-gray-400 to-gray-600 rounded-2xl blur-xl opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
+
+                {/* Card */}
+                <div className="relative bg-white/80 dark:bg-gray-700/80 backdrop-blur-xl p-8 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-600/50 hover:shadow-2xl dark:hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-2 group-hover:bg-white dark:group-hover:bg-gray-700">
+                  <div className="text-black dark:text-white mb-6 group-hover:scale-110 transition-transform duration-300">
+                    {feature.icon}
+                  </div>
+                  <h3 className="text-2xl font-bold text-black dark:text-white mb-4 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors">
+                    {feature.description}
+                  </p>
+
+                  {/* Hover indicator */}
+                  <div className="absolute bottom-4 right-4 w-8 h-8 bg-gradient-to-r from-gray-600 to-black dark:from-gray-400 dark:to-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <ArrowRight className="w-4 h-4 text-white dark:text-black" />
+                  </div>
                 </div>
-                <h3 className="text-xl font-semibold text-black dark:text-white mb-3">
-                  {feature.title}
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                  {feature.description}
-                </p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Benefits Section */}
-      <section className="py-16 bg-white dark:bg-gray-900">
+      {/* Benefits Section - Enhanced */}
+      <section className="py-32 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
-              <h2 className="text-3xl font-bold text-black dark:text-white mb-6">
+              <div className="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-800/50 rounded-full mb-6">
+                <Shield className="w-4 h-4 mr-2 text-gray-600 dark:text-gray-400" />
+                <span className="text-sm font-medium text-gray-800 dark:text-gray-300">Benefits</span>
+              </div>
+              <h2 className="text-5xl font-black text-black dark:text-white mb-8 leading-tight">
                 Streamlined Assessment Process
               </h2>
-              <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
+              <p className="text-xl text-gray-600 dark:text-gray-300 mb-12 leading-relaxed">
                 Transform your testing methodology with our efficient, user-friendly platform that delivers
                 professional results while saving valuable time and resources.
               </p>
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {benefitsList.map((benefit, index) => (
-                  <div key={index} className="flex items-start gap-3">
-                    <CheckCircle className="w-6 h-6 text-black dark:text-white mt-0.5 flex-shrink-0" />
-                    <p className="text-gray-700 dark:text-gray-300">{benefit}</p>
+                  <div key={index} className="flex items-start gap-4 group">
+                    <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-r from-gray-600 to-black dark:from-gray-400 dark:to-white rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <CheckCircle className="w-5 h-5 text-white dark:text-black" />
+                    </div>
+                    <p className="text-lg text-gray-700 dark:text-gray-300 group-hover:text-black dark:group-hover:text-white transition-colors">{benefit}</p>
                   </div>
                 ))}
               </div>
             </div>
-            <div className="bg-gray-50 dark:bg-gray-800 p-8 rounded-lg">
-              <div className="grid grid-cols-2 gap-6">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-black dark:text-white mb-2">
-                    <Zap className="w-12 h-12 mx-auto mb-2" />
-                    Instant
+
+            <div className="bg-gradient-to-br from-gray-50/80 to-white/80 dark:from-gray-800/80 dark:to-gray-700/80 backdrop-blur-xl p-10 rounded-3xl border border-gray-200/50 dark:border-gray-700/50 shadow-2xl">
+              <div className="grid grid-cols-2 gap-8">
+                {[
+                  { icon: Zap, label: "Instant", desc: "Result Generation" },
+                  { icon: Users, label: "Unlimited", desc: "Participants" },
+                  { icon: BarChart3, label: "Advanced", desc: "Analytics" },
+                  { icon: Trophy, label: "Real-time", desc: "Leaderboards" }
+                ].map(({ icon: Icon, label, desc }, index) => (
+                  <div key={index} className="text-center group">
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-r from-gray-600 to-black dark:from-gray-400 dark:to-white flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:shadow-xl transition-all duration-300">
+                      <Icon className="w-8 h-8 text-white dark:text-black" />
+                    </div>
+                    <div className="text-2xl font-bold text-black dark:text-white mb-2 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-all duration-300">
+                      {label}
+                    </div>
+                    <p className="text-gray-600 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">{desc}</p>
                   </div>
-                  <p className="text-gray-600 dark:text-gray-400">Result Generation</p>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-black dark:text-white mb-2">
-                    <Users className="w-12 h-12 mx-auto mb-2" />
-                    Unlimited
-                  </div>
-                  <p className="text-gray-600 dark:text-gray-400">Participants</p>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-black dark:text-white mb-2">
-                    <BarChart3 className="w-12 h-12 mx-auto mb-2" />
-                    Advanced
-                  </div>
-                  <p className="text-gray-600 dark:text-gray-400">Analytics</p>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-black dark:text-white mb-2">
-                    <Trophy className="w-12 h-12 mx-auto mb-2" />
-                    Real-time
-                  </div>
-                  <p className="text-gray-600 dark:text-gray-400">Leaderboards</p>
-                </div>
+                ))}
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Call to Action */}
-      <section className="py-12 bg-gray-900 dark:bg-black text-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold mb-4">
+      {/* Enhanced Call to Action */}
+      <section className="relative py-32 overflow-hidden">
+        {/* Background with gradients - Gray only */}
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900 dark:from-black dark:via-gray-950 dark:to-black"></div>
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-gray-600/20 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-gray-500/20 rounded-full blur-3xl"></div>
+        </div>
+
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+
+          <h2 className="text-6xl md:text-7xl font-black text-white mb-6 leading-tight">
             Start Your First Live Test
           </h2>
-          <p className="text-lg text-gray-300 dark:text-gray-400 mb-6">
+          <p className="text-2xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed">
             Create engaging MCQ tests with real-time results in under 5 minutes
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+
+          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center max-w-2xl mx-auto">
             <button
-              className="bg-white dark:bg-gray-800 text-black dark:text-white px-6 py-3 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 font-medium flex items-center justify-center gap-2"
+              className="group w-full sm:w-auto bg-white text-black px-8 py-4 rounded-2xl hover:bg-gray-100 transition-all duration-300 font-bold text-lg flex items-center justify-center gap-3 shadow-xl hover:shadow-2xl hover:-translate-y-1"
               onClick={() => router.push("/auth/verify?type=teacher")}
             >
-              <Target className="w-4 h-4" />
+              <Target className="w-6 h-6 group-hover:rotate-12 transition-transform" />
               Teacher Login
             </button>
             <button
-              className="bg-transparent text-white border border-gray-600 dark:border-gray-500 px-6 py-3 rounded-md hover:bg-gray-800 dark:hover:bg-gray-900 transition-colors duration-200 font-medium flex items-center justify-center gap-2"
+              className="group w-full sm:w-auto bg-transparent text-white border-2 border-white/30 px-8 py-4 rounded-2xl hover:bg-white/10 hover:border-white/50 transition-all duration-300 font-bold text-lg flex items-center justify-center gap-3 backdrop-blur-sm"
               onClick={() => router.push("/auth/verify?type=student")}
             >
-              <Users className="w-4 h-4" />
+              <Users className="w-6 h-6 group-hover:scale-110 transition-transform" />
               Student Login
             </button>
           </div>
-        </div>
-        <footer className="text-white mt-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="text-center">
-              <div className="text-2xl font-bold mb-4">MCQ<span className="text-gray-600 dark:text-gray-400">Live</span></div>
-              <p className="text-gray-600 dark:text-gray-400">
-                Professional assessment solutions for modern educational environments
-              </p>
+
+          {/* Trust indicators */}
+          <div className="mt-16 flex flex-col sm:flex-row items-center justify-center gap-8 text-white/60">
+            <div className="flex items-center gap-2">
+              <Shield className="w-5 h-5" />
+              <span>Secure & Private</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Zap className="w-5 h-5" />
+              <span>Lightning Fast</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Globe className="w-5 h-5" />
+              <span>Works Everywhere</span>
             </div>
           </div>
-        </footer>
+        </div>
       </section>
+
+      {/* Enhanced Footer */}
+      <footer className="bg-black dark:bg-gray-950 text-white relative overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+        </div>
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="text-center">
+            <div className="text-4xl font-black mb-6 bg-gradient-to-r from-white via-gray-300 to-white bg-clip-text text-transparent">
+              MCQ<span className="text-gray-600 dark:text-gray-400">Live</span>
+            </div>
+            <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto leading-relaxed">
+              Professional assessment solutions for modern educational environments
+            </p>
+
+            {/* Social proof mockup */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-8 text-gray-500 mb-8">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-gray-500 rounded-full animate-pulse"></div>
+                <span>1000+ Active Users</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
+                <span>50k+ Tests Created</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-gray-600 rounded-full animate-pulse"></div>
+                <span>99.9% Uptime</span>
+              </div>
+            </div>
+
+            <div className="text-gray-600 text-sm">
+              © 2024 MCQLive. All rights reserved.
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
