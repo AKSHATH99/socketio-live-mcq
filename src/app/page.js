@@ -1,6 +1,6 @@
 'use client'
 import { useRouter } from "next/navigation";
-import { useState , useEffect} from "react";
+import { useState, useEffect } from "react";
 import { Clock, BarChart3, Trophy, CheckCircle, ArrowRight, Users, Zap, Target, Mail, GraduationCap, BookOpen, Sparkles, Star, Globe, Shield } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggler";
 import { useTheme } from "@/Contexts/Themecontext";
@@ -12,7 +12,7 @@ export default function Home() {
   const [isValidEmail, setIsValidEmail] = useState(false);
   const { theme, toggleTheme } = useTheme();
 
-  const isDark = document.documentElement.classList.contains("dark");
+  // const isDark = document.documentElement.classList.contains("dark");
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -183,7 +183,8 @@ export default function Home() {
                 <div className="mb-8 p-6 bg-gradient-to-br from-gray-50/80 to-gray-100/80 dark:from-gray-700/50 dark:to-gray-600/50 rounded-2xl border border-gray-200/50 dark:border-gray-600/50 backdrop-blur-sm">
                   <h4 className="font-bold text-black dark:text-white mb-4 text-lg flex items-center gap-2">
                     <Sparkles className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                    What you'll get:
+                    What you&apos;ll get:
+
                   </h4>
                   <ul className="space-y-3">
                     {benefits[userType].map((benefit, index) => (
@@ -295,8 +296,8 @@ export default function Home() {
                     <p className="text-gray-500 dark:text-gray-400 text-lg font-medium">Dashboard Preview</p>
                     <p className="text-gray-400 dark:text-gray-500 text-sm">Analytics • Progress • Results</p>
                   </div> */}
-                <img src={ theme === "dark"? "dahsboard-dark.png" : "dashboard.png"} alt="Dashboard Preview" className="w-full h-full object-cover" />
-                {/* <img src="dashboard.png" alt="Dashboard Preview" className="w-full h-full object-cover" /> */}
+                  <img src={theme === "dark" ? "dahsboard-dark.png" : "dashboard.png"} alt="Dashboard Preview" className="w-full h-full object-cover" />
+                  {/* <img src="dashboard.png" alt="Dashboard Preview" className="w-full h-full object-cover" /> */}
                 </div>
               </div>
 
