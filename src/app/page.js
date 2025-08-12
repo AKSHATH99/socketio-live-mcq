@@ -3,13 +3,14 @@ import { useRouter } from "next/navigation";
 import { useState , useEffect} from "react";
 import { Clock, BarChart3, Trophy, CheckCircle, ArrowRight, Users, Zap, Target, Mail, GraduationCap, BookOpen, Sparkles, Star, Globe, Shield } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggler";
+import { useTheme } from "@/Contexts/Themecontext";
 
 export default function Home() {
   const router = useRouter();
   const [userType, setUserType] = useState("student");
   const [email, setEmail] = useState("");
   const [isValidEmail, setIsValidEmail] = useState(false);
-  const [theme , setTheme] = useState("light");
+  const { theme, toggleTheme } = useTheme();
 
   const isDark = document.documentElement.classList.contains("dark");
 
@@ -18,12 +19,6 @@ export default function Home() {
     return emailRegex.test(email);
   };
 
-  useEffect(()=>{
-    const theme = localStorage.getItem("theme");
-    if (theme) {
-      setTheme(theme);
-    }
-  }, [])
 
   const handleEmailChange = (e) => {
     const newEmail = e.target.value;
@@ -300,7 +295,7 @@ export default function Home() {
                     <p className="text-gray-500 dark:text-gray-400 text-lg font-medium">Dashboard Preview</p>
                     <p className="text-gray-400 dark:text-gray-500 text-sm">Analytics • Progress • Results</p>
                   </div> */}
-                <img src={isDark ? "dahsboard-dark.png" : "dashboard.png"} alt="Dashboard Preview" className="w-full h-full object-cover" />
+                <img src={ theme === "dark"? "dahsboard-dark.png" : "dashboard.png"} alt="Dashboard Preview" className="w-full h-full object-cover" />
                 {/* <img src="dashboard.png" alt="Dashboard Preview" className="w-full h-full object-cover" /> */}
                 </div>
               </div>
