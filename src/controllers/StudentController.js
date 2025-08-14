@@ -108,6 +108,19 @@ module.exports.StudentLogin = async (req, res) => {
     }
 }
 
+module.exports.StudentLogout = async (req, res) => {
+    try {
+        // Clear the JWT cookie
+        res.clearCookie('jwt');
+        return res.status(200).json({ message: "Student logged out successfully" });
+    } catch (error) {
+        console.error('Error logging out student:', error);
+        return res.status(500).json({
+            message: "Internal Server Error",
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+};
 
 module.exports.studentDetailsById = async (req, res) => {
     try {

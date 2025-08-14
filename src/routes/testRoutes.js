@@ -4,7 +4,7 @@ const { createTest, fetchTests , fetchTestByTeacherID ,fetchTestDetails} = requi
 const { addQuestionToTest, getQuestionsByTestId } = require('../controllers/questionController');
 const {addTestResult, getTestResults, getLeaderBoard , getLiveLeaderBoard ,getTestResultsDetailed} = require('../controllers/testResultController.js');
 const {TeacherSignup , TeacherLogin , TeacherLogout} = require('../controllers/TeacherControllers.js');
-const {StudentSignup , StudentLogin, studentDetailsById, fetchStudentTests, fetchStudentTestsWithPerformance} = require('../controllers/StudentController.js');
+const {StudentSignup , StudentLogin,StudentLogout ,studentDetailsById, fetchStudentTests, fetchStudentTestsWithPerformance} = require('../controllers/StudentController.js');
 const {sendOTP, verifyOTP} = require('../controllers/authVerify/OtpControllers.js')
 
 
@@ -24,6 +24,7 @@ module.exports = function(io) {
   router.post('/student/login', StudentLogin);
   router.post('/get-test-results-detailed', getTestResultsDetailed); 
   router.post('/get-student-detail', studentDetailsById); 
+  router.post('/student/logout', StudentLogout);
   // Protected Routes
   // router.use(protect); // All routes after this will be protected
   

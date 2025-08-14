@@ -8,9 +8,11 @@ import { Trophy, Target, BookOpen, Calendar, User, Award, Megaphone, Clock, File
 import { useSearchParams } from 'next/navigation';
 import ThemeToggle from "@/components/ThemeToggler";
 import { useSocket } from "@/Contexts/SocketContexts";
+import { useRouter } from "next/navigation";
+import Spinner from "@/components/Spinner";
 
 export default function Student({ params }) {
-
+    const router = useRouter();
     const studentId = params.slug;
     const [roomId, setRoomId] = useState("");
     const socketRef = useRef();
@@ -122,6 +124,29 @@ export default function Student({ params }) {
             setStudentTestsWithPerformance(data);
         } catch (error) {
             console.error('Error fetching student tests with performance:', error);
+        }
+    };
+
+    const logoutStudent = async () => {
+        try {
+            setIsLoading(true);
+            const response = await fetch('/api/student/logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+            });
+            const data = await response.json();
+            console.log('Logout response:', data);
+            if (response.ok) {
+                // Handle successful logout
+                localStorage.removeItem("roomId");
+                router.push("/");
+            }
+        } catch (error) {
+            console.error('Error logging out student:', error);
+            setIsLoading(false);
         }
     };
 
@@ -251,6 +276,14 @@ export default function Student({ params }) {
                                 <span className="text-sm font-medium text-slate-700 dark:text-gray-200">Welcome {studentData?.name}!</span>
                             </div>
                             <ThemeToggle />
+
+                            <div>
+                                {isLoading ? (
+                                    <Spinner />
+                                ) : (
+                                    <button onClick={logoutStudent} className="text-sm font-medium text-slate-700 dark:text-gray-200">Logout</button>
+                                )}
+                            </div>
                         </div>
                     </div>
 
