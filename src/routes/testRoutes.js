@@ -3,7 +3,7 @@ const express = require('express');
 const { createTest, fetchTests , fetchTestByTeacherID ,fetchTestDetails} = require('../controllers/testController.js');
 const { addQuestionToTest, getQuestionsByTestId } = require('../controllers/questionController');
 const {addTestResult, getTestResults, getLeaderBoard , getLiveLeaderBoard ,getTestResultsDetailed} = require('../controllers/testResultController.js');
-const {TeacherSignup , TeacherLogin} = require('../controllers/TeacherControllers.js');
+const {TeacherSignup , TeacherLogin , TeacherLogout} = require('../controllers/TeacherControllers.js');
 const {StudentSignup , StudentLogin, studentDetailsById, fetchStudentTests, fetchStudentTestsWithPerformance} = require('../controllers/StudentController.js');
 const {sendOTP, verifyOTP} = require('../controllers/authVerify/OtpControllers.js')
 
@@ -19,6 +19,7 @@ module.exports = function(io) {
   // Public Routes
   router.post('/teacher/signup', TeacherSignup);
   router.post('/teacher/login', TeacherLogin);
+  router.post('/teacher/logout', TeacherLogout);
   router.post('/student/signup', StudentSignup);
   router.post('/student/login', StudentLogin);
   router.post('/get-test-results-detailed', getTestResultsDetailed); 

@@ -89,7 +89,7 @@ export default function Teacher({ params }) {
   }, [teacherId]);
 
   useEffect(() => {
-    if(!teacherId){
+    if (!teacherId) {
       router.push('teacher/auth/signin');
     }
     const storedRoomId = localStorage.getItem('roomId');
@@ -184,11 +184,26 @@ export default function Teacher({ params }) {
     }
   };
 
-  useEffect(() => {
-    setInterval(function () {
+  const logoutTeacher = async () => {
+    try {
+      const res = await fetch("/api/teacher/logout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
 
-    }, 5000);
-  })
+      const data = await res.json();
+      console.log("✅ Teacher logged out:", data);
+
+      // Clear local storage and redirect to login
+      localStorage.removeItem("token");
+      localStorage.removeItem("roomId");
+      router.push("/");
+    } catch (error) {
+      console.error("❌ Error logging out teacher:", error);
+    }
+  };
 
   useEffect(() => {
     console.log(leaderboard)
@@ -362,6 +377,7 @@ export default function Teacher({ params }) {
                     <button
                       className="w-full px-4 py-2 text-left text-red-600 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-2"
                       onClick={() => {
+                        logoutTeacher();
                         setOpenSettingsModal(false);
                       }}
                     >

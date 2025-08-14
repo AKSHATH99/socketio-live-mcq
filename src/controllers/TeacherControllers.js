@@ -111,4 +111,26 @@ module.exports.TeacherLogin = async (req, res) => {
         });
     }
 }
-    
+
+module.exports.TeacherLogout = async (req, res) => {
+    try {
+        // Clear the HTTP-only cookie
+        res.cookie('jwt', '', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 0
+        });
+
+        return res.status(200).json({
+            message: "Teacher logged out successfully"
+        });
+    } catch (error) {
+        console.error('Error logging out teacher:', error);
+        return res.status(500).json({
+            success: false,
+            error: "Internal Server Error",
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+}
