@@ -1,9 +1,47 @@
+
 'use client'
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Clock, BarChart3, Trophy, CheckCircle, ArrowRight, Users, Zap, Target, Mail, GraduationCap, BookOpen, Sparkles, Star, Globe, Shield } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggler";
 import { useTheme } from "@/Contexts/Themecontext";
+
+// Custom hook for viewport animations
+const useViewportAnimation = (options = {}) => {
+  const ref = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          if (options.once !== false) {
+            observer.disconnect();
+          }
+        } else if (options.once === false) {
+          setIsVisible(false);
+        }
+      },
+      {
+        threshold: options.threshold || 0.1,
+        rootMargin: options.rootMargin || '0px'
+      }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => {
+      if (ref.current) {
+        observer.unobserve(ref.current);
+      }
+    };
+  }, []);
+
+  return [ref, isVisible];
+};
 
 export default function Home() {
   const router = useRouter();
@@ -12,13 +50,20 @@ export default function Home() {
   const [isValidEmail, setIsValidEmail] = useState(false);
   const { theme, toggleTheme } = useTheme();
 
-  // const isDark = document.documentElement.classList.contains("dark");
+  // Animation refs
+  const [heroRef, heroVisible] = useViewportAnimation({ threshold: 0.2 });
+  const [formRef, formVisible] = useViewportAnimation({ threshold: 0.3 });
+  const [dashboardRef, dashboardVisible] = useViewportAnimation({ threshold: 0.2 });
+  const [dashboardImageRef, dashboardImageVisible] = useViewportAnimation({ threshold: 0.3 });
+  const [featuresHeaderRef, featuresHeaderVisible] = useViewportAnimation({ threshold: 0.3 });
+  const [benefitsRef, benefitsVisible] = useViewportAnimation({ threshold: 0.2 });
+  const [benefitsGridRef, benefitsGridVisible] = useViewportAnimation({ threshold: 0.3 });
+  const [ctaRef, ctaVisible] = useViewportAnimation({ threshold: 0.3 });
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
-
 
   const handleEmailChange = (e) => {
     const newEmail = e.target.value;
@@ -118,21 +163,35 @@ export default function Home() {
             <div className="flex justify-center mb-8">
             </div>
 
-            <h1 className="text-6xl md:text-8xl font-black text-black dark:text-white mb-8 leading-none tracking-tight">
-              Create Live MCQ Tests
-              <span className="block bg-gradient-to-r from-gray-600 via-gray-500 to-gray-700 dark:from-gray-400 dark:via-gray-300 dark:to-gray-500 bg-clip-text text-transparent">
-                In Minutes
-              </span>
-            </h1>
+            <div
+              ref={heroRef}
+              className={`transition-all duration-1000 ${heroVisible
+                  ? 'opacity-100 translate-y-0'
+                  : 'opacity-0 translate-y-10'
+                }`}
+            >
+              <h1 className="text-6xl md:text-8xl font-black text-black dark:text-white mb-8 leading-none tracking-tight">
+                Create Live MCQ Tests
+                <span className="block bg-gradient-to-r from-gray-600 via-gray-500 to-gray-700 dark:from-gray-400 dark:via-gray-300 dark:to-gray-500 bg-clip-text text-transparent">
+                  In Minutes
+                </span>
+              </h1>
 
-            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed">
-              Move beyond Google Forms with <strong className="text-black dark:text-white">live MCQ assessments</strong> that show
-              real-time participation, instant scoring, and dynamic leaderboards. Watch students compete live
-              while you get immediate results.
-            </p>
+              <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed">
+                Move beyond Google Forms with <strong className="text-black dark:text-white">live MCQ assessments</strong> that show
+                real-time participation, instant scoring, and dynamic leaderboards. Watch students compete live
+                while you get immediate results.
+              </p>
+            </div>
 
             {/* Enhanced Login Form */}
-            <div className="max-w-xl mx-auto">
+            <div
+              ref={formRef}
+              className={`max-w-xl mx-auto transition-all duration-1000 delay-300 ${formVisible
+                  ? 'opacity-100 translate-y-0'
+                  : 'opacity-0 translate-y-10'
+                }`}
+            >
               <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl p-10 rounded-3xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50 transition-all duration-500 hover:shadow-3xl hover:bg-white/80 dark:hover:bg-gray-800/80">
                 {/* Header */}
                 <div className="text-center mb-10">
@@ -271,7 +330,13 @@ export default function Home() {
       {/* Dashboard Preview Section - Enhanced */}
       <section className="py-32 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-20">
+          <div
+            ref={dashboardRef}
+            className={`text-center mb-20 transition-all duration-1000 ${dashboardVisible
+                ? 'opacity-100 translate-y-0'
+                : 'opacity-0 translate-y-10'
+              }`}
+          >
             <h2 className="text-5xl md:text-6xl font-black text-black dark:text-white mb-8 leading-tight">
               Student Dashboard Experience
             </h2>
@@ -281,7 +346,13 @@ export default function Home() {
           </div>
 
           {/* Dashboard Image with Enhanced Styling */}
-          <div className="relative max-w-6xl mx-auto group">
+          <div
+            ref={dashboardImageRef}
+            className={`relative max-w-6xl mx-auto group transition-all duration-1000 delay-300 ${dashboardImageVisible
+                ? 'opacity-100 translate-y-0'
+                : 'opacity-0 translate-y-10'
+              }`}
+          >
             {/* Outer glow layers - Gray only */}
             <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-gray-400 via-gray-300 to-gray-500 opacity-20 blur-3xl group-hover:opacity-30 transition-opacity duration-1000"></div>
             <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-gray-500 via-gray-400 to-gray-600 opacity-10 blur-2xl group-hover:opacity-20 transition-opacity duration-1000"></div>
@@ -310,7 +381,13 @@ export default function Home() {
       {/* Features Grid - Enhanced */}
       <section className="py-32 bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-20">
+          <div
+            ref={featuresHeaderRef}
+            className={`text-center mb-20 transition-all duration-1000 ${featuresHeaderVisible
+                ? 'opacity-100 translate-y-0'
+                : 'opacity-0 translate-y-10'
+              }`}
+          >
             <div className="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-800/50 rounded-full mb-6">
               <Zap className="w-4 h-4 mr-2 text-gray-600 dark:text-gray-400" />
               <span className="text-sm font-medium text-gray-800 dark:text-gray-300">Advanced Features</span>
@@ -324,30 +401,41 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature, index) => (
-              <div key={index} className="group relative">
-                {/* Background glow - Gray only */}
-                <div className="absolute inset-0 bg-gradient-to-r from-gray-400 to-gray-600 rounded-2xl blur-xl opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
+            {features.map((feature, index) => {
+              const [featureRef, featureVisible] = useViewportAnimation({ threshold: 0.3 });
+              return (
+                <div
+                  key={index}
+                  ref={featureRef}
+                  className={`group relative transition-all duration-1000 ${featureVisible
+                      ? 'opacity-100 translate-y-0'
+                      : 'opacity-0 translate-y-10'
+                    }`}
+                  style={{ transitionDelay: `${index * 100}ms` }}
+                >
+                  {/* Background glow - Gray only */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-gray-400 to-gray-600 rounded-2xl blur-xl opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
 
-                {/* Card */}
-                <div className="relative bg-white/80 dark:bg-gray-700/80 backdrop-blur-xl p-8 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-600/50 hover:shadow-2xl dark:hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-2 group-hover:bg-white dark:group-hover:bg-gray-700">
-                  <div className="text-black dark:text-white mb-6 group-hover:scale-110 transition-transform duration-300">
-                    {feature.icon}
-                  </div>
-                  <h3 className="text-2xl font-bold text-black dark:text-white mb-4 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">
-                    {feature.title}
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors">
-                    {feature.description}
-                  </p>
+                  {/* Card */}
+                  <div className="relative bg-white/80 dark:bg-gray-700/80 backdrop-blur-xl p-8 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-600/50 hover:shadow-2xl dark:hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-2 group-hover:bg-white dark:group-hover:bg-gray-700">
+                    <div className="text-black dark:text-white mb-6 group-hover:scale-110 transition-transform duration-300">
+                      {feature.icon}
+                    </div>
+                    <h3 className="text-2xl font-bold text-black dark:text-white mb-4 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">
+                      {feature.title}
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors">
+                      {feature.description}
+                    </p>
 
-                  {/* Hover indicator */}
-                  <div className="absolute bottom-4 right-4 w-8 h-8 bg-gradient-to-r from-gray-600 to-black dark:from-gray-400 dark:to-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <ArrowRight className="w-4 h-4 text-white dark:text-black" />
+                    {/* Hover indicator */}
+                    <div className="absolute bottom-4 right-4 w-8 h-8 bg-gradient-to-r from-gray-600 to-black dark:from-gray-400 dark:to-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <ArrowRight className="w-4 h-4 text-white dark:text-black" />
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
@@ -356,11 +444,13 @@ export default function Home() {
       <section className="py-32 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <div className="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-800/50 rounded-full mb-6">
-                <Shield className="w-4 h-4 mr-2 text-gray-600 dark:text-gray-400" />
-                <span className="text-sm font-medium text-gray-800 dark:text-gray-300">Benefits</span>
-              </div>
+            <div
+              ref={benefitsRef}
+              className={`transition-all duration-1000 ${benefitsVisible
+                  ? 'opacity-100 translate-x-0'
+                  : 'opacity-0 -translate-x-10'
+                }`}
+            >
               <h2 className="text-5xl font-black text-black dark:text-white mb-8 leading-tight">
                 Streamlined Assessment Process
               </h2>
@@ -380,7 +470,13 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-gray-50/80 to-white/80 dark:from-gray-800/80 dark:to-gray-700/80 backdrop-blur-xl p-10 rounded-3xl border border-gray-200/50 dark:border-gray-700/50 shadow-2xl">
+            <div
+              ref={benefitsGridRef}
+              className={`bg-gradient-to-br from-gray-50/80 to-white/80 dark:from-gray-800/80 dark:to-gray-700/80 backdrop-blur-xl p-10 rounded-3xl border border-gray-200/50 dark:border-gray-700/50 shadow-2xl transition-all duration-1000 ${benefitsGridVisible
+                  ? 'opacity-100 translate-x-0'
+                  : 'opacity-0 translate-x-10'
+                }`}
+            >
               <div className="grid grid-cols-2 gap-8">
                 {[
                   { icon: Zap, label: "Instant", desc: "Result Generation" },
@@ -413,8 +509,13 @@ export default function Home() {
           <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-gray-500/20 rounded-full blur-3xl"></div>
         </div>
 
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-
+        <div
+          ref={ctaRef}
+          className={`relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center transition-all duration-1000 ${ctaVisible
+              ? 'opacity-100 translate-y-0'
+              : 'opacity-0 translate-y-10'
+            }`}
+        >
           <h2 className="text-6xl md:text-7xl font-black text-white mb-6 leading-tight">
             Start Your First Live Test
           </h2>
@@ -440,20 +541,7 @@ export default function Home() {
           </div>
 
           {/* Trust indicators */}
-          <div className="mt-16 flex flex-col sm:flex-row items-center justify-center gap-8 text-white/60">
-            <div className="flex items-center gap-2">
-              <Shield className="w-5 h-5" />
-              <span>Secure & Private</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Zap className="w-5 h-5" />
-              <span>Lightning Fast</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Globe className="w-5 h-5" />
-              <span>Works Everywhere</span>
-            </div>
-          </div>
+
         </div>
       </section>
 
@@ -473,20 +561,6 @@ export default function Home() {
             </p>
 
             {/* Social proof mockup */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-8 text-gray-500 mb-8">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-gray-500 rounded-full animate-pulse"></div>
-                <span>1000+ Active Users</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
-                <span>50k+ Tests Created</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-gray-600 rounded-full animate-pulse"></div>
-                <span>99.9% Uptime</span>
-              </div>
-            </div>
 
             <div className="text-gray-600 text-sm">
               © 2024 MCQLive. All rights reserved.
