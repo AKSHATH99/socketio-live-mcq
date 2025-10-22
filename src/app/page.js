@@ -1,4 +1,3 @@
-
 'use client'
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
@@ -56,9 +55,16 @@ export default function Home() {
   const [dashboardRef, dashboardVisible] = useViewportAnimation({ threshold: 0.2 });
   const [dashboardImageRef, dashboardImageVisible] = useViewportAnimation({ threshold: 0.3 });
   const [featuresHeaderRef, featuresHeaderVisible] = useViewportAnimation({ threshold: 0.3 });
+  const [feature0Ref, feature0Visible] = useViewportAnimation({ threshold: 0.3 });
+  const [feature1Ref, feature1Visible] = useViewportAnimation({ threshold: 0.3 });
+  const [feature2Ref, feature2Visible] = useViewportAnimation({ threshold: 0.3 });
+  const [feature3Ref, feature3Visible] = useViewportAnimation({ threshold: 0.3 });
   const [benefitsRef, benefitsVisible] = useViewportAnimation({ threshold: 0.2 });
   const [benefitsGridRef, benefitsGridVisible] = useViewportAnimation({ threshold: 0.3 });
   const [ctaRef, ctaVisible] = useViewportAnimation({ threshold: 0.3 });
+
+  const featureRefs = [feature0Ref, feature1Ref, feature2Ref, feature3Ref];
+  const featureVisibles = [feature0Visible, feature1Visible, feature2Visible, feature3Visible];
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -401,41 +407,38 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature, index) => {
-              const [featureRef, featureVisible] = useViewportAnimation({ threshold: 0.3 });
-              return (
-                <div
-                  key={index}
-                  ref={featureRef}
-                  className={`group relative transition-all duration-1000 ${featureVisible
-                      ? 'opacity-100 translate-y-0'
-                      : 'opacity-0 translate-y-10'
-                    }`}
-                  style={{ transitionDelay: `${index * 100}ms` }}
-                >
-                  {/* Background glow - Gray only */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-gray-400 to-gray-600 rounded-2xl blur-xl opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
+            {features.map((feature, index) => (
+              <div
+                key={index}
+                ref={featureRefs[index]}
+                className={`group relative transition-all duration-1000 ${featureVisibles[index]
+                    ? 'opacity-100 translate-y-0'
+                    : 'opacity-0 translate-y-10'
+                  }`}
+                style={{ transitionDelay: `${index * 100}ms` }}
+              >
+                {/* Background glow - Gray only */}
+                <div className="absolute inset-0 bg-gradient-to-r from-gray-400 to-gray-600 rounded-2xl blur-xl opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
 
-                  {/* Card */}
-                  <div className="relative bg-white/80 dark:bg-gray-700/80 backdrop-blur-xl p-8 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-600/50 hover:shadow-2xl dark:hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-2 group-hover:bg-white dark:group-hover:bg-gray-700">
-                    <div className="text-black dark:text-white mb-6 group-hover:scale-110 transition-transform duration-300">
-                      {feature.icon}
-                    </div>
-                    <h3 className="text-2xl font-bold text-black dark:text-white mb-4 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">
-                      {feature.title}
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors">
-                      {feature.description}
-                    </p>
+                {/* Card */}
+                <div className="relative bg-white/80 dark:bg-gray-700/80 backdrop-blur-xl p-8 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-600/50 hover:shadow-2xl dark:hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-2 group-hover:bg-white dark:group-hover:bg-gray-700">
+                  <div className="text-black dark:text-white mb-6 group-hover:scale-110 transition-transform duration-300">
+                    {feature.icon}
+                  </div>
+                  <h3 className="text-2xl font-bold text-black dark:text-white mb-4 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors">
+                    {feature.description}
+                  </p>
 
-                    {/* Hover indicator */}
-                    <div className="absolute bottom-4 right-4 w-8 h-8 bg-gradient-to-r from-gray-600 to-black dark:from-gray-400 dark:to-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <ArrowRight className="w-4 h-4 text-white dark:text-black" />
-                    </div>
+                  {/* Hover indicator */}
+                  <div className="absolute bottom-4 right-4 w-8 h-8 bg-gradient-to-r from-gray-600 to-black dark:from-gray-400 dark:to-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <ArrowRight className="w-4 h-4 text-white dark:text-black" />
                   </div>
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
         </div>
       </section>
