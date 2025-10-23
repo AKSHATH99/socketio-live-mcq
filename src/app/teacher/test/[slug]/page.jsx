@@ -1,13 +1,14 @@
 'use client'
-import { useEffect, useState , useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { use } from "react";
-import { Plus, Play, FileText, Trophy, BarChart3, Calendar, Hash, ChevronDown, ChevronUp, HomeIcon, LogOut, Settings } from "lucide-react";
+import { Plus, Play, FileText, Trophy, BarChart3, Calendar, ChevronLeft, Hash, ChevronDown, ChevronUp, HomeIcon, LogOut, Settings } from "lucide-react";
 import AddQuestionModal from "@/components/TestInterface/AddQuestionModal";
 import LiveTest from "@/components/TestInterface/LiveTest";
 import LeaderBoard from "@/components/TestInterface/LeaderBoard";
 import TestResult from "@/components/TestInterface/TestResult";
 import ThemeToggle from "@/components/ThemeToggler.jsx";
 import QuestionsPreview from "@/components/TestInterface/QuestionsPreview";
+import { useRouter } from "next/navigation";
 
 import CreateRoomModal from "@/components/TeacherInterface/CreateRoomModal";
 export default function Test({ params }) {
@@ -23,7 +24,9 @@ export default function Test({ params }) {
     const [roomId, setRoomId] = useState("");
     const [testEnded, setTestEnded] = useState(false);
     const [openCreateRoomModal, setOpenCreateRoomModal] = useState(false);
-      const [openSettingsModal, setOpenSettingsModal] = useState(false);
+    const [openSettingsModal, setOpenSettingsModal] = useState(false);
+    const router = useRouter();
+
 
     const settingsRef = useRef(null);
     const fetchTestDetails = async () => {
@@ -98,21 +101,21 @@ export default function Test({ params }) {
         }
     }, [testEnded])
 
-      useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (settingsRef.current && !settingsRef.current.contains(event.target)) {
-        setOpenSettingsModal(false);
-      }
-    };
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (settingsRef.current && !settingsRef.current.contains(event.target)) {
+                setOpenSettingsModal(false);
+            }
+        };
 
-    if (openSettingsModal) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
+        if (openSettingsModal) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
 
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [openSettingsModal]);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [openSettingsModal]);
     if (loading) {
         return (
             <div className="min-h-screen bg-white flex items-center justify-center">
@@ -124,7 +127,7 @@ export default function Test({ params }) {
         );
     }
 
-    
+
     const tabs = [
         { id: "questions", label: "Questions", icon: FileText },
         { id: "Live Test", label: "Start Test", icon: Play },
@@ -138,7 +141,10 @@ export default function Test({ params }) {
                 <div className="max-w-7xl mx-auto px-6 py-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                            <div>
+                            <div onClick={router.back} className="p-2 rounded-lg flex gap-1 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition-colors">
+                                {window.location.pathname === "/teacher/test/cc91bbcd-7e0c-45e9-b645-8603e6803b43" && (
+                                    <ChevronLeft className="mt-[3px]" />
+                                )}
                                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                                     Teacher Dashboard
                                 </h1>
@@ -354,7 +360,7 @@ export default function Test({ params }) {
                                         setOpenQuestionModal={setOpenQuestionModal}
                                     />
                                 )}
-                                {activeTab === "Live Test" && <LiveTest testEnded={testEnded}  setTestEnded={setTestEnded} testid={testId} testData= {testdata} setIsTestLive={setIsTestLive} isTestLive={isTestLive} startTest={startTest} />}
+                                {activeTab === "Live Test" && <LiveTest testEnded={testEnded} setTestEnded={setTestEnded} testid={testId} testData={testdata} setIsTestLive={setIsTestLive} isTestLive={isTestLive} startTest={startTest} />}
                                 {activeTab === "Test Results" && <TestResult testId={testId} />}
                                 {activeTab === "Leaderboard" && <LeaderBoard testId={testId} />}
                             </div>

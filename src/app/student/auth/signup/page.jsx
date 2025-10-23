@@ -27,6 +27,7 @@ export default function StudentSignup() {
     }, [])
 
     const Signup = async (e) => {
+        setLoading(true);
         e.preventDefault()
         try {
             const res = await fetch('/api/student/signup', {

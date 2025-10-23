@@ -30,6 +30,7 @@ export default function Signin() {
     const router = useRouter()
 
     const Signin = async (e) => {
+        setIsLoading(true);
         e.preventDefault()
         try {
             const res = await fetch('/api/student/login', {
