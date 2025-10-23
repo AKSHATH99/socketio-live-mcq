@@ -4,10 +4,8 @@ const { prisma } = require('../lib/prisma');
 const protectStudent = async (req, res, next) => {
     try {
         let token;
-        
-        // Check for token in cookies first
-        if (req.cookies && req.cookies.student_jwt) {
-            token = req.cookies.student_jwt;
+        if (req.cookies && req.cookies.jwt) {
+            token = req.cookies.jwt;
         } 
         // Fallback to Authorization header
         else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
