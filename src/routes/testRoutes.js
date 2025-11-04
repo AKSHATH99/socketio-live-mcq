@@ -36,14 +36,14 @@ module.exports = function (io) {
 
   router.post('/get-teacher-tests', protect, fetchTestByTeacherID)
   router.post('/get-test', protect, fetchTestDetails)
+  router.post('/get-live-leaderboard', protect, getLiveLeaderBoard)
+  router.post('/get-test-results-detailed', protect, getTestResultsDetailed);
 
   router.post('/add-result', protectStudent, addTestResult);
   router.post('/get-results', protectStudent, getTestResults);
-  router.post('/get-leaderboard', protectStudent, getLeaderBoard);
-  router.post('/get-live-leaderboard', protectStudent, getLiveLeaderBoard)
+  router.post('/get-leaderboard', protect, getLeaderBoard);
   router.post('/get-student-tests', protectStudent, fetchStudentTests)
   router.post('/get-student-tests-with-performance', protectStudent, fetchStudentTestsWithPerformance)
-  router.post('/get-test-results-detailed', protectStudent, getTestResultsDetailed);
   router.post('/get-student-detail', protectStudent, studentDetailsById);
   router.use(protectStudent); // All routes after this will be for student to pass through middleware
 
