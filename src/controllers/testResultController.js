@@ -98,17 +98,16 @@ module.exports.getLeaderBoard = async (req, res) => {
 
 module.exports.getLiveLeaderBoard = async (req, res) => {
   const { testId } = req.body;
-
   if (!testId) {
     return res.status(400).json({ message: "TestID not received" });
   }
-
   try {
-    const leaderboard = await redis.zrange(`leaderboard:${testId}`, {
-      rev: true,               // equivalent to zrevrange
-      withScores: true,        // equivalent to WITHSCORES
-      limit: { offset: 0, count: 10 }
+    const leaderboard = await redis.zrange(`leaderboard:${testId}`, 0, 9, {
+      rev: true,
+      withScores: true,
     });
+
+    console.log("live leaderboard without format", leaderboard);
 
     const formatted = [];
     for (let i = 0; i < leaderboard.length; i += 2) {
