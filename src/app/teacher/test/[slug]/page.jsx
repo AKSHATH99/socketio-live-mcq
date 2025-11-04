@@ -358,6 +358,7 @@ export default function Test({ params }) {
                                         showQuestionsPreview={showQuestionsPreview}
                                         setShowQuestionsPreview={setShowQuestionsPreview}
                                         setOpenQuestionModal={setOpenQuestionModal}
+                                        testId={testId}
                                     />
                                 )}
                                 {activeTab === "Live Test" && <LiveTest testEnded={testEnded} setTestEnded={setTestEnded} testid={testId} testData={testdata} setIsTestLive={setIsTestLive} isTestLive={isTestLive} startTest={startTest} />}

@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
 import { ChevronDown, ChevronUp, FileText, Plus, CheckCircle } from 'lucide-react';
 import EditQuestionModal from "./EditQuestionModal";
+import AddQuestionModal from "./AddQuestionModal";
 
-const QuestionsPreview = ({ questions: initialQuestions, onQuestionClick, onQuestionsUpdate }) => {
+const QuestionsPreview = ({ questions: initialQuestions, onQuestionClick, onQuestionsUpdate,testId }) => {
     const [questions, setQuestions] = useState(initialQuestions || []);
     const [showQuestionsPreview, setShowQuestionsPreview] = useState(false);
     const [openEditQuestionModal, setOpenQuestionModal] = useState(false);
     const [loading, setLoading] = useState(false);
     const [saveStatus, setSaveStatus] = useState(null); // 'success', 'error', or null
+    const [openAddQuestionModal, setOpenAddQuestionModal] = useState(false)
 
     // Update questions when initialQuestions prop changes
     useEffect(() => {
@@ -17,7 +19,7 @@ const QuestionsPreview = ({ questions: initialQuestions, onQuestionClick, onQues
     const handleSaveQuestions = async (updatedQuestions) => {
         setLoading(true);
         setSaveStatus(null);
-        
+
         try {
             const response = await fetch('/api/update-questions', {
                 method: 'POST',
@@ -31,7 +33,7 @@ const QuestionsPreview = ({ questions: initialQuestions, onQuestionClick, onQues
                 // Update local state with the returned questions
                 setQuestions(data.questions);
                 setSaveStatus('success');
-                
+
                 // Call parent component callback if provided
                 if (onQuestionsUpdate) {
                     onQuestionsUpdate(data.questions);
@@ -39,7 +41,7 @@ const QuestionsPreview = ({ questions: initialQuestions, onQuestionClick, onQues
 
                 // Show success message temporarily
                 setTimeout(() => setSaveStatus(null), 3000);
-                
+
                 console.log('Questions updated successfully:', data.summary);
             } else {
                 throw new Error(data.error || 'Failed to update questions');
@@ -58,11 +60,10 @@ const QuestionsPreview = ({ questions: initialQuestions, onQuestionClick, onQues
         <div>
             {/* Save Status Notification */}
             {saveStatus && (
-                <div className={`mb-4 p-4 rounded-lg border ${
-                    saveStatus === 'success' 
+                <div className={`mb-4 p-4 rounded-lg border ${saveStatus === 'success'
                         ? 'bg-green-50 border-green-200 text-green-800 dark:bg-green-900/30 dark:border-green-700 dark:text-green-300'
                         : 'bg-red-50 border-red-200 text-red-800 dark:bg-red-900/30 dark:border-red-700 dark:text-red-300'
-                }`}>
+                    }`}>
                     <div className="flex items-center gap-2">
                         {saveStatus === 'success' ? (
                             <>
@@ -88,8 +89,8 @@ const QuestionsPreview = ({ questions: initialQuestions, onQuestionClick, onQues
                             </p>
                         </div>
                         <div className="flex items-center gap-3">
-                            <button 
-                                onClick={() => setOpenQuestionModal(true)} 
+                            <button
+                                onClick={() => setOpenQuestionModal(true)}
                                 disabled={loading}
                                 className="inline-flex items-center gap-2 bg-black hover:bg-gray-800 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed dark:bg-white dark:text-black dark:hover:bg-gray-200"
                             >
@@ -131,11 +132,10 @@ const QuestionsPreview = ({ questions: initialQuestions, onQuestionClick, onQues
                                             {question.options && question.options.length > 0 && (
                                                 <div className="mt-3 space-y-1">
                                                     {question.options.map((option, optIndex) => (
-                                                        <div key={optIndex} className={`text-sm px-2 py-1 rounded ${
-                                                            option === question.answer 
-                                                                ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' 
+                                                        <div key={optIndex} className={`text-sm px-2 py-1 rounded ${option === question.answer
+                                                                ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
                                                                 : 'text-gray-600 dark:text-gray-400'
-                                                        }`}>
+                                                            }`}>
                                                             {String.fromCharCode(65 + optIndex)}. {option}
                                                         </div>
                                                     ))}
@@ -158,6 +158,8 @@ const QuestionsPreview = ({ questions: initialQuestions, onQuestionClick, onQues
                 />
             )}
 
+            {openAddQuestionModal && <AddQuestionModal onClose={() => setOpenAddQuestionModal(false)} testid={testId} />}
+
             {/* No Questions State */}
             {questions.length === 0 && !loading && (
                 <div className="text-center py-16">
@@ -169,7 +171,7 @@ const QuestionsPreview = ({ questions: initialQuestions, onQuestionClick, onQues
                         Start building your test by adding questions. Questions will appear here once added.
                     </p>
                     <button
-                        onClick={() => setOpenQuestionModal(true)}
+                        onClick={() => setOpenAddQuestionModal(true)}
                         className="inline-flex items-center gap-2 bg-black hover:bg-gray-800 text-white px-6 py-3 rounded-lg font-medium transition-colors dark:bg-white dark:text-black dark:hover:bg-gray-200"
                     >
                         <Plus className="w-5 h-5" />
