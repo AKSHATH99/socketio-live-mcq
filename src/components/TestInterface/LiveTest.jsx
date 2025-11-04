@@ -22,6 +22,10 @@ const LiveTest = ({ testid, isTestLive, startTest, setIsTestLive, testEnded, set
         };
     }, []);
 
+    useEffect(()=>{
+        console.log(leaderboard)
+    },[leaderboard])
+
     useEffect(() => {
         setTestId(testid);
         // const socket = io();
@@ -127,7 +131,7 @@ const LiveTest = ({ testid, isTestLive, startTest, setIsTestLive, testEnded, set
                 body: JSON.stringify({ testId: testId }) // ✅ directly use the object
             });
             const data = await res.json();
-            console.log(data)
+            console.log("leaderboard live data",data)
             setLeaderboard(data);
         } catch (error) {
             console.error("Error fetching leaderboard", error);
@@ -175,7 +179,7 @@ const LiveTest = ({ testid, isTestLive, startTest, setIsTestLive, testEnded, set
                             <div className="space-y-4">
                                 {isTestLive ? (
                                     questions.map((question, index) => (
-                                        <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                                        <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4" key={index}>
                                             <div className="flex items-center justify-between">
                                                 <div className="flex-1">
                                                     <h3 className="font-medium text-gray-800 dark:text-gray-100">
@@ -245,7 +249,7 @@ const LiveTest = ({ testid, isTestLive, startTest, setIsTestLive, testEnded, set
                             </button>
                             <div className="space-y-3">
                                 {isTestLive ? (
-                                    leaderboard.length > 0 ? (
+                                    leaderboard ? (
                                         <table className="min-w-full border border-gray-300 dark:border-gray-600">
                                             <thead>
                                                 <tr className="bg-gray-100 dark:bg-gray-700 border-b dark:border-gray-600">

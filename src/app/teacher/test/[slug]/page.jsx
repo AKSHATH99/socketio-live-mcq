@@ -268,7 +268,7 @@ export default function Test({ params }) {
                                     Add Question
                                 </button>
 
-                                <button
+                                {/* <button
                                     disabled={questions.length === 0}
                                     className={`flex items-center gap-2 px-6 py-2 rounded-lg font-medium transition-colors ${questions.length === 0
                                         ? 'bg-gray-200 text-gray-400 cursor-not-allowed dark:bg-gray-700 dark:text-gray-500'
@@ -278,7 +278,7 @@ export default function Test({ params }) {
                                 >
                                     <Play className="w-4 h-4" />
                                     Start Test
-                                </button>
+                                </button> */}
                             </div>
                         </div>
                     </div>
