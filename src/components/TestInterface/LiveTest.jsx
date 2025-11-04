@@ -132,7 +132,7 @@ const LiveTest = ({ testid, isTestLive, startTest, setIsTestLive, testEnded, set
             });
             const data = await res.json();
             console.log("leaderboard live data",data)
-            setLeaderboard(data);
+            setLeaderboard(data.leaderboard);
         } catch (error) {
             console.error("Error fetching leaderboard", error);
         }
@@ -249,7 +249,7 @@ const LiveTest = ({ testid, isTestLive, startTest, setIsTestLive, testEnded, set
                             </button>
                             <div className="space-y-3">
                                 {isTestLive ? (
-                                    leaderboard ? (
+                                    leaderboard.length  > 0 ? (
                                         <table className="min-w-full border border-gray-300 dark:border-gray-600">
                                             <thead>
                                                 <tr className="bg-gray-100 dark:bg-gray-700 border-b dark:border-gray-600">
