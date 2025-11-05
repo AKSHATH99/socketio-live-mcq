@@ -1,4 +1,7 @@
 const { Redis } = require('@upstash/redis');
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+
 // Initialize Redis client
 const redis = new Redis({
     url: process.env.UPSTASH_REDIS_REST_URL,
@@ -6,73 +9,49 @@ const redis = new Redis({
 });
 
 module.exports = function handleAnswerValidation(io, socket) {
-    socket.on('answer-validate', async ({ studentId, questionId, selectedAnswer, testId = "" , studentName }) => {
+    socket.on('answer-validate', async ({ studentId, questionId, selectedAnswer, testId = "", studentName }) => {
         try {
-            console.log("answer validate")
-            console.log(questionId)
+            console.log("answer validate");
+            console.log("Received:", { studentId, questionId, selectedAnswer, testId, studentName });
+
             const redisKey = `test:${testId}`;
-            console.log(redisKey)
             const questionData = await redis.get(redisKey);
-            console.log("fetched from redis", questionData)
-
-
-
-            // Remove this line - data is already parsed
-            // const questionsFromRedis = JSON.parse(questionData);
-
-            // Use questionData directly since it's already an array
-            const questionsFromRedis = questionData;
 
             if (!questionData || !Array.isArray(questionData)) {
                 return socket.emit('answer-result', { correct: false, error: 'Question expired or missing' });
             }
 
-            const question = questionsFromRedis.find(q => q.id === questionId);
-            console.log("question found ", question)
+            const question = questionData.find(q => q.id === questionId);
 
             if (!question) {
                 return socket.emit('answer-result', { correct: false, error: 'Question not found' });
             }
 
-            console.log("question found ", question.answer)
-            console.log("my anwer", selectedAnswer);
+            const isCorrect = question.answer === selectedAnswer;
 
-            const isCorrect = question.answer === selectedAnswer ? true : false;
-
-            if(isCorrect){
-                await redis.zincrby(`leaderboard:${testId}`,  1 , studentId);
-
+            if (isCorrect) {
+                await redis.zincrby(`leaderboard:${testId}`, 1, studentId);
             }
 
-            fetch("http://localhost:3000/api/add-result", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
+            console.log("-----------------------ANSWER STORING-----------------------------");
+            console.log("Payload:", { studentId, testId, questionId, selectedAnswer, isCorrect, studentName });
+
+            // ✅ DIRECT DB INSERT — replacing fetch
+            await prisma.testResult.create({
+                data: {
                     studentId,
                     testId,
                     questionId,
                     selectedAnswer,
                     isCorrect,
                     studentName
-                }),
-            }).then(() => {
-                console.log("✅ Result stored in DB");
-            }).catch((e) => {
-                console.error("❌ Failed to store result in DB", e);
+                },
             });
-            // if(isCorrect){
-            //     // SEND ANSWER TO DB 
 
+            console.log("✅ Result stored in DB via Prisma directly");
 
-            //     console.log("correct answer")
-            // } else {
-            //     // SEND TO DB SAYING ITS WRONG
-            //     console.log("wrong")
-            //     // socket.emit('answer-result', { correct: false, correctAnswer: question.answer });
-            // }
         } catch (error) {
             console.error('Error validating answer:', error);
-            // socket.emit('answer-result', { correct: false, error: 'Internal Server Error' });
         }
     })
 }

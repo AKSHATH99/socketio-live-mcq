@@ -38,10 +38,11 @@ module.exports = function (io) {
   router.post('/get-test', protect, fetchTestDetails)
   router.post('/get-live-leaderboard', protect, getLiveLeaderBoard)
   router.post('/get-test-results-detailed', protect, getTestResultsDetailed);
+  router.post('/get-leaderboard', protect, getLeaderBoard);
 
+  router.post('/get-leaderboard', protect, getLeaderBoard);
   router.post('/add-result', protectStudent, addTestResult);
   router.post('/get-results', protectStudent, getTestResults);
-  router.post('/get-leaderboard', protect, getLeaderBoard);
   router.post('/get-student-tests', protectStudent, fetchStudentTests)
   router.post('/get-student-tests-with-performance', protectStudent, fetchStudentTestsWithPerformance)
   router.post('/get-student-detail', protectStudent, studentDetailsById);
