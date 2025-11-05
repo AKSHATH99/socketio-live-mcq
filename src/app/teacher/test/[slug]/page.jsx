@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState, useRef } from "react";
 import { use } from "react";
-import { Plus, Play, FileText, Trophy, BarChart3, Calendar, ChevronLeft, Hash, ChevronDown, ChevronUp, HomeIcon, LogOut, Settings } from "lucide-react";
+import { Send, MessageCircle, MessageSquare, Plus, Play, FileText, Trophy, BarChart3, Calendar, ChevronLeft, Hash, ChevronDown, ChevronUp, HomeIcon, LogOut, Settings } from "lucide-react";
 import AddQuestionModal from "@/components/TestInterface/AddQuestionModal";
 import LiveTest from "@/components/TestInterface/LiveTest";
 import LeaderBoard from "@/components/TestInterface/LeaderBoard";
@@ -9,6 +9,7 @@ import TestResult from "@/components/TestInterface/TestResult";
 import ThemeToggle from "@/components/ThemeToggler.jsx";
 import QuestionsPreview from "@/components/TestInterface/QuestionsPreview";
 import { useRouter } from "next/navigation";
+import { useSocket } from "@/Contexts/SocketContexts";
 
 import CreateRoomModal from "@/components/TeacherInterface/CreateRoomModal";
 export default function Test({ params }) {
@@ -24,11 +25,20 @@ export default function Test({ params }) {
     const [roomId, setRoomId] = useState("");
     const [testEnded, setTestEnded] = useState(false);
     const [openCreateRoomModal, setOpenCreateRoomModal] = useState(false);
+    const [messages, setMessages] = useState([]);
+    const [message, setMessage] = useState("");
     const [openSettingsModal, setOpenSettingsModal] = useState(false);
     const router = useRouter();
+    const socket = useSocket();
 
 
     const settingsRef = useRef(null);
+    useEffect(() => {
+        socket.on('receive-message', (data) => {
+            console.log("📥 New message", data);
+            setMessages((prev) => [...prev, data.message]);
+        });
+    }, [socket])
     const fetchTestDetails = async () => {
         try {
             const res = await fetch(`/api/get-test`, {
@@ -126,6 +136,16 @@ export default function Test({ params }) {
             </div>
         );
     }
+
+    const sendMessage = () => {
+        console.log("Sending message")
+        socket.emit('send-message', {
+            roomId: roomId,
+            message: message
+        })
+
+    }
+
 
 
     const tabs = [
@@ -366,6 +386,61 @@ export default function Test({ params }) {
                                 {activeTab === "Leaderboard" && <LeaderBoard testId={testId} />}
                             </div>
                         </div>
+                        {roomId && (
+                            <div className="bg-white rounded-xl border border-gray-200 mt-20     dark:bg-gray-900 dark:border-gray-800">
+                                <div className="p-6 border-b border-gray-200 dark:border-gray-800">
+                                    <div className="flex items-center gap-3">
+                                        <MessageSquare size={20} className="text-gray-600 dark:text-gray-400" />
+                                        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Class Communication</h2>
+                                    </div>
+                                </div>
+
+                                <div className="p-6">
+                                    <div className="flex gap-3 mb-6">
+                                        <input
+                                            type="text"
+                                            value={message}
+                                            onChange={(e) => setMessage(e.target.value)}
+                                            onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                                            placeholder="Type your message to the class..."
+                                            className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none dark:bg-gray-800 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:focus:ring-white"
+                                        />
+                                        <button
+                                            onClick={() => sendMessage()}
+                                            className="px-4 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2 dark:bg-white dark:text-black dark:hover:bg-gray-200"
+                                        >
+                                            <Send size={16} />
+                                        </button>
+                                    </div>
+
+                                    <div className="bg-gray-50 rounded-lg border border-gray-200 p-4 h-64 overflow-y-auto dark:bg-gray-800 dark:border-gray-700">
+                                        <div className="space-y-3">
+                                            {messages.length > 0 ? (
+                                                messages.map((msg, idx) => (
+                                                    <div key={idx} className="bg-white rounded-lg p-3 border-l-4 border-black dark:bg-gray-700 dark:border-white">
+                                                        <div className="flex items-start gap-3">
+                                                            <div className="w-6 h-6 bg-black rounded-full flex items-center justify-center dark:bg-white">
+                                                                <span className="text-white text-xs font-bold dark:text-black">T</span>
+                                                            </div>
+                                                            <p className="text-sm text-gray-800 dark:text-gray-200">{msg}</p>
+                                                        </div>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
+                                                    <div className="text-center">
+                                                        <MessageCircle size={32} className="mx-auto mb-2 opacity-50" />
+                                                        <p className="text-sm">No messages yet</p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                    <div>
                     </div>
                 </div>
             </div>

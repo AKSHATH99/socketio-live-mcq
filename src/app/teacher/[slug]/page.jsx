@@ -1,8 +1,9 @@
 'use client'
 import Image from "next/image";
 import { io } from "socket.io-client";
+import { use } from 'react';
 import { useEffect, useRef, useState } from "react";
-import { Users, Wifi, WifiOff, Calendar, Play, MessageSquare, Send, Plus, FileText, MessageCircle, Monitor, Settings, LogOut } from "lucide-react";
+import { Users, Wifi, Copy, WifiOff, Calendar, Play, MessageSquare, Send, Plus, FileText, MessageCircle, Monitor, Settings, LogOut, Check } from "lucide-react";
 // import QuestionsInput from "@/components/QuestionsInput";
 import CreateRoomModal from "@/components/TeacherInterface/CreateRoomModal";
 import CreateTestModal from "@/components/TeacherInterface/CreateTestModal";
@@ -13,7 +14,8 @@ import { useSocket } from "@/Contexts/SocketContexts";
 
 export default function Teacher({ params }) {
   const router = useRouter();
-  const teacherId = params.slug;
+  const resolvedParams = use(params); // Unwrap the Promise
+  const teacherId = resolvedParams.slug;
   const socketRef = useRef();
 
   const settingsRef = useRef(null);
@@ -209,6 +211,7 @@ export default function Teacher({ params }) {
     console.log(leaderboard)
   }, [leaderboard])
 
+ 
 
 
 
@@ -304,6 +307,7 @@ export default function Teacher({ params }) {
 
   const sendMessage = () => {
     console.log("Sending message")
+    // setMessages((prev) => [...prev, message]);
     socket.emit('send-message', {
       roomId: roomId,
       message: message
@@ -317,6 +321,19 @@ export default function Teacher({ params }) {
   }, [messages])
 
 
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      const baseUrl = `${window.location.protocol}//${window.location.host}`;
+      const link = `${baseUrl}/student/joinRoom?roomId=${roomId}`
+      await navigator.clipboard.writeText(link);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000); // reset after 2s
+    } catch (err) {
+      console.error("Copy failed", err);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-black">
@@ -439,10 +456,11 @@ export default function Teacher({ params }) {
                     <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Room ID</span>
                   </div>
-                  <div className="bg-gray-50 rounded-lg p-4 border-2 border-dashed border-gray-300 dark:bg-gray-800 dark:border-gray-700">
+                  <div className="bg-gray-50 rounded-lg p-4 border-2 border-dashed flex gap-10 border-gray-300 dark:bg-gray-800 dark:border-gray-700">
                     <code className="text-sm font-mono text-gray-800 dark:text-gray-200">
                       {roomId || "No active room"}
                     </code>
+                    {copied ? <Check size={17} /> : <Copy size={17} onClick={handleCopy} className="hover:cursor-pointer" />}
                   </div>
                 </div>
 
