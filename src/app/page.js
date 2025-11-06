@@ -1,11 +1,11 @@
 'use client'
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
-import { Clock, BarChart3, Trophy, CheckCircle, ArrowRight, Users, Zap, Target, Mail, GraduationCap, BookOpen, Sparkles, Star, Globe, Shield } from "lucide-react";
+import { Clock, BarChart3, Trophy, CheckCircle, ArrowRight, Users, Zap, Target, Mail, GraduationCap, BookOpen, Sparkles } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggler";
 import { useTheme } from "@/Contexts/Themecontext";
 
-// Custom hook for viewport animations
+// Custom hook for viewport animations with faster timing
 const useViewportAnimation = (options = {}) => {
   const ref = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -23,8 +23,8 @@ const useViewportAnimation = (options = {}) => {
         }
       },
       {
-        threshold: options.threshold || 0.1,
-        rootMargin: options.rootMargin || '0px'
+        threshold: options.threshold || 0.05,
+        rootMargin: options.rootMargin || '50px'
       }
     );
 
@@ -50,18 +50,18 @@ export default function Home() {
   const { theme, toggleTheme } = useTheme();
 
   // Animation refs
-  const [heroRef, heroVisible] = useViewportAnimation({ threshold: 0.2 });
-  const [formRef, formVisible] = useViewportAnimation({ threshold: 0.3 });
-  const [dashboardRef, dashboardVisible] = useViewportAnimation({ threshold: 0.2 });
-  const [dashboardImageRef, dashboardImageVisible] = useViewportAnimation({ threshold: 0.3 });
-  const [featuresHeaderRef, featuresHeaderVisible] = useViewportAnimation({ threshold: 0.3 });
-  const [feature0Ref, feature0Visible] = useViewportAnimation({ threshold: 0.3 });
-  const [feature1Ref, feature1Visible] = useViewportAnimation({ threshold: 0.3 });
-  const [feature2Ref, feature2Visible] = useViewportAnimation({ threshold: 0.3 });
-  const [feature3Ref, feature3Visible] = useViewportAnimation({ threshold: 0.3 });
-  const [benefitsRef, benefitsVisible] = useViewportAnimation({ threshold: 0.2 });
-  const [benefitsGridRef, benefitsGridVisible] = useViewportAnimation({ threshold: 0.3 });
-  const [ctaRef, ctaVisible] = useViewportAnimation({ threshold: 0.3 });
+  const [heroRef, heroVisible] = useViewportAnimation({ threshold: 0.1 });
+  const [formRef, formVisible] = useViewportAnimation({ threshold: 0.1 });
+  const [dashboardRef, dashboardVisible] = useViewportAnimation({ threshold: 0.1 });
+  const [dashboardImageRef, dashboardImageVisible] = useViewportAnimation({ threshold: 0.1 });
+  const [featuresHeaderRef, featuresHeaderVisible] = useViewportAnimation({ threshold: 0.1 });
+  const [feature0Ref, feature0Visible] = useViewportAnimation({ threshold: 0.1 });
+  const [feature1Ref, feature1Visible] = useViewportAnimation({ threshold: 0.1 });
+  const [feature2Ref, feature2Visible] = useViewportAnimation({ threshold: 0.1 });
+  const [feature3Ref, feature3Visible] = useViewportAnimation({ threshold: 0.1 });
+  const [benefitsRef, benefitsVisible] = useViewportAnimation({ threshold: 0.1 });
+  const [benefitsGridRef, benefitsGridVisible] = useViewportAnimation({ threshold: 0.1 });
+  const [ctaRef, ctaVisible] = useViewportAnimation({ threshold: 0.1 });
 
   const featureRefs = [feature0Ref, feature1Ref, feature2Ref, feature3Ref];
   const featureVisibles = [feature0Visible, feature1Visible, feature2Visible, feature3Visible];
@@ -127,7 +127,9 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             <div className="flex items-center">
-              <div className="flex-shrink-0">
+              <div className="flex flex-shrink-0">
+                <img src="icon-white.svg" alt="MCQLive Logo" className="h-9 w-9 mx-1 hidden dark:block" />
+                <img src="Checked-595b40b75ba036ed117d588a.svg" alt="MCQLive Logo" className="h-9 w-9 mx-1 dark:hidden" />
                 <div className="text-3xl font-bold bg-gradient-to-r from-black to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
                   MCQ<span className="text-gray-600 dark:text-gray-400">Live</span>
                 </div>
@@ -155,7 +157,7 @@ export default function Home() {
       </nav>
 
       {/* Enhanced Hero Section */}
-      <section className="relative py-32 overflow-hidden">
+      <section className="relative py-32 pt-20 overflow-hidden">
         {/* Background decorations - Gray only */}
         <div className="absolute inset-0">
           <div className="absolute top-20 left-10 w-72 h-72 bg-gray-300/20 dark:bg-gray-600/20 rounded-full blur-3xl animate-pulse"></div>
@@ -171,9 +173,9 @@ export default function Home() {
 
             <div
               ref={heroRef}
-              className={`transition-all duration-1000 ${heroVisible
-                  ? 'opacity-100 translate-y-0'
-                  : 'opacity-0 translate-y-10'
+              className={`transition-all duration-500 ${heroVisible
+                ? 'opacity-100 translate-y-0'
+                : 'opacity-0 translate-y-5'
                 }`}
             >
               <h1 className="text-6xl md:text-8xl font-black text-black dark:text-white mb-8 leading-none tracking-tight">
@@ -193,9 +195,9 @@ export default function Home() {
             {/* Enhanced Login Form */}
             <div
               ref={formRef}
-              className={`max-w-xl mx-auto transition-all duration-1000 delay-300 ${formVisible
-                  ? 'opacity-100 translate-y-0'
-                  : 'opacity-0 translate-y-10'
+              className={`max-w-xl mx-auto transition-all duration-500 delay-100 ${formVisible
+                ? 'opacity-100 translate-y-0'
+                : 'opacity-0 translate-y-5'
                 }`}
             >
               <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl p-10 rounded-3xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50 transition-all duration-500 hover:shadow-3xl hover:bg-white/80 dark:hover:bg-gray-800/80">
@@ -249,7 +251,6 @@ export default function Home() {
                   <h4 className="font-bold text-black dark:text-white mb-4 text-lg flex items-center gap-2">
                     <Sparkles className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                     What you&apos;ll get:
-
                   </h4>
                   <ul className="space-y-3">
                     {benefits[userType].map((benefit, index) => (
@@ -338,9 +339,9 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div
             ref={dashboardRef}
-            className={`text-center mb-20 transition-all duration-1000 ${dashboardVisible
-                ? 'opacity-100 translate-y-0'
-                : 'opacity-0 translate-y-10'
+            className={`text-center mb-20 transition-all duration-500 ${dashboardVisible
+              ? 'opacity-100 translate-y-0'
+              : 'opacity-0 translate-y-5'
               }`}
           >
             <h2 className="text-5xl md:text-6xl font-black text-black dark:text-white mb-8 leading-tight">
@@ -354,9 +355,9 @@ export default function Home() {
           {/* Dashboard Image with Enhanced Styling */}
           <div
             ref={dashboardImageRef}
-            className={`relative max-w-6xl mx-auto group transition-all duration-1000 delay-300 ${dashboardImageVisible
-                ? 'opacity-100 translate-y-0'
-                : 'opacity-0 translate-y-10'
+            className={`relative max-w-6xl mx-auto group transition-all duration-500 delay-100 ${dashboardImageVisible
+              ? 'opacity-100 translate-y-0'
+              : 'opacity-0 translate-y-5'
               }`}
           >
             {/* Outer glow layers - Gray only */}
@@ -368,13 +369,7 @@ export default function Home() {
               {/* Dashboard Image Container */}
               <div className="relative bg-white dark:bg-gray-600 rounded-2xl shadow-xl border border-gray-100/50 dark:border-gray-600/50 overflow-hidden group-hover:shadow-2xl transition-shadow duration-500">
                 <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center">
-                  {/* <div className="text-center">
-                    <BarChart3 className="w-24 h-24 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-                    <p className="text-gray-500 dark:text-gray-400 text-lg font-medium">Dashboard Preview</p>
-                    <p className="text-gray-400 dark:text-gray-500 text-sm">Analytics • Progress • Results</p>
-                  </div> */}
                   <img src={theme === "dark" ? "dahsboard-dark.png" : "dashboard.png"} alt="Dashboard Preview" className="w-full h-full object-cover" />
-                  {/* <img src="dashboard.png" alt="Dashboard Preview" className="w-full h-full object-cover" /> */}
                 </div>
               </div>
 
@@ -389,9 +384,9 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div
             ref={featuresHeaderRef}
-            className={`text-center mb-20 transition-all duration-1000 ${featuresHeaderVisible
-                ? 'opacity-100 translate-y-0'
-                : 'opacity-0 translate-y-10'
+            className={`text-center mb-20 transition-all duration-500 ${featuresHeaderVisible
+              ? 'opacity-100 translate-y-0'
+              : 'opacity-0 translate-y-5'
               }`}
           >
             <div className="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-800/50 rounded-full mb-6">
@@ -411,11 +406,11 @@ export default function Home() {
               <div
                 key={index}
                 ref={featureRefs[index]}
-                className={`group relative transition-all duration-1000 ${featureVisibles[index]
-                    ? 'opacity-100 translate-y-0'
-                    : 'opacity-0 translate-y-10'
+                className={`group relative transition-all duration-500 ${featureVisibles[index]
+                  ? 'opacity-100 translate-y-0'
+                  : 'opacity-0 translate-y-5'
                   }`}
-                style={{ transitionDelay: `${index * 100}ms` }}
+                style={{ transitionDelay: `${index * 50}ms` }}
               >
                 {/* Background glow - Gray only */}
                 <div className="absolute inset-0 bg-gradient-to-r from-gray-400 to-gray-600 rounded-2xl blur-xl opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
@@ -449,9 +444,9 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div
               ref={benefitsRef}
-              className={`transition-all duration-1000 ${benefitsVisible
-                  ? 'opacity-100 translate-x-0'
-                  : 'opacity-0 -translate-x-10'
+              className={`transition-all duration-500 ${benefitsVisible
+                ? 'opacity-100 translate-x-0'
+                : 'opacity-0 -translate-x-5'
                 }`}
             >
               <h2 className="text-5xl font-black text-black dark:text-white mb-8 leading-tight">
@@ -475,9 +470,9 @@ export default function Home() {
 
             <div
               ref={benefitsGridRef}
-              className={`bg-gradient-to-br from-gray-50/80 to-white/80 dark:from-gray-800/80 dark:to-gray-700/80 backdrop-blur-xl p-10 rounded-3xl border border-gray-200/50 dark:border-gray-700/50 shadow-2xl transition-all duration-1000 ${benefitsGridVisible
-                  ? 'opacity-100 translate-x-0'
-                  : 'opacity-0 translate-x-10'
+              className={`bg-gradient-to-br from-gray-50/80 to-white/80 dark:from-gray-800/80 dark:to-gray-700/80 backdrop-blur-xl p-10 rounded-3xl border border-gray-200/50 dark:border-gray-700/50 shadow-2xl transition-all duration-500 ${benefitsGridVisible
+                ? 'opacity-100 translate-x-0'
+                : 'opacity-0 translate-x-5'
                 }`}
             >
               <div className="grid grid-cols-2 gap-8">
@@ -514,9 +509,9 @@ export default function Home() {
 
         <div
           ref={ctaRef}
-          className={`relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center transition-all duration-1000 ${ctaVisible
-              ? 'opacity-100 translate-y-0'
-              : 'opacity-0 translate-y-10'
+          className={`relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center transition-all duration-500 ${ctaVisible
+            ? 'opacity-100 translate-y-0'
+            : 'opacity-0 translate-y-5'
             }`}
         >
           <h2 className="text-6xl md:text-7xl font-black text-white mb-6 leading-tight">
