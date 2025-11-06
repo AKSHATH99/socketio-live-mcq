@@ -293,3 +293,63 @@ module.exports.fetchStudentTestsWithPerformance = async (req, res) => {
     });
   }
 };
+module.exports.getSingleStudentTestResultsDetailed = async (req, res) => {
+  const { testId, studentId } = req.body;
+
+  if (!testId || !studentId) {
+    return res.status(400).json({ error: "testId and studentId both required" });
+  }
+
+  try {
+    // get all results for THIS user & THIS test
+    const results = await prisma.testResult.findMany({
+      where: { testId, studentId },
+      include: {
+        student: { select: { id: true, name: true, email: true } },
+      },
+      orderBy: { timestamp: "asc" },
+    });
+
+    // get all questions for this test
+    const questions = await prisma.question.findMany({
+      where: { testId },
+      select: { id: true, question: true, answer: true, options: true },
+    });
+
+    const questionMap = {};
+    for (const q of questions) {
+      questionMap[q.id] = q;
+    }
+
+    let totalCorrect = 0;
+    const answers = [];
+
+    for (const r of results) {
+      const qData = questionMap[r.questionId];
+
+      answers.push({
+        question: qData?.question ?? "Unknown",
+        correctAnswer: qData?.answer ?? "Unknown",
+        options: qData?.options ?? [],
+        selectedAnswer: r.selectedAnswer,
+        isCorrect: r.isCorrect,
+        studentName: r.studentName
+      });
+
+      if (r.isCorrect) totalCorrect++;
+    }
+
+    const final = {
+      student: results[0]?.student || null,
+      totalCorrect,
+      answers,
+    };
+
+    return res.status(200).json(final);
+
+  } catch (error) {
+    console.error("Error in getSingleStudentTestResultsDetailed:", error);
+    return res.status(500).json({ error: "Server error" });
+  }
+};
+

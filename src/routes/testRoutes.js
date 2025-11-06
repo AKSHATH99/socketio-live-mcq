@@ -4,7 +4,7 @@ const { createTest, fetchTests, fetchTestByTeacherID, fetchTestDetails } = requi
 const { addQuestionToTest, getQuestionsByTestId, updateQuestions } = require('../controllers/questionController');
 const { addTestResult, getTestResults, getLeaderBoard, getLiveLeaderBoard, getTestResultsDetailed } = require('../controllers/testResultController.js');
 const { TeacherSignup, TeacherLogin, TeacherLogout } = require('../controllers/TeacherControllers.js');
-const { StudentSignup, StudentLogin, StudentLogout, studentDetailsById, fetchStudentTests, fetchStudentTestsWithPerformance } = require('../controllers/StudentController.js');
+const { StudentSignup, StudentLogin, StudentLogout, studentDetailsById, fetchStudentTests, fetchStudentTestsWithPerformance,getSingleStudentTestResultsDetailed } = require('../controllers/StudentController.js');
 const { sendOTP, verifyOTP } = require('../controllers/authVerify/OtpControllers.js')
 
 
@@ -27,6 +27,7 @@ module.exports = function (io) {
   // router.use(protect); // All routes after this will be protected
 
   // Test Routes
+    router.post('/get-leaderboard', getLeaderBoard);
   router.post('/test', protect, createTest);
   router.post('/fetchTest', protect, fetchTests);
   router.post('/add-question', protect, addQuestionToTest);
@@ -40,12 +41,12 @@ module.exports = function (io) {
   router.post('/get-test-results-detailed', protect, getTestResultsDetailed);
   router.post('/get-leaderboard', protect, getLeaderBoard);
 
-  router.post('/get-leaderboard', protect, getLeaderBoard);
   router.post('/add-result', protectStudent, addTestResult);
   router.post('/get-results', protectStudent, getTestResults);
   router.post('/get-student-tests', protectStudent, fetchStudentTests)
   router.post('/get-student-tests-with-performance', protectStudent, fetchStudentTestsWithPerformance)
   router.post('/get-student-detail', protectStudent, studentDetailsById);
+  router.post('/get-single-student-test-results-detailed', protectStudent, getSingleStudentTestResultsDetailed);
   router.use(protectStudent); // All routes after this will be for student to pass through middleware
 
   return router;
