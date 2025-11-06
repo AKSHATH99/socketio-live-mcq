@@ -260,253 +260,229 @@ export default function Student({ params }) {
         );
     }
 
-    return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-black">
-            {/* Header */}
-            <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-slate-200 dark:border-gray-600">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div className="flex-1">
-                            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">Student Dashboard</h1>
-                            <p className="text-slate-600 dark:text-gray-400 mt-1 text-sm sm:text-base">Track your learning progress and performance</p>
+return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-black">
+        {/* Header */}
+        <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-slate-200 dark:border-gray-600">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex-1">
+                        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">Student Dashboard</h1>
+                        <p className="text-slate-600 dark:text-gray-400 mt-1 text-sm sm:text-base">Track your learning progress and performance</p>
+                    </div>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                        <div className="flex items-center space-x-2 bg-slate-100 dark:bg-gray-700 px-3 py-2 rounded-full">
+                            <User className="w-4 h-4 text-slate-600 dark:text-gray-300" />
+                            <span className="text-sm font-medium text-slate-700 dark:text-gray-200">Welcome {studentData?.name}!</span>
                         </div>
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                            <div className="flex items-center space-x-2 bg-slate-100 dark:bg-gray-700 px-3 py-2 rounded-full">
-                                <User className="w-4 h-4 text-slate-600 dark:text-gray-300" />
-                                <span className="text-sm font-medium text-slate-700 dark:text-gray-200">Welcome {studentData?.name}!</span>
-                            </div>
-                            <ThemeToggle />
+                        <ThemeToggle />
 
-                            <div>
-                                {isLoading ? (
-                                    <Spinner />
-                                ) : (
-                                    <button onClick={logoutStudent} className="text-sm font-medium text-slate-700 dark:text-gray-200">Logout</button>
-                                )}
-                            </div>
+                        <div>
+                            {isLoading ? (
+                                <Spinner />
+                            ) : (
+                                <button onClick={logoutStudent} className="text-sm font-medium text-slate-700 dark:text-gray-200">Logout</button>
+                            )}
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
 
-                    {/* Room Status and Join Room Section - Moved inside header */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-6 pt-6 border-t border-slate-200 dark:border-gray-600">
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-                            {/* Room Status Badge */}
-                            <div className="flex items-center">
-                                {currentRoomID ? (
-                                    <div className="flex items-center bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 px-3 py-2 rounded-full text-sm font-medium">
-                                        <div className="w-2 h-2 bg-emerald-500 rounded-full mr-2 animate-pulse"></div>
-                                        Room: {currentRoomID}
-                                    </div>
-                                ) : (
-                                    <div className="flex items-center bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-200 px-3 py-2 rounded-full text-sm font-medium">
-                                        <div className="w-2 h-2 bg-amber-500 rounded-full mr-2"></div>
-                                        Not in room
-                                    </div>
-                                )}
-                            </div>
+        {/* ROOM MANAGEMENT CARD NEW */}
+        <div className="max-w-7xl mx-auto px-6 mt-8">
+            <div className="bg-white dark:bg-gray-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm p-6">
+                <div className="flex items-center justify-between mb-5">
+                    <h2 className="flex items-center gap-2 font-semibold text-slate-900 dark:text-white text-lg">
+                        Room Management
+                    </h2>
+                    <div className="flex items-center gap-2 text-sm">
+                        <div className={`w-3 h-3 rounded-full ${currentRoomID ? "bg-emerald-500" : "bg-amber-500"}`} />
+                        <span className="font-medium text-slate-900 dark:text-gray-200">
+                            {currentRoomID ? "Connected" : "Not in room"}
+                        </span>
+                    </div>
+                </div>
 
-                            <div className="text-sm text-slate-600 dark:text-gray-400">
-                                Student Status: {studentStatus}
-                            </div>
-                        </div>
-
-                        {/* Join Room Button */}
+                {!currentRoomID && (
+                    <div className="flex justify-center py-16">
                         <button
                             onClick={() => setShowJoinModal(true)}
-                            className="bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-gray-100 text-white dark:text-black font-medium py-2.5 px-4 rounded-lg transition-colors duration-200 whitespace-nowrap"
+                            className="px-10 py-4 bg-slate-900 dark:bg-white text-white dark:text-black rounded-xl text-lg font-semibold hover:opacity-90 transition"
                         >
-                            {currentRoomID ? 'Change Room' : 'Join Room'}
+                            Join Room
                         </button>
                     </div>
-                </div>
-            </div>
+                )}
 
-            {/* Announcements Section */}
-            {messages.length > 0 && (
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm">
-                        <div className="px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700">
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                                <div className="flex items-center space-x-3">
-                                    <Megaphone className="w-5 h-5 text-gray-700 dark:text-gray-300" />
-                                    <h3 className="font-semibold text-gray-900 dark:text-white">Room Announcements</h3>
-                                </div>
-                                <span className="text-xs text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 px-2 py-1 rounded-full border border-gray-200 dark:border-gray-600 self-start sm:self-center">
-                                    {messages.length} announcement{messages.length !== 1 ? 's' : ''}
-                                </span>
+                {currentRoomID && (
+                    <>
+                        <div className="mb-6">
+                            <h3 className="text-sm font-medium text-slate-700 dark:text-gray-400 mb-2">Room ID</h3>
+                            <div className="px-4 py-3 border border-dashed border-slate-300 dark:border-gray-600 rounded-lg text-base text-slate-900 dark:text-white font-medium">
+                                {currentRoomID}
                             </div>
                         </div>
-                        <div className="max-h-32 overflow-y-auto">
-                            <div className="p-4 sm:p-6 space-y-3">
-                                {messages.slice(-5).map((msg, idx) => (
-                                    <div
-                                        key={idx}
-                                        className="flex items-start space-x-3 bg-white dark:bg-gray-800 rounded-lg p-3 sm:p-4 border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                                    >
-                                        <div className="flex-shrink-0 w-2 h-2 bg-gray-900 dark:bg-white rounded-full mt-2"></div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed break-words">{msg}</p>
-                                        </div>
+
+                        <div>
+                            <h3 className="text-sm font-medium text-slate-700 dark:text-gray-400 mb-2">Room Announcements</h3>
+
+                            <div className="max-h-40 overflow-y-auto space-y-3 border border-slate-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-800">
+                                {messages.length === 0 && (
+                                    <p className="text-sm text-slate-400 dark:text-gray-500 text-center">
+                                        No announcements yet
+                                    </p>
+                                )}
+
+                                {messages.map((msg, idx) => (
+                                    <div key={idx} className="text-sm text-slate-800 dark:text-gray-200">
+                                        • {msg}
                                     </div>
                                 ))}
-                                {messages.length > 5 && (
-                                    <div className="text-center pt-2">
-                                        <span className="text-xs text-gray-500 dark:text-gray-400">
-                                            Showing latest 5 announcements
-                                        </span>
-                                    </div>
-                                )}
                             </div>
                         </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Dashboard */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <Dashboard studentTestData={studentTests} studentPerformanceData={studentTestsWithPerformance} />
+                    </>
+                )}
             </div>
-
-            {/* Main Content - Questions */}
-            {openLiveTestModal && questions.length > 0 && questions[currentIndex] && (
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-                        <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-gray-600">
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                                <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
-                                    Question {currentIndex + 1}
-                                </h2>
-                                <div className="bg-slate-100 dark:bg-gray-700 text-slate-800 dark:text-gray-200 px-3 py-2 rounded-full text-sm font-medium self-start sm:self-center">
-                                    {questions.length - currentIndex - 1 > 0
-                                        ? `${questions.length - currentIndex - 1} remaining`
-                                        : 'Last question'}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="p-4 sm:p-6">
-                            <LiveQuestion
-                                question={questions[currentIndex]}
-                                onAnswer={(data) => {
-                                    console.log("✅ Parent received answer", data);
-                                    socket.emit("answer-validate", data);
-
-                                    // Move to next question if available
-                                    if (currentIndex + 1 < questions.length) {
-                                        setCurrentIndex(currentIndex + 1);
-                                    } else {
-                                        console.log("✅ All questions completed");
-                                    }
-                                }}
-                                studentId={studentId}
-                                studentName={studentName}
-                                TestEnded={TestEnded}
-                                openLiveTestModal={openLiveTestModal}
-                                setOpenLiveTestModal={setOpenLiveTestModal}
-                                fetchStudentDetailsById={getStudentDetailsById}
-                            />
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Join Room Modal */}
-            <JoinRoomModal
-                isOpen={showJoinModal}
-                onClose={() => setShowJoinModal(false)}
-                onJoinRoom={joinRoom}
-                isJoining={isJoining}
-                joinRoomFromParams={roomId}
-            />
-
-            {openLobby && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm z-50 p-4">
-                    <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 border border-gray-200">
-                        {/* Header */}
-                        <div className="bg-gray-900 text-white rounded-t-xl px-6 sm:px-8 py-4">
-                            <div className="flex items-center gap-3">
-                                <div className="bg-gray-900 p-2 rounded-lg">
-                                    {/* <FileText className="w-5 h-5" /> */}
-                                </div>
-                                {/* <h2 className="text-xl font-semibold">Test Lobby</h2> */}
-                            </div>
-                        </div>
-
-                        {/* Content */}
-                        <div className="p-4 sm:p-6">
-                            {/* Status indicator */}
-                            <div className="flex items-center justify-center gap-3 bg-gray-50 rounded-lg py-4 px-4 sm:px-6 mb-6">
-                                <Loader2 className="w-5 h-5 text-gray-600 animate-spin" />
-                                <span className="text-gray-700 font-medium text-center text-sm sm:text-base">
-                                    Waiting for administrator to start the test
-                                </span>
-                            </div>
-
-                            {/* Test details in grid */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
-                                <div className="flex items-center gap-3 p-3 sm:p-0">
-                                    <div className="bg-gray-100 p-2 rounded-lg flex-shrink-0">
-                                        <FileText className="w-4 h-4 text-gray-600" />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <h3 className="font-medium text-gray-900 text-sm">Test Title</h3>
-                                        <p className="text-gray-700 text-sm truncate">{lobbyData?.title}</p>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-center gap-3 p-3 sm:p-0">
-                                    <div className="bg-gray-100 p-2 rounded-lg flex-shrink-0">
-                                        <Calendar className="w-4 h-4 text-gray-600" />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <h3 className="font-medium text-gray-900 text-sm">Created</h3>
-                                        <p className="text-gray-700 text-sm">{formatDate(lobbyData?.createdAt)}</p>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-center gap-3 p-3 sm:p-0 sm:col-span-2 lg:col-span-1">
-                                    <div className="bg-gray-100 p-2 rounded-lg flex-shrink-0">
-                                        <Users className="w-4 h-4 text-gray-600" />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <h3 className="font-medium text-gray-900 text-sm">Status</h3>
-                                        <p className="text-gray-700 text-sm">Connected</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Description */}
-                            <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                                <div className="flex items-start gap-3">
-                                    <User className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" />
-                                    <div className="flex-1 min-w-0">
-                                        <h4 className="font-medium text-gray-900 text-sm mb-1">Description</h4>
-                                        <p className="text-gray-700 text-sm break-words">{lobbyData?.description}</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Instructions - compact */}
-                            <div className="flex items-start gap-3 bg-gray-50 rounded-lg p-4">
-                                <Clock className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" />
-                                <div className="flex-1 min-w-0">
-                                    <h4 className="font-medium text-gray-900 text-sm mb-1">Instructions</h4>
-                                    <p className="text-sm text-gray-700">
-                                        Stay on this page • Ensure stable connection • Close other tabs • Have materials ready
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Footer */}
-                        <div className="bg-gray-50 rounded-b-xl px-4 sm:px-6 py-3 border-t border-gray-200">
-                            <p className="text-center text-sm text-gray-600">
-                                The test will begin automatically once started by your administrator
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
-    );
+
+        {/* Dashboard */}
+        <div className="mt-8">
+            <Dashboard studentTestData={studentTests} studentPerformanceData={studentTestsWithPerformance} studentId={studentId} />
+        </div>
+
+        {/* Main Content - Questions */}
+        {openLiveTestModal && questions.length > 0 && questions[currentIndex] && (
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+                    <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-gray-600">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
+                                Question {currentIndex + 1}
+                            </h2>
+                            <div className="bg-slate-100 dark:bg-gray-700 text-slate-800 dark:text-gray-200 px-3 py-2 rounded-full text-sm font-medium self-start sm:self-center">
+                                {questions.length - currentIndex - 1 > 0
+                                    ? `${questions.length - currentIndex - 1} remaining`
+                                    : 'Last question'}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="p-4 sm:p-6">
+                        <LiveQuestion
+                            question={questions[currentIndex]}
+                            onAnswer={(data) => {
+                                console.log("✅ Parent received answer", data);
+                                socket.emit("answer-validate", data);
+
+                                if (currentIndex + 1 < questions.length) {
+                                    setCurrentIndex(currentIndex + 1);
+                                } else {
+                                    console.log("✅ All questions completed");
+                                }
+                            }}
+                            studentId={studentId}
+                            studentName={studentName}
+                            TestEnded={TestEnded}
+                            openLiveTestModal={openLiveTestModal}
+                            setOpenLiveTestModal={setOpenLiveTestModal}
+                            fetchStudentDetailsById={getStudentDetailsById}
+                        />
+                    </div>
+                </div>
+            </div>
+        )}
+
+        {/* Join Room Modal */}
+        <JoinRoomModal
+            isOpen={showJoinModal}
+            onClose={() => setShowJoinModal(false)}
+            onJoinRoom={joinRoom}
+            isJoining={isJoining}
+            joinRoomFromParams={roomId}
+        />
+
+        {openLobby && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm z-50 p-4">
+                <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 border border-gray-200">
+
+                    <div className="bg-gray-900 text-white rounded-t-xl px-6 sm:px-8 py-4">
+                        <div className="flex items-center gap-3">
+                            <div className="bg-gray-900 p-2 rounded-lg"></div>
+                        </div>
+                    </div>
+
+                    <div className="p-4 sm:p-6">
+                        <div className="flex items-center justify-center gap-3 bg-gray-50 rounded-lg py-4 px-4 sm:px-6 mb-6">
+                            <Loader2 className="w-5 h-5 text-gray-600 animate-spin" />
+                            <span className="text-gray-700 font-medium text-center text-sm sm:text-base">
+                                Waiting for administrator to start the test
+                            </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
+                            <div className="flex items-center gap-3 p-3 sm:p-0">
+                                <div className="bg-gray-100 p-2 rounded-lg flex-shrink-0">
+                                    <FileText className="w-4 h-4 text-gray-600" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <h3 className="font-medium text-gray-900 text-sm">Test Title</h3>
+                                    <p className="text-gray-700 text-sm truncate">{lobbyData?.title}</p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-3 p-3 sm:p-0">
+                                <div className="bg-gray-100 p-2 rounded-lg flex-shrink-0">
+                                    <Calendar className="w-4 h-4 text-gray-600" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <h3 className="font-medium text-gray-900 text-sm">Created</h3>
+                                    <p className="text-gray-700 text-sm">{formatDate(lobbyData?.createdAt)}</p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-3 p-3 sm:p-0 sm:col-span-2 lg:col-span-1">
+                                <div className="bg-gray-100 p-2 rounded-lg flex-shrink-0">
+                                    <Users className="w-4 h-4 text-gray-600" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <h3 className="font-medium text-gray-900 text-sm">Status</h3>
+                                    <p className="text-gray-700 text-sm">Connected</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                            <div className="flex items-start gap-3">
+                                <User className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" />
+                                <div className="flex-1 min-w-0">
+                                    <h4 className="font-medium text-gray-900 text-sm mb-1">Description</h4>
+                                    <p className="text-gray-700 text-sm break-words">{lobbyData?.description}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex items-start gap-3 bg-gray-50 rounded-lg p-4">
+                            <Clock className="w-4 h-4 text-gray-600 mt-0.5 flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                                <h4 className="font-medium text-gray-900 text-sm mb-1">Instructions</h4>
+                                <p className="text-sm text-gray-700">
+                                    Stay on this page • Ensure stable connection • Close other tabs • Have materials ready
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="bg-gray-50 rounded-b-xl px-4 sm:px-6 py-3 border-t border-gray-200">
+                        <p className="text-center text-sm text-gray-600">
+                            The test will begin automatically once started by your administrator
+                        </p>
+                    </div>
+                </div>
+            </div>
+        )}
+    </div>
+);
+
+
 }
