@@ -1,11 +1,6 @@
 // src/controllers/testResultController.js
 const { prisma } = require('../lib/prisma');
-const { Redis } = require('@upstash/redis');
-
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN,
-});
+const { redis } = require('../lib/redis');
 
 
 module.exports.addTestResult = async (req, res) => {
@@ -115,6 +110,34 @@ module.exports.getLiveLeaderBoard = async (req, res) => {
         studentId: leaderboard[i],
         score: parseInt(leaderboard[i + 1]),
       });
+    }
+
+    // Fall back to the stored results when the live cache is unavailable or
+    // empty, so the leaderboard still reflects reality.
+    if (formatted.length === 0) {
+      const results = await prisma.testResult.findMany({
+        where: { testId },
+        include: { student: { select: { name: true } } },
+      });
+
+      const scores = {};
+
+      for (const result of results) {
+        if (!scores[result.studentId]) {
+          scores[result.studentId] = {
+            studentId: result.studentId,
+            studentName: result.student?.name || 'Unknown',
+            score: 0,
+          };
+        }
+        if (result.isCorrect) {
+          scores[result.studentId].score++;
+        }
+      }
+
+      const dbLeaderboard = Object.values(scores).sort((a, b) => b.score - a.score);
+
+      return res.status(200).json({ leaderboard: dbLeaderboard });
     }
 
     res.status(200).json({ leaderboard: formatted });

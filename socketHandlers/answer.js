@@ -1,12 +1,5 @@
-const { Redis } = require('@upstash/redis');
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
-
-// Initialize Redis client
-const redis = new Redis({
-    url: process.env.UPSTASH_REDIS_REST_URL,
-    token: process.env.UPSTASH_REDIS_REST_TOKEN,
-});
+const { redis } = require('../src/lib/redis');
+const { prisma } = require('../src/lib/prisma');
 
 module.exports = function handleAnswerValidation(io, socket) {
     socket.on('answer-validate', async ({ studentId, questionId, selectedAnswer, testId = "", studentName }) => {
@@ -14,23 +7,44 @@ module.exports = function handleAnswerValidation(io, socket) {
             console.log("answer validate");
             console.log("Received:", { studentId, questionId, selectedAnswer, testId, studentName });
 
-            const redisKey = `test:${testId}`;
-            const questionData = await redis.get(redisKey);
+            // The database is the source of truth for the correct answer. The
+            // cached copy in Redis is only a fast path, so a Redis outage must
+            // not stop students from being scored.
+            let question = null;
 
-            if (!questionData || !Array.isArray(questionData)) {
-                return socket.emit('answer-result', { correct: false, error: 'Question expired or missing' });
+            try {
+                question = await prisma.question.findUnique({
+                    where: { id: questionId },
+                    select: { id: true, answer: true },
+                });
+            } catch (dbError) {
+                console.error('Error reading question from DB:', dbError.message);
             }
 
-            const question = questionData.find(q => q.id === questionId);
+            if (!question) {
+                try {
+                    const questionData = await redis.get(`test:${testId}`);
+
+                    if (Array.isArray(questionData)) {
+                        question = questionData.find(q => q.id === questionId) || null;
+                    }
+                } catch (redisError) {
+                    console.error('Error reading question from cache:', redisError.message);
+                }
+            }
 
             if (!question) {
-                return socket.emit('answer-result', { correct: false, error: 'Question not found' });
+                return socket.emit('answer-result', { correct: false, error: 'Question expired or missing' });
             }
 
             const isCorrect = question.answer === selectedAnswer;
 
-            if (isCorrect) {
-                await redis.zincrby(`leaderboard:${testId}`, 1, studentId);
+            try {
+                if (isCorrect) {
+                    await redis.zincrby(`leaderboard:${testId}`, 1, studentId);
+                }
+            } catch (leaderboardError) {
+                console.error('Error updating live leaderboard:', leaderboardError.message);
             }
 
             console.log("-----------------------ANSWER STORING-----------------------------");

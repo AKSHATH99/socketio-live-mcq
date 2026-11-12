@@ -2,7 +2,6 @@
 // src/controllers/testController.js
 const { prisma } = require('../lib/prisma');
 const { redis } = require('../lib/redis');
-
 function liveTestController(io) {
     return {
         sendQuestions: async (req, res) => {
@@ -28,9 +27,16 @@ function liveTestController(io) {
                 }
 
 
-                await redis.set(`test:${testid}`, JSON.stringify(questions), {
-                    ex: 60 * 60, // ⏱️ expires in 1 hour
-                });
+                // Cache the questions for answer validation. This is best-effort:
+                // the database stays the source of truth, so a cache failure
+                // must never stop the live test from starting.
+                try {
+                    await redis.set(`test:${testid}`, JSON.stringify(questions), {
+                        ex: 60 * 60, // ⏱️ expires in 1 hour
+                    });
+                } catch (cacheError) {
+                    console.error('Error caching questions:', cacheError.message);
+                }
 
                 console.log(questions);
 

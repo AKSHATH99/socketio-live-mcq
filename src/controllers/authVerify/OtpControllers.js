@@ -1,13 +1,8 @@
 // const redis = require('../../lib/redis.js');
 const { generateOTP } = require("../../utils/generateOTP.js");
 const sendMail = require("../../utils/sendOTp.js");
-const { Redis } = require('@upstash/redis')
+const { redis } = require('../../lib/redis.js');
 const { prisma } = require('../../lib/prisma.js');
-
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN,
-});
 
 const OtpControllers = {
   sendOTP: async (req, res) => {
