@@ -25,7 +25,7 @@ import {
 import CreateRoomModal from "@/components/TeacherInterface/CreateRoomModal";
 import CreateTestModal from "@/components/TeacherInterface/CreateTestModal";
 import TeacherHeader from "@/components/TeacherInterface/TeacherHeader";
-import { generateRoomCode } from "@/lib/roomCode";
+import { generateRoomCode, normalizeRoomCode } from "@/lib/roomCode";
 import { getTestVisual } from "@/lib/testVisuals";
 import { useSocket } from "@/Contexts/SocketContexts";
 
@@ -134,11 +134,21 @@ export default function Teacher({ params }) {
   useEffect(() => {
     if (!socket) return;
 
+    // Read the room from storage at connect time: the state value captured in
+    // this closure would be stale, and a reconnect creates a new socket that
+    // has to re-join the room.
+    const joinStoredRoom = () => {
+      const storedRoom = normalizeRoomCode(localStorage.getItem('roomId'));
+
+      if (!storedRoom) return;
+
+      socket.emit('join-room', storedRoom, teacherId, 'teacher');
+      socket.emit('lobby-status-update', storedRoom);
+    };
+
     socket.on('connect', () => {
       console.log('connected from frontend', socket.id);
-      if (roomId) {
-        socket.emit('join-room', roomId, teacherId, 'teacher');
-      }
+      joinStoredRoom();
     });
 
     socket.on('receive-message', (data) => {
@@ -158,18 +168,16 @@ export default function Teacher({ params }) {
 
     socket.on('reconnect', () => {
       console.log('Reconnected to server');
-      if (roomId) {
-        socket.emit('join-room', roomId, teacherId, 'teacher');
-      }
+      joinStoredRoom();
     });
 
     return () => {
       // socket.disconnect()
     }
-  }, [socket]);
+  }, [socket, teacherId]);
 
   const createRoom = () => {
-    const roomCode = generateRoomCode();
+    const roomCode = normalizeRoomCode(generateRoomCode());
 
     if (roomId && roomId !== roomCode) {
       socket?.emit('leave-room', { roomId });

@@ -13,6 +13,7 @@ import {
     X,
 } from "lucide-react";
 import { useSocket } from "@/Contexts/SocketContexts";
+import { normalizeRoomCode } from "@/lib/roomCode";
 
 const LiveTest = ({ testid, isTestLive, startTest, testEnded, setTestEnded, testData }) => {
     const [roomId, setRoomId] = useState("");
@@ -31,15 +32,22 @@ const LiveTest = ({ testid, isTestLive, startTest, testEnded, setTestEnded, test
 
         if (!socket) return;
 
-        const currentRoom = localStorage.getItem("roomId");
+        const currentRoom = normalizeRoomCode(localStorage.getItem("roomId"));
 
-        if (currentRoom) {
-            socket.emit("join-room", currentRoom);
+        const joinCurrentRoom = () => {
+            if (!currentRoom) return;
+
+            socket.emit("join-room", currentRoom, null, "teacher");
             socket.emit("lobby-status-update", currentRoom);
-        }
+        };
+
+        joinCurrentRoom();
 
         const handleConnect = () => {
             console.log("connected from teacher side", socket.id);
+            // A reconnect creates a new socket, so room membership has to be
+            // restored explicitly.
+            joinCurrentRoom();
         };
 
         const handleQuestion = (newQuestion) => {

@@ -7,7 +7,9 @@ import StatsCards from "@/components/StudentInterface/StatsCards";
 import StudentHeader from "@/components/StudentInterface/StudentHeader";
 import { Calendar, User, Clock, FileText, Loader2, Users, DoorOpen, QrCode } from "lucide-react";
 import { useSearchParams } from 'next/navigation';
+import { toast } from 'react-toastify';
 import { useSocket } from "@/Contexts/SocketContexts";
+import { normalizeRoomCode } from "@/lib/roomCode";
 
 export default function Student({ params }) {
     const studentId = params.slug;
@@ -78,6 +80,7 @@ export default function Student({ params }) {
     }
 
     const [currentRoomID, setCurrentRoomID] = useState("");
+    const autoJoinedRef = useRef(false);
 
 
     const formatDate = (dateString) => {
@@ -190,22 +193,34 @@ export default function Student({ params }) {
     }, [socket])
 
     const joinRoom = async (roomCode) => {
-        console.log("Student joining the room ", roomCode)
+        const normalizedCode = normalizeRoomCode(roomCode);
+        console.log("Student joining the room ", normalizedCode)
         setIsJoining(true);
         try {
-            const joined = await socket.emit('join-room', roomCode, studentId, 'student');
-            if (joined) {
-                setCurrentRoomID(roomCode);
-                console.log("Joined hahaha")
+            // emit() returns the socket instance, not the server's response, so
+            // an acknowledgement is required to know the join actually worked.
+            const response = await socket.timeout(5000).emitWithAck(
+                'join-room',
+                normalizedCode,
+                studentId,
+                'student'
+            );
 
-                //adding to list of students
-                socket.emit('student-ready', { roomId: roomCode, studentName: studentName });
-                setStudentStatus(true)
-
-
+            if (!response?.ok) {
+                console.error("Failed to join room:", response?.error || 'unknown error');
+                toast.error(response?.error || "Could not join the room. Check the code and try again.");
+                return;
             }
+
+            setCurrentRoomID(normalizedCode);
+            console.log("Joined room", normalizedCode)
+
+            //adding to list of students
+            socket.emit('student-ready', { roomId: normalizedCode, studentName: studentName });
+            setStudentStatus(true)
         } catch (error) {
             console.error("Failed to join room:", error);
+            toast.error("Could not join the room. Check the code and try again.");
         } finally {
             setIsJoining(false);
         }
@@ -213,10 +228,22 @@ export default function Student({ params }) {
 
     const handleJoinRoom = async (e) => {
         e.preventDefault();
-        const code = roomCodeInput.trim().toUpperCase();
+        const code = roomCodeInput.trim();
         if (!code) return;
         await joinRoom(code);
     }
+
+    // Students arriving through an invite link are joined automatically, since
+    // the room code is already known.
+    useEffect(() => {
+        const roomIdFromParams = searchParams.get('joinRoom');
+
+        if (!roomIdFromParams || !socket || !studentName) return;
+        if (autoJoinedRef.current) return;
+
+        autoJoinedRef.current = true;
+        joinRoom(roomIdFromParams);
+    }, [socket, studentName, searchParams]);
 
     useEffect(() => {
         console.log("new question questions  ", question)
@@ -324,7 +351,7 @@ return (
                                             id="room-code"
                                             type="text"
                                             value={roomCodeInput}
-                                            onChange={(e) => setRoomCodeInput(e.target.value.toUpperCase())}
+                                            onChange={(e) => setRoomCodeInput(e.target.value)}
                                             placeholder="ENTER CODE"
                                             disabled={isJoining}
                                             autoComplete="off"

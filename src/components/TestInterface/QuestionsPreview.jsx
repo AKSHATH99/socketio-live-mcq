@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { CheckCircle, FileText, Pencil, Plus, Trash2 } from "lucide-react";
+import { CheckCircle, FileText, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
 import QuestionForm from "./QuestionForm";
+import AiGeneratorModal from "./AiGeneratorModal";
 
 const getQuestionText = (question) =>
     question?.question || question?.text || "Untitled question";
@@ -8,6 +9,7 @@ const getQuestionText = (question) =>
 const QuestionsPreview = ({ questions: initialQuestions, testId, onRefresh }) => {
     const [questions, setQuestions] = useState(initialQuestions || []);
     const [showAddForm, setShowAddForm] = useState(false);
+    const [showAiGenerator, setShowAiGenerator] = useState(false);
     const [editingId, setEditingId] = useState(null);
     const [pendingDelete, setPendingDelete] = useState(null);
     const [deleting, setDeleting] = useState(false);
@@ -148,17 +150,28 @@ const QuestionsPreview = ({ questions: initialQuestions, testId, onRefresh }) =>
                                 </p>
                             </div>
 
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setEditingId(null);
-                                    setShowAddForm((open) => !open);
-                                }}
-                                className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-700"
-                            >
-                                <Plus className="h-4 w-4" />
-                                Add question
-                            </button>
+                            <div className="flex flex-wrap items-center gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowAiGenerator(true)}
+                                    className="inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700 transition-colors hover:border-emerald-300 hover:bg-emerald-100 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-400 dark:hover:bg-emerald-500/20"
+                                >
+                                    <Sparkles className="h-4 w-4" />
+                                    Generate with AI
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setEditingId(null);
+                                        setShowAddForm((open) => !open);
+                                    }}
+                                    className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-700"
+                                >
+                                    <Plus className="h-4 w-4" />
+                                    Add question
+                                </button>
+                            </div>
                         </div>
 
                         {showAddForm && (
@@ -269,16 +282,38 @@ const QuestionsPreview = ({ questions: initialQuestions, testId, onRefresh }) =>
                         <p className="text-slate-500 text-base mb-8 max-w-md mx-auto dark:text-gray-400">
                             Start building your test by adding questions. Questions will appear here once added.
                         </p>
-                        <button
-                            type="button"
-                            onClick={() => setShowAddForm(true)}
-                            className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition-colors"
-                        >
-                            <Plus className="w-4 h-4" />
-                            Add first question
-                        </button>
+                        <div className="flex flex-wrap items-center justify-center gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setShowAiGenerator(true)}
+                                className="inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-5 py-2.5 text-sm font-medium text-emerald-700 transition-colors hover:border-emerald-300 hover:bg-emerald-100 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-400 dark:hover:bg-emerald-500/20"
+                            >
+                                <Sparkles className="h-4 w-4" />
+                                Generate with AI
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => setShowAddForm(true)}
+                                className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition-colors"
+                            >
+                                <Plus className="w-4 h-4" />
+                                Add first question
+                            </button>
+                        </div>
                     </div>
                 )
+            )}
+
+            {showAiGenerator && (
+                <AiGeneratorModal
+                    testId={testId}
+                    onClose={() => setShowAiGenerator(false)}
+                    onSaved={() => {
+                        setShowAiGenerator(false);
+                        handleSaved('Questions added to the test.');
+                    }}
+                />
             )}
 
             {pendingDelete && (

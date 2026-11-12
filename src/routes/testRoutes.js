@@ -2,6 +2,7 @@
 const express = require('express');
 const { createTest, fetchTests, fetchTestByTeacherID, fetchTestDetails } = require('../controllers/testController.js');
 const { addQuestionToTest, getQuestionsByTestId, updateQuestions, updateQuestion, deleteQuestion } = require('../controllers/questionController');
+const { generateTestQuestions, getAiOptions } = require('../controllers/aiController');
 const { addTestResult, getTestResults, getLeaderBoard, getLiveLeaderBoard, getTestResultsDetailed } = require('../controllers/testResultController.js');
 const { TeacherSignup, TeacherLogin, TeacherLogout } = require('../controllers/TeacherControllers.js');
 const { StudentSignup, StudentLogin, StudentLogout, studentDetailsById, fetchStudentTests, fetchStudentTestsWithPerformance,getSingleStudentTestResultsDetailed } = require('../controllers/StudentController.js');
@@ -34,6 +35,8 @@ module.exports = function (io) {
   router.post('/update-question', protect, updateQuestion);
   router.post('/delete-question', protect, deleteQuestion);
   router.post('/update-questions', protect, updateQuestions);
+  router.post('/generate-questions', protect, generateTestQuestions);
+  router.get('/ai-options', protect, getAiOptions);
   router.post('/fetch-test-questions', protect, getQuestionsByTestId);
   router.post('/live-test', protect, sendQuestions);
 

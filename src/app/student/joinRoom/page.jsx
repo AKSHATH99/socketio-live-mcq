@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from "react";
 import { Loader2, LogIn, Users } from "lucide-react";
+import { normalizeRoomCode } from "@/lib/roomCode";
 
 const JoinRoomPage = () => {
     const [roomId, setRoomId] = useState("");
@@ -9,8 +10,8 @@ const JoinRoomPage = () => {
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
-        const id = params.get("roomId");
-        setRoomId(id || "");
+        const id = normalizeRoomCode(params.get("roomId"));
+        setRoomId(id);
 
         // Simulate checking authentication
         setTimeout(() => {

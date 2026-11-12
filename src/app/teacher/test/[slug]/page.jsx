@@ -31,7 +31,7 @@ import TestResult from "@/components/TestInterface/TestResult";
 import QuestionsPreview from "@/components/TestInterface/QuestionsPreview";
 import CreateRoomModal from "@/components/TeacherInterface/CreateRoomModal";
 import TeacherHeader from "@/components/TeacherInterface/TeacherHeader";
-import { generateRoomCode } from "@/lib/roomCode";
+import { generateRoomCode, normalizeRoomCode } from "@/lib/roomCode";
 import { useSocket } from "@/Contexts/SocketContexts";
 
 const formatDate = (dateString) =>
@@ -213,7 +213,7 @@ export default function Test({ params }) {
   };
 
   const createRoom = () => {
-    const roomCode = generateRoomCode();
+    const roomCode = normalizeRoomCode(generateRoomCode());
 
     if (roomId && roomId !== roomCode) {
       socket?.emit("leave-room", { roomId });
