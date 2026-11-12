@@ -30,52 +30,73 @@ export default function SingleStudentTestResultDetails({ testId, studentId }) {
 
     if (!testId || !studentId) return null;
 
-    if (loading)
+    if (loading) {
         return (
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-slate-200 dark:border-gray-600 text-center">
-                <p className="text-gray-600 dark:text-gray-400">Loading test details...</p>
-            </div>
-        );
-
-    return (
-        <div className="bg-white dark:bg-gray-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm p-6 space-y-5">
-
-            <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
-                    Your Test Breakdown
-                </h2>
-                <p className="text-sm text-slate-600 dark:text-gray-400">
-                    Correct: {data?.totalCorrect} / {data?.answers?.length}
-                </p>
-            </div>
-
-            {/* SCROLL CONTAINER */}
-            <div className="space-y-4 max-h-[350px] overflow-y-auto pr-2">
-                {data?.answers?.map((a, index) => (
+            <div className="animate-pulse space-y-2">
+                {[0, 1, 2].map((row) => (
                     <div
-                        key={index}
-                        className="rounded-xl border border-emerald-200 bg-emerald-50 p-6"
-                    >
-                        <h3 className="text-lg font-bold text-slate-900 mb-3">
-                            Q{index + 1}: {a.question.toUpperCase()}
-                        </h3>
-
-                        <p className="text-sm text-slate-700 mb-1">
-                            <span className="font-medium">Correct Answer:</span>{" "}
-                            <span className="font-semibold text-emerald-600">
-                                {a.correctAnswer}
-                            </span>
-                        </p>
-
-                        <p className="text-sm text-slate-700">
-                            <span className="font-medium">Student&apos;s Answer:</span>{" "}
-                            <span className="font-semibold text-emerald-600">
-                                {a.selectedAnswer}
-                            </span>
-                        </p>
-                    </div>
+                        key={row}
+                        className="h-16 rounded-lg bg-slate-100 dark:bg-gray-800"
+                    />
                 ))}
             </div>
+        );
+    }
+
+    const answers = data?.answers || [];
+
+    return (
+        <div>
+            <div className="mb-3 flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+                    Your answers
+                </h3>
+                <span className="text-xs text-slate-400 dark:text-gray-500">
+                    {data?.totalCorrect ?? 0} of {answers.length} correct
+                </span>
+            </div>
+
+            {answers.length === 0 ? (
+                <p className="rounded-xl border border-dashed border-slate-200 px-4 py-6 text-center text-sm text-slate-400 dark:border-gray-800 dark:text-gray-500">
+                    No answer details available.
+                </p>
+            ) : (
+                <div className="max-h-[360px] overflow-y-auto rounded-xl border border-slate-200 dark:border-gray-800">
+                    <div className="divide-y divide-slate-100 dark:divide-gray-800">
+                        {answers.map((answer, index) => {
+                            const isCorrect = answer.selectedAnswer === answer.correctAnswer;
+
+                            return (
+                                <div key={index} className="px-4 py-3.5">
+                                    <p className="text-sm font-medium text-slate-900 dark:text-white">
+                                        <span className="mr-1.5 text-slate-400 dark:text-gray-500">
+                                            Q{index + 1}.
+                                        </span>
+                                        {answer.question}
+                                    </p>
+
+                                    <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                                        <span className="inline-flex items-center gap-1.5 rounded-md bg-emerald-50 px-2 py-1 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            <span className="font-medium">Correct</span>
+                                            {answer.correctAnswer}
+                                        </span>
+                                        <span
+                                            className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 ${
+                                                isCorrect
+                                                    ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
+                                                    : "bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400"
+                                            }`}
+                                        >
+                                            <span className="font-medium">Your answer</span>
+                                            {answer.selectedAnswer || "Not answered"}
+                                        </span>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

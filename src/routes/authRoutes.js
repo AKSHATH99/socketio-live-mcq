@@ -22,13 +22,22 @@ router.get('/google', (req, res, next) => {
 /**
  * Step 2 — Google callback
  */
-router.get(
-    '/google/callback',
-    passport.authenticate('google', { session: false, failureRedirect: '/' }),
-    (req, res) => {
-        const role = req.query.state; // Comes back from Google
+router.get('/google/callback', (req, res, next) => {
+    passport.authenticate('google', { session: false }, (err, user) => {
+        const role = req.query.state;
+        const signinPath =
+            role === 'teacher' ? '/teacher/auth/signin' : '/student/auth/signin';
+
+        if (err) {
+            console.error('Google authentication error:', err);
+            return res.redirect(`${signinPath}?error=google`);
+        }
+        if (!user) {
+            return res.redirect(signinPath);
+        }
+
         const token = jwt.sign(
-            { id: req.user.id, role },
+            { id: user.id, role },
             process.env.JWT_SECRET,
             { expiresIn: '7d' }
         );
@@ -42,13 +51,13 @@ router.get(
 
         // Redirect by role
         if (role === 'student') {
-            return res.redirect(`/student/${req.user.id}`);
+            return res.redirect(`/student/${user.id}`);
         } else if (role === 'teacher') {
-            return res.redirect(`/teacher/${req.user.id}`);
+            return res.redirect(`/teacher/${user.id}`);
         } else {
             return res.redirect(`/`);
         }
-    }
-);
+    })(req, res, next);
+});
 
 module.exports = router;

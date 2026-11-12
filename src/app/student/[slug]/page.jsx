@@ -2,19 +2,15 @@
 import { useState, useEffect, useRef } from "react";
 import { io } from "socket.io-client";
 import LiveQuestion from "@/controllers/DisplayQuestionBox";
-import JoinRoomModal from "@/components/StudentInterface/JoinRoom";
 import Dashboard from "@/components/StudentInterface/Dashboard";
-import { Trophy, Target, BookOpen, Calendar, User, Award, Megaphone, Clock, FileText, Loader2, Users } from "lucide-react";
+import StatsCards from "@/components/StudentInterface/StatsCards";
+import StudentHeader from "@/components/StudentInterface/StudentHeader";
+import { Calendar, User, Clock, FileText, Loader2, Users, DoorOpen, QrCode } from "lucide-react";
 import { useSearchParams } from 'next/navigation';
-import ThemeToggle from "@/components/ThemeToggler";
 import { useSocket } from "@/Contexts/SocketContexts";
-import { useRouter } from "next/navigation";
-import Spinner from "@/components/Spinner";
 
 export default function Student({ params }) {
-    const router = useRouter();
     const studentId = params.slug;
-    const [roomId, setRoomId] = useState("");
     const socketRef = useRef();
     const [messages, setMessages] = useState([]);
     const [question, setQuestion] = useState(null);
@@ -24,7 +20,7 @@ export default function Student({ params }) {
     const [studentData, setStudentData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isJoining, setIsJoining] = useState(false);
-    const [showJoinModal, setShowJoinModal] = useState(false);
+    const [roomCodeInput, setRoomCodeInput] = useState("");
     const [studentName, setStudentName] = useState("");
     const [TestEnded, setTestEnded] = useState(false);
     const [studentTests, setStudentTests] = useState([]);
@@ -42,8 +38,7 @@ export default function Student({ params }) {
         const roomIdFromParams = searchParams.get('joinRoom');
 
         if (roomIdFromParams) {
-            setRoomId(roomIdFromParams);
-            setShowJoinModal(true);
+            setRoomCodeInput(roomIdFromParams);
         }
     }, []);
 
@@ -127,29 +122,6 @@ export default function Student({ params }) {
         }
     };
 
-    const logoutStudent = async () => {
-        try {
-            setIsLoading(true);
-            const response = await fetch('/api/student/logout', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-            });
-            const data = await response.json();
-            console.log('Logout response:', data);
-            if (response.ok) {
-                // Handle successful logout
-                localStorage.removeItem("roomId");
-                router.push("/");
-            }
-        } catch (error) {
-            console.error('Error logging out student:', error);
-            setIsLoading(false);
-        }
-    };
-
     //SOCKET IO 
     useEffect(() => {
         if (!socket) return;
@@ -224,7 +196,6 @@ export default function Student({ params }) {
             const joined = await socket.emit('join-room', roomCode, studentId, 'student');
             if (joined) {
                 setCurrentRoomID(roomCode);
-                setShowJoinModal(false);
                 console.log("Joined hahaha")
 
                 //adding to list of students
@@ -240,6 +211,13 @@ export default function Student({ params }) {
         }
     }
 
+    const handleJoinRoom = async (e) => {
+        e.preventDefault();
+        const code = roomCodeInput.trim().toUpperCase();
+        if (!code) return;
+        await joinRoom(code);
+    }
+
     useEffect(() => {
         console.log("new question questions  ", question)
     }, [question])
@@ -251,105 +229,186 @@ export default function Student({ params }) {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600">Loading student data...</p>
-                </div>
+            <div className="min-h-screen bg-white dark:bg-gray-950">
+                <div className="h-16 border-b border-slate-200 dark:border-gray-800" />
+                <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+                    <div className="animate-pulse space-y-6">
+                        <div className="space-y-2">
+                            <div className="h-3 w-20 rounded bg-slate-100 dark:bg-gray-800" />
+                            <div className="h-7 w-64 rounded bg-slate-100 dark:bg-gray-800" />
+                        </div>
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                            {[0, 1, 2].map((card) => (
+                                <div
+                                    key={card}
+                                    className="h-28 rounded-2xl bg-slate-100 dark:bg-gray-800"
+                                />
+                            ))}
+                        </div>
+                        <div className="h-48 rounded-2xl bg-slate-100 dark:bg-gray-800" />
+                    </div>
+                </main>
             </div>
         );
     }
 
 return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-black">
-        {/* Header */}
-        <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-slate-200 dark:border-gray-600">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="flex-1">
-                        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">Student Dashboard</h1>
-                        <p className="text-slate-600 dark:text-gray-400 mt-1 text-sm sm:text-base">Track your learning progress and performance</p>
-                    </div>
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                        <div className="flex items-center space-x-2 bg-slate-100 dark:bg-gray-700 px-3 py-2 rounded-full">
-                            <User className="w-4 h-4 text-slate-600 dark:text-gray-300" />
-                            <span className="text-sm font-medium text-slate-700 dark:text-gray-200">Welcome {studentData?.name}!</span>
-                        </div>
-                        <ThemeToggle />
+    <div className="min-h-screen bg-white dark:bg-gray-950">
+        <StudentHeader studentId={studentId} studentName={studentData?.name} />
 
-                        <div>
-                            {isLoading ? (
-                                <Spinner />
-                            ) : (
-                                <button onClick={logoutStudent} className="text-sm font-medium text-slate-700 dark:text-gray-200">Logout</button>
-                            )}
-                        </div>
-                    </div>
+        <main className="mx-auto max-w-7xl px-4 pb-8 pt-8 sm:px-6 lg:px-8">
+            {/* Section 1: overview */}
+            <section>
+                <p className="text-xs font-semibold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">
+                    Overview
+                </p>
+                <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">
+                    Welcome back, {studentData?.name || 'Student'}
+                </h2>
+                <p className="mt-1 text-sm text-slate-600 dark:text-gray-400">
+                    Here&apos;s a quick look at your progress.
+                </p>
+
+                <div className="mt-6">
+                    <StatsCards studentTestData={studentTests} studentPerformanceData={studentTestsWithPerformance} />
                 </div>
-            </div>
-        </div>
+            </section>
 
-        {/* ROOM MANAGEMENT CARD NEW */}
-        <div className="max-w-7xl mx-auto px-6 mt-8">
-            <div className="bg-white dark:bg-gray-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm p-6">
-                <div className="flex items-center justify-between mb-5">
-                    <h2 className="flex items-center gap-2 font-semibold text-slate-900 dark:text-white text-lg">
-                        Room Management
-                    </h2>
-                    <div className="flex items-center gap-2 text-sm">
-                        <div className={`w-3 h-3 rounded-full ${currentRoomID ? "bg-emerald-500" : "bg-amber-500"}`} />
-                        <span className="font-medium text-slate-900 dark:text-gray-200">
-                            {currentRoomID ? "Connected" : "Not in room"}
-                        </span>
+            {/* Section 2: join a room */}
+            <section className="mt-12">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                        <p className="text-xs font-semibold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">
+                            Live session
+                        </p>
+                        <h2 className="mt-2 text-lg font-semibold text-slate-900 dark:text-white">
+                            Join a room
+                        </h2>
                     </div>
+                    <span
+                        className={`inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${
+                            currentRoomID
+                                ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
+                                : 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400'
+                        }`}
+                    >
+                        <span className={`h-1.5 w-1.5 rounded-full ${currentRoomID ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                        {currentRoomID ? 'Connected' : 'Not in a room'}
+                    </span>
                 </div>
 
-                {!currentRoomID && (
-                    <div className="flex justify-center py-16">
-                        <button
-                            onClick={() => setShowJoinModal(true)}
-                            className="px-10 py-4 bg-slate-900 dark:bg-white text-white dark:text-black rounded-xl text-lg font-semibold hover:opacity-90 transition"
-                        >
-                            Join Room
-                        </button>
-                    </div>
-                )}
-
-                {currentRoomID && (
-                    <>
-                        <div className="mb-6">
-                            <h3 className="text-sm font-medium text-slate-700 dark:text-gray-400 mb-2">Room ID</h3>
-                            <div className="px-4 py-3 border border-dashed border-slate-300 dark:border-gray-600 rounded-lg text-base text-slate-900 dark:text-white font-medium">
-                                {currentRoomID}
-                            </div>
-                        </div>
-
-                        <div>
-                            <h3 className="text-sm font-medium text-slate-700 dark:text-gray-400 mb-2">Room Announcements</h3>
-
-                            <div className="max-h-40 overflow-y-auto space-y-3 border border-slate-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-800">
-                                {messages.length === 0 && (
-                                    <p className="text-sm text-slate-400 dark:text-gray-500 text-center">
-                                        No announcements yet
-                                    </p>
-                                )}
-
-                                {messages.map((msg, idx) => (
-                                    <div key={idx} className="text-sm text-slate-800 dark:text-gray-200">
-                                        • {msg}
+                <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900 sm:p-8">
+                    {!currentRoomID ? (
+                        <div className="grid gap-8 md:grid-cols-[1fr_auto] md:items-center">
+                            <div>
+                                <div className="flex items-start gap-3">
+                                    <span className="grid h-11 w-11 flex-none place-items-center rounded-xl bg-emerald-50 text-emerald-600 ring-1 ring-inset ring-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-500/20">
+                                        <DoorOpen className="h-5 w-5" />
+                                    </span>
+                                    <div>
+                                        <h3 className="text-base font-semibold text-slate-900 dark:text-white">
+                                            Enter your room code
+                                        </h3>
+                                        <p className="mt-0.5 text-sm text-slate-500 dark:text-gray-400">
+                                            Your teacher will share a short code for the live session.
+                                        </p>
                                     </div>
-                                ))}
+                                </div>
+
+                                <form onSubmit={handleJoinRoom} className="mt-6">
+                                    <label htmlFor="room-code" className="mb-2 block text-sm font-medium text-slate-700 dark:text-gray-300">
+                                        Room code
+                                    </label>
+                                    <div className="flex flex-col gap-3 sm:flex-row">
+                                        <input
+                                            id="room-code"
+                                            type="text"
+                                            value={roomCodeInput}
+                                            onChange={(e) => setRoomCodeInput(e.target.value.toUpperCase())}
+                                            placeholder="ENTER CODE"
+                                            disabled={isJoining}
+                                            autoComplete="off"
+                                            className="w-full rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3 text-center text-lg font-semibold uppercase tracking-[0.25em] text-slate-900 placeholder-slate-400 transition-colors focus:border-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder-gray-500"
+                                        />
+                                        <button
+                                            type="submit"
+                                            disabled={!roomCodeInput.trim() || isJoining}
+                                            className="inline-flex flex-none items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+                                        >
+                                            {isJoining ? (
+                                                <>
+                                                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                                                    Joining...
+                                                </>
+                                            ) : (
+                                                'Join room'
+                                            )}
+                                        </button>
+                                    </div>
+                                    <p className="mt-3 text-xs text-slate-400 dark:text-gray-500">
+                                        Codes are not case sensitive.
+                                    </p>
+                                </form>
+                            </div>
+
+                            <div className="hidden w-44 flex-col items-center rounded-xl border border-dashed border-slate-300 bg-slate-50/60 p-4 text-center dark:border-gray-700 dark:bg-gray-800/40 md:flex">
+                                <QrCode className="h-20 w-20 text-slate-800 dark:text-gray-200" strokeWidth={1.25} />
+                                <p className="mt-3 text-xs font-semibold text-slate-700 dark:text-gray-200">Scan to join</p>
+                                <p className="mt-1 text-[11px] leading-4 text-slate-400 dark:text-gray-500">
+                                    Point your camera at the QR shared by your teacher
+                                </p>
                             </div>
                         </div>
-                    </>
-                )}
-            </div>
-        </div>
+                    ) : (
+                        <div className="grid gap-8 md:grid-cols-2">
+                            <div>
+                                <h3 className="text-sm font-medium text-slate-500 dark:text-gray-400">Room code</h3>
+                                <p className="mt-2 inline-flex rounded-xl border border-dashed border-slate-300 px-4 py-3 text-lg font-semibold tracking-[0.2em] text-slate-900 dark:border-gray-600 dark:text-white">
+                                    {currentRoomID}
+                                </p>
+                                <p className="mt-3 text-sm text-slate-500 dark:text-gray-400">
+                                    You&apos;re connected. The test will start when your teacher begins the session.
+                                </p>
+                            </div>
 
-        {/* Dashboard */}
-        <div className="mt-8">
-            <Dashboard studentTestData={studentTests} studentPerformanceData={studentTestsWithPerformance} studentId={studentId} />
-        </div>
+                            <div>
+                                <h3 className="mb-2 text-sm font-medium text-slate-500 dark:text-gray-400">Room announcements</h3>
+                                <div className="max-h-40 space-y-3 overflow-y-auto rounded-xl border border-slate-200 bg-slate-50/60 p-4 dark:border-gray-700 dark:bg-gray-800/60">
+                                    {messages.length === 0 && (
+                                        <p className="text-sm text-slate-400 dark:text-gray-500 text-center">
+                                            No announcements yet
+                                        </p>
+                                    )}
+
+                                    {messages.map((msg, idx) => (
+                                        <div key={idx} className="text-sm text-slate-800 dark:text-gray-200">
+                                            • {msg}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </section>
+
+            {/* Section 3: activity */}
+            <section className="mt-12 border-t border-slate-200 pt-10 dark:border-gray-800">
+                <div className="mb-6">
+                    <p className="text-xs font-semibold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">
+                        Your activity
+                    </p>
+                    <h2 className="mt-2 text-lg font-semibold text-slate-900 dark:text-white">
+                        Recent tests &amp; performance
+                    </h2>
+                    <p className="mt-1 text-sm text-slate-600 dark:text-gray-400">
+                        Pick a test to review your score and answers.
+                    </p>
+                </div>
+
+                <Dashboard studentTestData={studentTests} studentPerformanceData={studentTestsWithPerformance} studentId={studentId} />
+            </section>
+        </main>
 
         {/* Main Content - Questions */}
         {openLiveTestModal && questions.length > 0 && questions[currentIndex] && (
@@ -392,15 +451,6 @@ return (
                 </div>
             </div>
         )}
-
-        {/* Join Room Modal */}
-        <JoinRoomModal
-            isOpen={showJoinModal}
-            onClose={() => setShowJoinModal(false)}
-            onJoinRoom={joinRoom}
-            isJoining={isJoining}
-            joinRoomFromParams={roomId}
-        />
 
         {openLobby && (
             <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm z-50 p-4">

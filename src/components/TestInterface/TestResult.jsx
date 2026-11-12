@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { X } from "lucide-react";
+import { BarChart3, X } from "lucide-react";
 
 export default function TestResult({ testId }) {
     const [students, setStudents] = useState([]);
@@ -18,8 +18,7 @@ export default function TestResult({ testId }) {
                     body: JSON.stringify({ testId })
                 });
                 const data = await res.json();
-                console.log("✅ fetched results", data);
-                setStudents(data.students);
+                setStudents(data.students || []);
             } catch (err) {
                 console.error(err);
             }
@@ -28,113 +27,143 @@ export default function TestResult({ testId }) {
         if (testId) fetchResults();
     }, [testId]);
 
-
     return (
-<div className="p-8 text-black dark:text-white bg-white dark:bg-gray-900 min-h-screen">
-            <h1 className="text-3xl font-bold mb-8 text-gray-900 dark:text-gray-100">Test Results</h1>
-            
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                <table className="w-full">
-                    <thead>
-                        <tr className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
-                            <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 dark:text-gray-100 uppercase tracking-wider">Rank</th>
-                            <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 dark:text-gray-100 uppercase tracking-wider">Student</th>
-                            <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 dark:text-gray-100 uppercase tracking-wider">Score</th>
-                            <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 dark:text-gray-100 uppercase tracking-wider">Details</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                        {students.map((s, idx) => {
-                            const rank = idx + 1;
-                            const isTop3 = rank <= 3;
-                            
-                            return (
-                                <tr key={s.student.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                            {rank}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`text-sm font-medium ${
-                                            isTop3 
-                                                ? rank === 1 
-                                                    ? 'text-yellow-600 dark:text-yellow-400 font-bold' 
-                                                    : rank === 2 
-                                                        ? 'text-gray-600 dark:text-gray-300 font-bold'
-                                                        : 'text-amber-600 dark:text-amber-400 font-bold'
-                                                : 'text-gray-900 dark:text-gray-100'
-                                        }`}>
-                                            {s.student.name}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                            {s.totalCorrect}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <button
-                                            onClick={() => setSelectedStudent(s)}
-                                            className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm font-medium underline transition-colors"
-                                        >
-                                            View Answers
-                                        </button>
-                                    </td>
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
+        <div className="text-slate-900 dark:text-white">
+            <div className="flex items-center justify-between gap-3">
+                <div>
+                    <h2 className="text-sm font-semibold text-slate-900 dark:text-white">
+                        Student results
+                    </h2>
+                    <p className="mt-0.5 text-xs text-slate-400 dark:text-gray-500">
+                        Scores are updated as students submit their answers.
+                    </p>
+                </div>
+                <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-500 dark:bg-gray-800 dark:text-gray-400">
+                    {students.length} {students.length === 1 ? "student" : "students"}
+                </span>
             </div>
 
-            {/* Modal */}
-            {selectedStudent && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-black dark:bg-opacity-70 flex justify-center items-center z-50 p-4">
-                    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-2xl w-full relative border dark:border-gray-700">
-                        <button
-                            className="absolute top-4 right-4 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
-                            onClick={() => setSelectedStudent(null)}
-                        >
-                            <X size={24} />
-                        </button>
-                        
-                        <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100 pr-8">
-                            {selectedStudent.student.name}'s Answers
-                        </h2>
-                        
-                        <div className="space-y-4 max-h-[70vh] overflow-y-auto">
-                            {selectedStudent.answers.map((ans, idx) => (
-                                <div
-                                    key={idx}
-                                    className={`border rounded-lg p-4 ${
-                                        ans.isCorrect 
-                                            ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800" 
-                                            : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800"
-                                    }`}
-                                >
-                                    <p className="font-semibold mb-3 text-gray-900 dark:text-gray-100">
-                                        Q{idx + 1}: {ans.question}
-                                    </p>
-                                    <div className="space-y-2">
-                                        <p className="text-sm text-gray-700 dark:text-gray-300">
-                                            <span className="font-medium">Correct Answer:</span>{" "}
-                                            <span className="font-semibold text-green-700 dark:text-green-400">
-                                                {ans.correctAnswer}
-                                            </span>
-                                        </p>
-                                        <p className="text-sm text-gray-700 dark:text-gray-300">
-                                            <span className="font-medium">Student's Answer:</span>{" "}
+            {students.length === 0 ? (
+                <div className="mt-4 flex flex-col items-center rounded-xl border border-dashed border-slate-200 px-6 py-12 text-center dark:border-gray-800">
+                    <span className="grid h-11 w-11 place-items-center rounded-xl bg-slate-100 text-slate-400 dark:bg-gray-800 dark:text-gray-500">
+                        <BarChart3 className="h-5 w-5" />
+                    </span>
+                    <p className="mt-4 text-sm font-medium text-slate-900 dark:text-white">
+                        No results yet
+                    </p>
+                    <p className="mt-1 max-w-sm text-sm text-slate-500 dark:text-gray-400">
+                        Results will appear here once students complete the test.
+                    </p>
+                </div>
+            ) : (
+                <div className="mt-4 overflow-x-auto rounded-xl border border-slate-200 dark:border-gray-800">
+                    <table className="w-full">
+                        <thead>
+                            <tr className="border-b border-slate-200 bg-slate-50 dark:border-gray-800 dark:bg-gray-800/50">
+                                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-gray-500">
+                                    Rank
+                                </th>
+                                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-gray-500">
+                                    Student
+                                </th>
+                                <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-gray-500">
+                                    Score
+                                </th>
+                                <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-gray-500">
+                                    Details
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 dark:divide-gray-800">
+                            {students.map((student, index) => {
+                                const rank = index + 1;
+
+                                return (
+                                    <tr
+                                        key={student.student.id}
+                                        className="transition-colors hover:bg-slate-50 dark:hover:bg-gray-800/50"
+                                    >
+                                        <td className="px-4 py-3">
                                             <span
-                                                className={`font-semibold ${
-                                                    ans.isCorrect 
-                                                        ? "text-green-700 dark:text-green-400" 
-                                                        : "text-red-700 dark:text-red-400"
+                                                className={`grid h-6 w-6 place-items-center rounded-full text-[11px] font-semibold ${
+                                                    rank === 1
+                                                        ? "bg-emerald-600 text-white"
+                                                        : "bg-slate-100 text-slate-600 dark:bg-gray-800 dark:text-gray-300"
                                                 }`}
                                             >
-                                                {ans.selectedAnswer}
+                                                {rank}
                                             </span>
-                                        </p>
+                                        </td>
+                                        <td className="px-4 py-3 text-sm font-medium text-slate-900 dark:text-white">
+                                            {student.student.name}
+                                        </td>
+                                        <td className="px-4 py-3 text-sm tabular-nums text-slate-700 dark:text-gray-300">
+                                            {student.totalCorrect}
+                                        </td>
+                                        <td className="px-4 py-3 text-right">
+                                            <button
+                                                type="button"
+                                                onClick={() => setSelectedStudent(student)}
+                                                className="text-xs font-medium text-emerald-600 transition-colors hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
+                                            >
+                                                View answers
+                                            </button>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+
+            {selectedStudent && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm dark:bg-black/60">
+                    <div className="max-h-[85vh] w-full max-w-2xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-gray-800 dark:bg-gray-900">
+                        <div className="flex items-center justify-between gap-4 border-b border-slate-100 px-5 py-4 dark:border-gray-800">
+                            <div>
+                                <h2 className="text-sm font-semibold text-slate-900 dark:text-white">
+                                    {selectedStudent.student.name}&apos;s answers
+                                </h2>
+                                <p className="mt-0.5 text-xs text-slate-400 dark:text-gray-500">
+                                    {selectedStudent.totalCorrect} correct
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setSelectedStudent(null)}
+                                aria-label="Close"
+                                className="grid h-8 w-8 place-items-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-gray-500 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
+                        </div>
+
+                        <div className="max-h-[70vh] divide-y divide-slate-100 overflow-y-auto dark:divide-gray-800">
+                            {selectedStudent.answers.map((answer, index) => (
+                                <div key={index} className="px-5 py-4">
+                                    <p className="text-sm font-medium text-slate-900 dark:text-white">
+                                        <span className="mr-1.5 text-slate-400 dark:text-gray-500">
+                                            Q{index + 1}.
+                                        </span>
+                                        {answer.question}
+                                    </p>
+
+                                    <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                                        <span className="inline-flex items-center gap-1.5 rounded-md bg-emerald-50 px-2 py-1 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                            <span className="font-medium">Correct</span>
+                                            {answer.correctAnswer}
+                                        </span>
+                                        <span
+                                            className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 ${
+                                                answer.isCorrect
+                                                    ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
+                                                    : "bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400"
+                                            }`}
+                                        >
+                                            <span className="font-medium">Answered</span>
+                                            {answer.selectedAnswer || "Not answered"}
+                                        </span>
                                     </div>
                                 </div>
                             ))}

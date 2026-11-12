@@ -1,7 +1,7 @@
 // src/routes/testRoutes.js
 const express = require('express');
 const { createTest, fetchTests, fetchTestByTeacherID, fetchTestDetails } = require('../controllers/testController.js');
-const { addQuestionToTest, getQuestionsByTestId, updateQuestions } = require('../controllers/questionController');
+const { addQuestionToTest, getQuestionsByTestId, updateQuestions, updateQuestion, deleteQuestion } = require('../controllers/questionController');
 const { addTestResult, getTestResults, getLeaderBoard, getLiveLeaderBoard, getTestResultsDetailed } = require('../controllers/testResultController.js');
 const { TeacherSignup, TeacherLogin, TeacherLogout } = require('../controllers/TeacherControllers.js');
 const { StudentSignup, StudentLogin, StudentLogout, studentDetailsById, fetchStudentTests, fetchStudentTestsWithPerformance,getSingleStudentTestResultsDetailed } = require('../controllers/StudentController.js');
@@ -31,6 +31,8 @@ module.exports = function (io) {
   router.post('/test', protect, createTest);
   router.post('/fetchTest', protect, fetchTests);
   router.post('/add-question', protect, addQuestionToTest);
+  router.post('/update-question', protect, updateQuestion);
+  router.post('/delete-question', protect, deleteQuestion);
   router.post('/update-questions', protect, updateQuestions);
   router.post('/fetch-test-questions', protect, getQuestionsByTestId);
   router.post('/live-test', protect, sendQuestions);

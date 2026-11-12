@@ -26,6 +26,77 @@ module.exports.addQuestionToTest = async (req, res) => {
 };
 
 
+module.exports.updateQuestion = async (req, res) => {
+  try {
+    const { id, question, options, answer, timer } = req.body;
+
+    if (!id || !question || !Array.isArray(options) || !answer) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    const filledOptions = options.map((opt) => (opt || '').trim()).filter(Boolean);
+
+    if (!question.trim()) {
+      return res.status(400).json({ error: 'Question text is required' });
+    }
+
+    if (filledOptions.length < 2) {
+      return res.status(400).json({ error: 'At least two options are required' });
+    }
+
+    if (!filledOptions.includes(answer.trim())) {
+      return res.status(400).json({ error: 'Correct answer must be one of the options' });
+    }
+
+    const existing = await prisma.question.findUnique({ where: { id } });
+
+    if (!existing) {
+      return res.status(404).json({ error: 'Question not found' });
+    }
+
+    const updated = await prisma.question.update({
+      where: { id },
+      data: {
+        question: question.trim(),
+        options: filledOptions,
+        answer: answer.trim(),
+        timer: timer || existing.timer || 10,
+      }
+    });
+
+    return res.status(200).json(updated);
+  } catch (err) {
+    console.error('Error updating question:', err);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+module.exports.deleteQuestion = async (req, res) => {
+  try {
+    const { id } = req.body;
+
+    if (!id) {
+      return res.status(400).json({ error: 'Question id is required' });
+    }
+
+    const existing = await prisma.question.findUnique({ where: { id } });
+
+    if (!existing) {
+      return res.status(404).json({ error: 'Question not found' });
+    }
+
+    // Answers recorded for this question go with it so results stay consistent
+    await prisma.testResult.deleteMany({ where: { questionId: id } });
+
+    await prisma.question.delete({ where: { id } });
+
+    return res.status(200).json({ message: 'Question deleted successfully', id });
+  } catch (err) {
+    console.error('Error deleting question:', err);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
 module.exports.getQuestionsByTestId = async (req, res) => {
   try {
     const { testId } = req.body;

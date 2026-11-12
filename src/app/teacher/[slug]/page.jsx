@@ -1,115 +1,101 @@
 'use client'
-import Image from "next/image";
-import { io } from "socket.io-client";
-import { use } from 'react';
-import { useEffect, useRef, useState } from "react";
-import { Users, Wifi, Copy, WifiOff, Calendar, Play, MessageSquare, Send, Plus, FileText, MessageCircle, Monitor, Settings, LogOut, Check } from "lucide-react";
-// import QuestionsInput from "@/components/QuestionsInput";
+
+import { use, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Calendar,
+  Check,
+  ChevronDown,
+  ChevronRight,
+  Copy,
+  DoorOpen,
+  FileText,
+  Link2,
+  Loader2,
+  LogOut,
+  MessageCircle,
+  MessageSquare,
+  Monitor,
+  Plus,
+  Send,
+  Share2,
+  User,
+  Users,
+} from "lucide-react";
 import CreateRoomModal from "@/components/TeacherInterface/CreateRoomModal";
 import CreateTestModal from "@/components/TeacherInterface/CreateTestModal";
-import { useRouter } from "next/navigation";
-import ThemeToggle from "@/components/ThemeToggler";
+import TeacherHeader from "@/components/TeacherInterface/TeacherHeader";
+import { generateRoomCode } from "@/lib/roomCode";
+import { getTestVisual } from "@/lib/testVisuals";
 import { useSocket } from "@/Contexts/SocketContexts";
 
+const formatDate = (dateString) =>
+  new Date(dateString).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 
 export default function Teacher({ params }) {
   const router = useRouter();
-  const resolvedParams = use(params); // Unwrap the Promise
+  const resolvedParams = use(params);
   const teacherId = resolvedParams.slug;
-  const socketRef = useRef();
-
-  const settingsRef = useRef(null);
 
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
-  const [teacherData, setTeacherData] = useState(null);
+  const [teacherName, setTeacherName] = useState("Teacher");
   const [fetchedTest, setFetchedTest] = useState(null);
-  const [leaderboard, setLeaderboard] = useState([]);
   const [roomId, setRoomId] = useState("");
 
   const [openCreateRoomModal, setOpenCreateRoomModal] = useState(false);
   const [openCreateTestModal, setOpenCreateTestModal] = useState(false);
-  const [allStudentsReady, setAllStudentsReady] = useState()
-  const [liveStudentList, setLiveStudentList] = useState([])
-  const [roomCreated, setRoomCreated] = useState(false);
-  const [openSettingsModal, setOpenSettingsModal] = useState(false);
-
-  const [questions, setQuestions] = useState([
-    {
-      question: "",
-      options: ["", "", "", ""]
-    }
-  ]);
+  const [allStudentsReady, setAllStudentsReady] = useState(false);
+  const [liveStudentList, setLiveStudentList] = useState([]);
+  const [copied, setCopied] = useState(false);
+  const [copiedCode, setCopiedCode] = useState(false);
+  const [shareMenuOpen, setShareMenuOpen] = useState(false);
+  const shareMenuRef = useRef(null);
 
   const [testMeta, setTestMeta] = useState({
     title: "",
     description: "",
-    teacherId: teacherId
+    teacherId: teacherId,
   });
 
   const socket = useSocket();
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (settingsRef.current && !settingsRef.current.contains(event.target)) {
-        setOpenSettingsModal(false);
-      }
-    };
-
-    if (openSettingsModal) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [openSettingsModal]);
-  // Fetch teacher data when component mounts
-  // const fetchTeacherData = async () => {
-  //   try {
-  //     const token = localStorage.getItem('token');
-  //     const response = await fetch(`/api/teacher/${teacherId}`, {
-  //       headers: {
-  //         'Authorization': `Bearer ${token}`
-  //       }
-  //     });
-  //     const data = await response.json();
-  //     if (data.teacher) {
-  //       setTeacherData(data.teacher);
-  //     }
-  //   } catch (error) {
-  //     console.error('Error fetching teacher data:', error);
-  //   }
-  // };
-
+  const onlineStudents = Object.entries(liveStudentList || {}).filter(([, value]) => value);
 
   useEffect(() => {
     if (teacherId) {
       fetchTests();
-      // fetchTeacherData();
     }
   }, [teacherId]);
 
   useEffect(() => {
     if (!teacherId) {
-      router.push('teacher/auth/signin');
+      router.push("teacher/auth/signin");
+      return;
     }
-    const storedRoomId = localStorage.getItem('roomId');
+
+    const storedRoomId = localStorage.getItem("roomId");
     if (storedRoomId) {
       setRoomId(storedRoomId);
-      console.log("Joined room with ID:", storedRoomId);
+    }
+
+    const storedName = localStorage.getItem("teacherName");
+    if (storedName) {
+      setTeacherName(storedName);
     }
   }, []);
-
 
   const createTest = async () => {
     try {
       const res = await fetch("/api/test", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(testMeta) // ✅ directly use the object
+        body: JSON.stringify(testMeta),
       });
 
       const data = await res.json();
@@ -119,9 +105,9 @@ export default function Teacher({ params }) {
 
       setTestMeta({
         title: "",
-        description: ""
+        description: "",
+        teacherId: teacherId,
       });
-
     } catch (error) {
       console.error("❌ Error creating test:", error);
     }
@@ -132,119 +118,24 @@ export default function Teacher({ params }) {
       const res = await fetch("/api/get-teacher-tests", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ id: teacherId }) // ✅ directly use the object
+        body: JSON.stringify({ id: teacherId }),
       });
 
       const data = await res.json();
-      console.log("✅ Fetched data:", data);
-
       setFetchedTest(data);
-
     } catch (error) {
-      console.error("❌ Error creating test:", error);
+      console.error("❌ Error fetching tests:", error);
     }
   };
-
-
-
-  const startTest = async (testId) => {
-    try {
-      const res = await fetch("/api/live-test", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          testid: testId,
-          roomId: roomId // or whatever variable you're using
-        })
-      });
-
-      const data = await res.json();
-      console.log("🚀 Test Started:", data);
-    } catch (err) {
-      console.error("❌ Failed to start test:", err);
-    }
-  };
-
-
-  const fetchLeaderboard = async () => {
-    try {
-      const res = await fetch("/api/get-leaderboard", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ testid: "0046b553-a37f-4145-9105-65ddfcb90ae6" }) // ✅ directly use the object
-      });
-      const data = await res.json();
-      setLeaderboard(data);
-    } catch (error) {
-      console.error("Error fetching leaderboard", error);
-    }
-  };
-
-  const logoutTeacher = async () => {
-    try {
-      const res = await fetch("/api/teacher/logout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        }
-      });
-
-      const data = await res.json();
-      console.log("✅ Teacher logged out:", data);
-
-      // Clear local storage and redirect to login
-      localStorage.removeItem("token");
-      localStorage.removeItem("roomId");
-      router.push("/");
-    } catch (error) {
-      console.error("❌ Error logging out teacher:", error);
-    }
-  };
-
-  useEffect(() => {
-    console.log(leaderboard)
-  }, [leaderboard])
-
- 
-
-
 
   // ----------------------SOCKET IO------------------------------------------------------
-  const sendQuestions = () => {
-    if (!fetchedTest || fetchedTest.length === 0) {
-      console.error('No test selected');
-      return;
-    }
-    const currentTestId = fetchedTest[0].id;
-
-    // Add testId to each question before sending
-    const questionsWithTestId = questions.map(q => ({
-      ...q,
-      testId: currentTestId
-    }));
-
-    socket.emit('send-questions', {
-      roomId: roomId,
-      questions: questionsWithTestId
-    });
-
-    console.log('Sent questions with testId:', currentTestId);
-  }
-
   useEffect(() => {
     if (!socket) return;
-    // const socket = io();
-    // socketRef.current = socket;
 
     socket.on('connect', () => {
       console.log('connected from frontend', socket.id);
-      // Join the room immediately after connection
       if (roomId) {
         socket.emit('join-room', roomId, teacherId, 'teacher');
       }
@@ -257,16 +148,14 @@ export default function Teacher({ params }) {
 
     socket.on('lobby-status', (data) => {
       console.log("lobby status", data);
-      // Update your state here if needed
-      setLiveStudentList(data)
+      setLiveStudentList(data);
     });
 
     socket.on('all-students-ready', (data) => {
       console.log("all students ready", data);
       setAllStudentsReady(true);
-    })
+    });
 
-    // Handle reconnection
     socket.on('reconnect', () => {
       console.log('Reconnected to server');
       if (roomId) {
@@ -280,375 +169,501 @@ export default function Teacher({ params }) {
   }, [socket]);
 
   const createRoom = () => {
-    console.log("CREATING THE ROOM BROOOOOOOOOO", roomId);
-    socket.emit('join-room', roomId, teacherId, 'teacher');
-    socket.emit('send-message', {
-      roomId: roomId,
+    const roomCode = generateRoomCode();
+
+    if (roomId && roomId !== roomCode) {
+      socket?.emit('leave-room', { roomId });
+    }
+
+    setRoomId(roomCode);
+    socket?.emit('join-room', roomCode, teacherId, 'teacher');
+    socket?.emit('send-message', {
+      roomId: roomCode,
       message: 'Hello quiz team'
     });
-    localStorage.setItem('roomId', roomId);
-    setRoomCreated(true);
+    localStorage.setItem('roomId', roomCode);
+    setOpenCreateRoomModal(true);
   };
 
   const leaveRoom = () => {
-    console.log("LEAVING THE ROOM BROOOOOOOOOO", roomId);
     if (!roomId || !socket) return;
 
     socket.emit('leave-room', { roomId });
 
     localStorage.removeItem('roomId');
     setRoomId('');
-    setRoomCreated(false);
     setLiveStudentList({});
     setAllStudentsReady(false);
     console.log("🚪 Left room:", roomId);
   };
 
-
   const sendMessage = () => {
-    console.log("Sending message")
-    // setMessages((prev) => [...prev, message]);
+    if (!message.trim()) return;
+
     socket.emit('send-message', {
       roomId: roomId,
-      message: message
-    })
-
-  }
+      message: message,
+    });
+    setMessage("");
+  };
 
   useEffect(() => {
-    console.log("hiii")
-    console.log(messages)
-  }, [messages])
+    if (!shareMenuOpen) return;
 
+    const handleClickOutside = (event) => {
+      if (shareMenuRef.current && !shareMenuRef.current.contains(event.target)) {
+        setShareMenuOpen(false);
+      }
+    };
+    const handleEscape = (event) => {
+      if (event.key === "Escape") setShareMenuOpen(false);
+    };
 
-  const [copied, setCopied] = useState(false);
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [shareMenuOpen]);
+
+  const getInviteLink = () => {
+    const baseUrl = `${window.location.protocol}//${window.location.host}`;
+    return `${baseUrl}/student/joinRoom?roomId=${roomId}`;
+  };
 
   const handleCopy = async () => {
     try {
-      const baseUrl = `${window.location.protocol}//${window.location.host}`;
-      const link = `${baseUrl}/student/joinRoom?roomId=${roomId}`
-      await navigator.clipboard.writeText(link);
+      await navigator.clipboard.writeText(getInviteLink());
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000); // reset after 2s
+      setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error("Copy failed", err);
     }
   };
 
+  const handleShare = async () => {
+    const link = getInviteLink();
+    setShareMenuOpen(false);
+
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try {
+        await navigator.share({
+          title: `Join ${roomId}`,
+          text: `Join my live test room ${roomId}`,
+          url: link,
+        });
+      } catch (err) {
+        if (err?.name !== "AbortError") {
+          console.error("Share failed", err);
+        }
+      }
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Copy failed", err);
+    }
+  };
+
+  const handleCopyCode = async () => {
+    try {
+      await navigator.clipboard.writeText(roomId);
+      setCopiedCode(true);
+      setTimeout(() => setCopiedCode(false), 2000);
+    } catch (err) {
+      console.error("Copy failed", err);
+    }
+  };
+
+  const sortedTests = [...(fetchedTest || [])].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-black">
-      {/* Header */}
-      <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200 dark:bg-gray-900/95 dark:border-gray-800">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  Teacher Dashboard
-                </h1>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              {!roomId ? (
-                <button
-                  className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2 dark:bg-white dark:text-black dark:hover:bg-gray-200"
-                  onClick={() => setOpenCreateRoomModal(true)}
-                >
-                  <Plus size={16} />
-                  Create Room
-                </button>
-              ) : (
-                <button
-                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-500 transition-colors flex items-center gap-2 dark:bg-red-500 dark:hover:bg-red-400"
-                  onClick={() => {
+    <div className="min-h-screen bg-white dark:bg-gray-950">
+      <TeacherHeader teacherId={teacherId} teacherName={teacherName} />
 
-                    leaveRoom()
+      <main className="mx-auto max-w-7xl px-4 pb-16 pt-8 sm:px-6 lg:px-8">
+        {/* Welcome */}
+        <section className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+              Teacher dashboard
+            </p>
+            <h1 className="mt-3 text-2xl font-semibold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
+              Welcome back{teacherName && teacherName !== "Teacher" ? `, ${teacherName}` : ""}
+            </h1>
+            <p className="mt-2 max-w-2xl text-sm text-slate-500 dark:text-gray-400">
+              Start a live session, add a test, and keep an eye on your class in real time.
+            </p>
+          </div>
 
-                  }}
-                >
-                  <LogOut size={16} />
-                  Leave Room
-                </button>
-              )}
-              <button
-                className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center gap-2 dark:bg-gray-700 dark:hover:bg-gray-600"
-                onClick={() => setOpenCreateTestModal(true)}
-              >
-                <Plus size={16} />
-                Create Test
-              </button>
+          <div className="flex flex-col gap-3 sm:flex-row lg:flex-none">
+            <button
+              type="button"
+              onClick={createRoom}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-sm shadow-emerald-600/20 transition-colors hover:bg-emerald-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
+            >
+              <Monitor className="h-4 w-4" />
+              Create room
+            </button>
+          </div>
+        </section>
 
-              {/* Settings dropdown container with relative positioning and ref */}
-              <div className="relative" ref={settingsRef}>
-                <button
-                  onClick={() => setOpenSettingsModal(!openSettingsModal)}
-                  className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                >
-                  <Settings className="w-5 h-5 text-gray-700 dark:text-gray-300" />
-                </button>
+        {/* Active room */}
+        {roomId && (
+          <section className="mt-10">
+            <div className="overflow-hidden rounded-2xl border border-slate-300 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
+              <div className="flex flex-wrap items-center justify-between gap-4 rounded-t-2xl border-b border-slate-200 bg-slate-50/80 px-5 py-5 dark:border-gray-800 dark:bg-gray-800/40 sm:px-6">
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="grid h-10 w-10 place-items-center rounded-xl border border-emerald-100 bg-white text-emerald-600 shadow-sm dark:border-emerald-500/20 dark:bg-gray-900 dark:text-emerald-400">
+                    <DoorOpen className="h-5 w-5" />
+                  </span>
+                  <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
+                    {roomId}
+                  </h2>
+                  <button
+                    type="button"
+                    onClick={handleCopyCode}
+                    aria-label="Copy room code"
+                    title="Copy room code"
+                    className="grid h-8 w-8 flex-none place-items-center rounded-lg border border-slate-200 bg-white text-slate-500 shadow-sm transition-colors hover:bg-slate-50 hover:text-slate-900 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
+                  >
+                    {copiedCode ? (
+                      <Check className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
 
-                {/* Settings dropdown menu */}
-                {openSettingsModal && (
-                  <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-10">
-                    {/* Logout option */}
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    Active
+                  </span>
+                  <div className="relative" ref={shareMenuRef}>
                     <button
-                      className="w-full px-4 py-2 text-left text-red-600 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-2"
-                      onClick={() => {
-                        logoutTeacher();
-                        setOpenSettingsModal(false);
-                      }}
+                      type="button"
+                      onClick={() => setShareMenuOpen((open) => !open)}
+                      aria-haspopup="menu"
+                      aria-expanded={shareMenuOpen}
+                      className="inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 transition-colors hover:border-emerald-300 hover:bg-emerald-100 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-400 dark:hover:bg-emerald-500/20"
                     >
-                      <LogOut size={16} />
-                      Logout
+                      {copied ? (
+                        <Check className="h-3.5 w-3.5" />
+                      ) : (
+                        <Share2 className="h-3.5 w-3.5" />
+                      )}
+                      {copied ? "Link copied" : "Share"}
+                      <ChevronDown
+                        className={`h-3 w-3 transition-transform ${
+                          shareMenuOpen ? "rotate-180" : ""
+                        }`}
+                      />
                     </button>
 
-                    {/* Divider */}
-                    <div className="border-t border-gray-200 dark:border-gray-600 my-2"></div>
-
-                    {/* Theme toggle section */}
-                    <div className="px-4 py-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Theme
-                        </span>
-                        <ThemeToggle />
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Room Management */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Room Details */}
-            <div className="bg-white rounded-xl border border-gray-200 dark:bg-gray-900 dark:border-gray-800">
-              <div className="p-6 border-b border-gray-200 dark:border-gray-800">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Monitor size={20} className="text-gray-600 dark:text-gray-400" />
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Room Management</h2>
-                  </div>
-                  {/* Room Status moved here */}
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg ${roomId ? 'bg-green-100 dark:bg-green-900/50' : 'bg-red-100 dark:bg-red-900/50'}`}>
-                      {roomId ? <Wifi size={20} className="text-green-600 dark:text-green-400" /> : <WifiOff size={20} className="text-red-600 dark:text-red-400" />}
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Status</p>
-                      <p className="text-lg font-bold text-gray-900 dark:text-white">
-                        {roomId ? "Connected" : "Offline"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-6">
-                <div className="mb-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Room ID</span>
-                  </div>
-                  <div className="bg-gray-50 rounded-lg p-4 border-2 border-dashed flex gap-10 border-gray-300 dark:bg-gray-800 dark:border-gray-700">
-                    <code className="text-sm font-mono text-gray-800 dark:text-gray-200">
-                      {roomId || "No active room"}
-                    </code>
-                    {copied ? <Check size={17} /> : <Copy size={17} onClick={handleCopy} className="hover:cursor-pointer" />}
-                  </div>
-                </div>
-
-                {/* Student List */}
-                <div className="mb-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Connected Students</span>
-                    </div>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
-                      {Object.values(liveStudentList).filter(Boolean).length} online
-                    </span>
-                  </div>
-
-                  <div className="space-y-2">
-                    {Object.entries(liveStudentList).map(([key, value]) => (
-                      value ? (
-                        <div key={key} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center dark:bg-gray-700">
-                              <User size={14} className="text-gray-600 dark:text-gray-400" />
-                            </div>
-                            <span className="text-sm font-medium text-gray-900 dark:text-white">{key}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                            <span className="text-xs text-gray-600 dark:text-gray-400">Online</span>
-                          </div>
-                        </div>
-                      ) : null
-                    ))}
-
-                    {Object.values(liveStudentList).filter(Boolean).length === 0 && (
-                      <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                        <Users size={32} className="mx-auto mb-2 opacity-50" />
-                        <p className="text-sm">No students connected</p>
+                    {shareMenuOpen && (
+                      <div
+                        role="menu"
+                        className="absolute right-0 z-30 mt-2 w-48 overflow-hidden rounded-xl border border-slate-200 bg-white p-1 shadow-lg dark:border-gray-700 dark:bg-gray-900"
+                      >
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={() => {
+                            handleCopy();
+                            setShareMenuOpen(false);
+                          }}
+                          className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:text-gray-200 dark:hover:bg-gray-800"
+                        >
+                          <Link2 className="h-3.5 w-3.5 text-slate-400 dark:text-gray-500" />
+                          Copy link
+                        </button>
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={handleShare}
+                          className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:text-gray-200 dark:hover:bg-gray-800"
+                        >
+                          <Share2 className="h-3.5 w-3.5 text-slate-400 dark:text-gray-500" />
+                          Share via apps
+                        </button>
                       </div>
                     )}
                   </div>
-                </div>
-
-                {/* Status Indicator */}
-                <div className={`p-4 rounded-lg border ${allStudentsReady ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800' : 'bg-gray-50 border-gray-200 dark:bg-gray-800 dark:border-gray-700'}`}>
-                  <div className="flex items-center gap-3">
-                    <div className={`w-3 h-3 rounded-full ${allStudentsReady ? 'bg-green-500' : 'bg-gray-400'}`}></div>
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      {allStudentsReady ? "All students ready" : "Waiting for students"}
-                    </span>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={leaveRoom}
+                    className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-600 shadow-sm transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400 dark:hover:border-red-500/30 dark:hover:bg-red-500/10 dark:hover:text-red-400"
+                  >
+                    <LogOut className="h-3.5 w-3.5" />
+                    Leave room
+                  </button>
                 </div>
               </div>
-            </div>
 
-            {/* Communication Panel - Only when room exists */}
-            {roomId && (
-              <div className="bg-white rounded-xl border border-gray-200 dark:bg-gray-900 dark:border-gray-800">
-                <div className="p-6 border-b border-gray-200 dark:border-gray-800">
-                  <div className="flex items-center gap-3">
-                    <MessageSquare size={20} className="text-gray-600 dark:text-gray-400" />
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Class Communication</h2>
+              <div className="grid divide-y divide-slate-200 dark:divide-gray-800 lg:grid-cols-5 lg:divide-x lg:divide-y-0">
+                {/* Connected students */}
+                <div className="bg-slate-50/70 p-5 dark:bg-gray-800/30 sm:p-6 lg:col-span-2">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-2.5">
+                      <span className="grid h-8 w-8 flex-none place-items-center rounded-lg border border-slate-200 bg-white text-emerald-600 shadow-sm dark:border-gray-700 dark:bg-gray-900 dark:text-emerald-400">
+                        <Users className="h-4 w-4" />
+                      </span>
+                      <div>
+                        <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                          Connected students
+                        </p>
+                        <p className="mt-0.5 text-xs text-slate-500 dark:text-gray-400">
+                          Students in this room
+                        </p>
+                      </div>
+                    </div>
+                    <span className="rounded-full border border-slate-200 bg-white px-2.5 py-0.5 text-xs font-medium text-slate-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
+                      {onlineStudents.length} online
+                    </span>
                   </div>
+
+                  <div className="mt-4 min-h-[9rem] max-h-56 space-y-2 overflow-y-auto pr-1">
+                    {onlineStudents.length > 0 ? (
+                      onlineStudents.map(([key]) => (
+                        <div
+                          key={key}
+                          className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm dark:border-gray-700 dark:bg-gray-900"
+                        >
+                          <div className="flex min-w-0 items-center gap-2.5">
+                            <span className="grid h-7 w-7 place-items-center rounded-full bg-slate-100 text-slate-500 dark:bg-gray-800 dark:text-gray-400">
+                              <User className="h-3.5 w-3.5" />
+                            </span>
+                            <span className="truncate text-sm text-slate-800 dark:text-gray-100">
+                              {key}
+                            </span>
+                          </div>
+                          <span className="inline-flex flex-none items-center gap-1.5 text-xs text-slate-400 dark:text-gray-500">
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                            Online
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="flex h-[9rem] flex-col items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-center shadow-sm dark:border-gray-700 dark:bg-gray-900">
+                        <Loader2 className="h-5 w-5 animate-spin text-emerald-500" />
+                        <p className="mt-2 text-xs font-medium text-slate-500 dark:text-gray-400">
+                          Waiting for students
+                        </p>
+                        <p className="mt-0.5 text-[11px] text-slate-400 dark:text-gray-500">
+                          They&apos;ll appear here as they join.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {onlineStudents.length > 0 && (
+                    <div
+                      className={`mt-4 flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium ${
+                        allStudentsReady
+                          ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-400"
+                          : "border-slate-200 bg-white text-slate-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+                      }`}
+                    >
+                      <span
+                        className={`h-1.5 w-1.5 rounded-full ${
+                          allStudentsReady ? "bg-emerald-500" : "bg-slate-400 dark:bg-gray-500"
+                        }`}
+                      />
+                      {allStudentsReady ? "All students ready" : "Waiting for students"}
+                    </div>
+                  )}
                 </div>
 
-                <div className="p-6">
-                  <div className="flex gap-3 mb-6">
+                {/* Live chat */}
+                <div className="flex flex-col p-5 sm:p-6 lg:col-span-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-2.5">
+                      <span className="grid h-8 w-8 flex-none place-items-center rounded-lg border border-slate-200 bg-white text-emerald-600 shadow-sm dark:border-gray-700 dark:bg-gray-900 dark:text-emerald-400">
+                        <MessageSquare className="h-4 w-4" />
+                      </span>
+                      <div>
+                        <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                          Live chat
+                        </p>
+                        <p className="mt-0.5 text-xs text-slate-500 dark:text-gray-400">
+                          Message everyone in the room
+                        </p>
+                      </div>
+                    </div>
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                      Live
+                    </span>
+                  </div>
+
+                  <div className="mt-4 min-h-[9rem] max-h-56 overflow-y-auto rounded-xl border border-slate-200 bg-slate-50/80 dark:border-gray-700 dark:bg-gray-800/40">
+                    {messages.length > 0 ? (
+                      <div className="divide-y divide-slate-200 dark:divide-gray-700">
+                        {messages.map((msg, idx) => (
+                          <div key={idx} className="flex items-start gap-3 px-4 py-3">
+                            <span className="grid h-6 w-6 flex-none place-items-center rounded-full bg-emerald-600 text-[11px] font-semibold text-white">
+                              T
+                            </span>
+                            <p className="text-sm text-slate-700 dark:text-gray-200">{msg}</p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex h-[9rem] flex-col items-center justify-center px-4 text-center">
+                        <MessageCircle className="h-5 w-5 text-slate-300 dark:text-gray-600" />
+                        <p className="mt-2 text-xs font-medium text-slate-500 dark:text-gray-400">
+                          No messages yet
+                        </p>
+                        <p className="mt-0.5 text-[11px] text-slate-400 dark:text-gray-500">
+                          Start the conversation with your class.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-4 flex gap-2">
                     <input
                       type="text"
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                      placeholder="Type your message to the class..."
-                      className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none dark:bg-gray-800 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:focus:ring-white"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          sendMessage();
+                        }
+                      }}
+                      placeholder="Message your class..."
+                      className="min-w-0 flex-1 rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white dark:placeholder:text-gray-500"
                     />
                     <button
-                      onClick={() => sendMessage()}
-                      className="px-4 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2 dark:bg-white dark:text-black dark:hover:bg-gray-200"
+                      type="button"
+                      onClick={sendMessage}
+                      aria-label="Send message"
+                      className="grid h-10 w-10 flex-none place-items-center rounded-xl bg-emerald-600 text-white transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+                      disabled={!message.trim()}
                     >
-                      <Send size={16} />
+                      <Send className="h-4 w-4" />
                     </button>
                   </div>
-
-                  <div className="bg-gray-50 rounded-lg border border-gray-200 p-4 h-64 overflow-y-auto dark:bg-gray-800 dark:border-gray-700">
-                    <div className="space-y-3">
-                      {messages.length > 0 ? (
-                        messages.map((msg, idx) => (
-                          <div key={idx} className="bg-white rounded-lg p-3 border-l-4 border-black dark:bg-gray-700 dark:border-white">
-                            <div className="flex items-start gap-3">
-                              <div className="w-6 h-6 bg-black rounded-full flex items-center justify-center dark:bg-white">
-                                <span className="text-white text-xs font-bold dark:text-black">T</span>
-                              </div>
-                              <p className="text-sm text-gray-800 dark:text-gray-200">{msg}</p>
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
-                          <div className="text-center">
-                            <MessageCircle size={32} className="mx-auto mb-2 opacity-50" />
-                            <p className="text-sm">No messages yet</p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-
-          {/* Right Column - Tests */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl border border-gray-200 dark:bg-gray-900 dark:border-gray-800">
-              <div className="p-6 border-b border-gray-200 dark:border-gray-800">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <FileText size={20} className="text-gray-600 dark:text-gray-400" />
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Your Tests</h2>
-                  </div>
-                  {/* Test count moved here */}
-                  <div className="flex items-center gap-2">
-                    <div className="p-2 bg-gray-100 rounded-lg dark:bg-gray-800">
-                      <FileText size={16} className="text-gray-600 dark:text-gray-400" />
-                    </div>
-                    <div>
-                      {/* <p className="text-xs text-gray-600 dark:text-gray-400">Total</p> */}
-                      <p className="text-lg font-bold text-gray-900 dark:text-white">
-                        {fetchedTest ? fetchedTest.length : 0}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-6">
-                {fetchedTest && fetchedTest.length > 0 ? (
-                  <div className="space-y-3">
-                    {fetchedTest.map((test) => (
-                      <div
-                        key={test.id}
-                        className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors dark:border-gray-700 dark:hover:bg-gray-800"
-                        onClick={() => { router.push(`/teacher/test/${test.id}`) }}
-                      >
-                        <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 dark:bg-gray-800">
-                            <FileText size={16} className="text-gray-600 dark:text-gray-400" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-medium text-gray-900 dark:text-white text-sm line-clamp-2 mb-1">
-                              {test.title}
-                            </h3>
-                            <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mb-2">
-                              {test.description}
-                            </p>
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-500">
-                                <Calendar size={10} />
-                                <span>{new Date(test.createdAt).toLocaleDateString()}</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <FileText size={32} className="mx-auto mb-3 text-gray-400 dark:text-gray-600" />
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">No tests created yet</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-500">Create your first test to get started</p>
-                  </div>
-                )}
               </div>
             </div>
+          </section>
+        )}
+
+        {/* Your tests */}
+        <section className={roomId ? "mt-10 border-t border-slate-200 pt-10 dark:border-gray-800" : "mt-10"}>
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
+                  Select a test to start
+                </h2>
+                <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-500 dark:bg-gray-800 dark:text-gray-400">
+                  {sortedTests.length}
+                </span>
+              </div>
+              <p className="mt-1 text-sm text-slate-500 dark:text-gray-400">
+                Pick a test to add questions and start it live for your class.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setOpenCreateTestModal(true)}
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800"
+            >
+              <Plus className="h-4 w-4" />
+              New test
+            </button>
           </div>
-        </div>
+
+          {sortedTests.length > 0 ? (
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {sortedTests.map((test, index) => {
+                const ThumbnailIcon = getTestVisual(test);
+
+                return (
+                  <button
+                    key={test.id}
+                    type="button"
+                    onClick={() => router.push(`/teacher/test/${test.id}`)}
+                    className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-lg hover:shadow-slate-200/60 dark:border-gray-800 dark:bg-gray-900 dark:hover:border-gray-700 dark:hover:shadow-black/20"
+                  >
+                    <div className="relative h-16 overflow-hidden border-b border-slate-100 bg-slate-50 dark:border-gray-800 dark:bg-gray-800/40">
+                      <span className="absolute -right-5 -top-6 h-16 w-16 rounded-full bg-slate-100 dark:bg-gray-800" />
+                      <span className="absolute -bottom-8 -left-3 h-20 w-20 rounded-full bg-slate-100/70 dark:bg-gray-800/70" />
+                      <span className="absolute inset-0 grid place-items-center">
+                        <span className="grid h-9 w-9 place-items-center rounded-lg border border-emerald-100 bg-white text-emerald-600 shadow-sm transition-transform duration-300 group-hover:scale-105 dark:border-emerald-500/20 dark:bg-gray-900 dark:text-emerald-400">
+                          <ThumbnailIcon className="h-4 w-4" strokeWidth={1.6} />
+                        </span>
+                      </span>
+                      {index === 0 && (
+                        <span className="absolute left-2 top-2 rounded-full border border-emerald-200 bg-white px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-emerald-700 dark:border-emerald-500/30 dark:bg-gray-900 dark:text-emerald-400">
+                          Recent
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex flex-1 flex-col p-3">
+                      <h3 className="truncate text-[13px] font-semibold text-slate-900 dark:text-white">
+                        {test.title}
+                      </h3>
+                      <p className="mt-0.5 line-clamp-2 text-[11px] leading-4 text-slate-500 dark:text-gray-400">
+                        {test.description || "No description added yet."}
+                      </p>
+
+                      <div className="mt-auto flex items-center justify-between gap-2 pt-3">
+                        <span className="inline-flex items-center gap-1 text-[11px] text-slate-400 dark:text-gray-500">
+                          <Calendar className="h-3 w-3" />
+                          {formatDate(test.createdAt)}
+                        </span>
+                        <span className="inline-flex items-center gap-0.5 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+                          Start test
+                          <ChevronRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+                        </span>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="mt-4 flex flex-col items-center rounded-2xl border border-slate-200 bg-white px-6 py-12 text-center dark:border-gray-800 dark:bg-gray-900">
+              <span className="grid h-12 w-12 place-items-center rounded-xl bg-slate-100 text-slate-400 dark:bg-gray-800 dark:text-gray-500">
+                <FileText className="h-5 w-5" />
+              </span>
+              <p className="mt-4 text-sm font-medium text-slate-900 dark:text-white">
+                No tests yet
+              </p>
+              <p className="mt-1 max-w-sm text-sm text-slate-500 dark:text-gray-400">
+                Create your first test to add questions and start a live session.
+              </p>
+              <button
+                type="button"
+                onClick={() => setOpenCreateTestModal(true)}
+                className="mt-5 inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-700"
+              >
+                <Plus className="h-4 w-4" />
+                Create test
+              </button>
+            </div>
+          )}
+        </section>
 
         {/* Modals */}
         {openCreateRoomModal && (
           <CreateRoomModal
-            onCreateRoom={() => {
-              createRoom();
-              // setOpenCreateRoomModal(false);
-            }}
             roomId={roomId}
-            setRoomId={setRoomId}
             onClose={() => setOpenCreateRoomModal(false)}
-            roomCreated={roomCreated}
           />
         )}
 
@@ -663,7 +678,7 @@ export default function Teacher({ params }) {
             onClose={() => setOpenCreateTestModal(false)}
           />
         )}
-      </div>
+      </main>
     </div>
   );
 }
