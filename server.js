@@ -1,3 +1,8 @@
+// Load .env before anything else reads process.env (googleAuth.js reads
+// credentials at require time). Missing file is fine — platforms like Render
+// inject the variables directly.
+require('./src/lib/loadEnv').loadEnv();
+
 const express = require('express');
 const next = require('next');
 const http = require('http');

@@ -1,5 +1,7 @@
 const express = require('express');
-const passport = require('passport');
+// Requiring the google auth module (not the raw passport package) guarantees the
+// Google strategy is registered and exposes `isGoogleAuthEnabled`.
+const passport = require('../lib/googleAuth.js');
 const jwt = require('jsonwebtoken');
 
 const router = express.Router();
@@ -12,6 +14,11 @@ const router = express.Router();
 router.get('/google', (req, res, next) => {
     const role = req.query.role; // 'student' or 'teacher'
     if (!role) return res.status(400).send('Missing role');
+
+    if (!passport.isGoogleAuthEnabled) {
+        console.warn('[auth] Google sign-in requested but credentials are not configured.');
+        return res.redirect(`/${role}/auth/signin?error=google_unavailable`);
+    }
 
     passport.authenticate('google', {
         scope: ['profile', 'email'],
